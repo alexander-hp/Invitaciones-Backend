@@ -222,3 +222,12 @@ curl http://localhost:4000/health
 - No cambiar el stack principal sin confirmacion: Node + Express + MongoDB + Angular separado.
 - Documentar toda deuda nueva en este archivo si se agrega comportamiento parcial.
 - Si se modifica una API usada por el frontend, actualizar tambien `AI_MEMORY.md` del frontend.
+
+## Actualizacion 2026-06-06 - Beta guests/templates/assets/payments
+
+- Invitados ahora tienen DTO/allowlist en alta manual e importacion.
+- `GET /api/guests/event/:eventId` verifica ownership del evento antes de listar.
+- Importacion CSV/XLSX valida evento propio, extension soportada y devuelve `{ imported, invalidRows, guests }`.
+- Templates tienen DTO en creacion admin y seed inicial con `npm run seed:templates`.
+- Assets validan `fileName`, `contentType`, `folder` y `size`; si S3 no esta configurado responden `501 AWS_S3_BUCKET no configurado`.
+- Checkout valida DTO y ownership de invitacion antes de crear sesion; webhook evita reprocesar pagos ya `paid`.

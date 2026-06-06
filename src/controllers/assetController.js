@@ -1,4 +1,4 @@
-﻿const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
+const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const env = require('../config/env');
 const asyncHandler = require('../utils/asyncHandler');
@@ -12,7 +12,7 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  const { fileName, contentType, folder = 'assets' } = req.body;
+  const { fileName, contentType, folder = 'assets' } = req.validated.body;
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
   const key = `${folder}/${req.user._id}/${Date.now()}-${safeName}`;
   const command = new PutObjectCommand({ Bucket: env.s3Bucket, Key: key, ContentType: contentType });

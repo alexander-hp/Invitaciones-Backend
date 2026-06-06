@@ -1,4 +1,4 @@
-﻿const Template = require('../models/Template');
+const Template = require('../models/Template');
 const asyncHandler = require('../utils/asyncHandler');
 
 exports.list = asyncHandler(async (req, res) => {
@@ -10,6 +10,6 @@ exports.list = asyncHandler(async (req, res) => {
 });
 
 exports.create = asyncHandler(async (req, res) => {
-  const template = await Template.create(req.body);
+  const template = await Template.create(req.validated.body);
   res.status(201).json({ template });
 });
