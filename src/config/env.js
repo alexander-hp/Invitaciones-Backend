@@ -4,6 +4,7 @@ module.exports = {
   port: Number(process.env.PORT || 4000),
   nodeEnv: process.env.NODE_ENV || 'development',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:4200',
+  frontendUrl: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:4200',
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/invitaciones',
   jwtSecret: process.env.JWT_SECRET || 'dev_secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',

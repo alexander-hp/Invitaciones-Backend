@@ -1,0 +1,328 @@
+{
+  "info": {
+    "_postman_id": "c5c61d08-8f2d-4f4b-b6bb-0db3f2683c5c",
+    "name": "Invitaciones S3 Upload Debug",
+    "description": "Coleccion para diagnosticar subida de assets a S3. Si el paso 2 genera uploadUrl y el paso 3 funciona en Postman pero falla en el navegador, el problema es CORS del bucket. Si el paso 3 falla tambien en Postman, revisar permisos IAM, bucket, region, Content-Type o firma.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login - guardar token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login responde 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const data = pm.response.json();",
+              "pm.test('Respuesta incluye token', function () {",
+              "  pm.expect(data.token).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.collectionVariables.set('token', data.token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Crear presigned upload URL",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Upload URL responde 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const data = pm.response.json();",
+              "pm.test('Respuesta incluye uploadUrl, publicUrl y key', function () {",
+              "  pm.expect(data.uploadUrl).to.include('amazonaws.com');",
+              "  pm.expect(data.publicUrl).to.include('amazonaws.com');",
+              "  pm.expect(data.key).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "pm.collectionVariables.set('uploadUrl', data.uploadUrl);",
+              "pm.collectionVariables.set('publicUrl', data.publicUrl);",
+              "pm.collectionVariables.set('s3Key', data.key);",
+              "console.log('S3 key:', data.key);",
+              "console.log('Public URL:', data.publicUrl);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fileName\": \"{{fileName}}\",\n  \"contentType\": \"{{contentType}}\",\n  \"folder\": \"{{folder}}\",\n  \"size\": {{fileSize}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/assets/upload-url",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "assets",
+            "upload-url"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. PUT archivo directo a S3 - SIN Authorization",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.request.headers.remove('Authorization');",
+              "pm.request.headers.remove('authorization');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('S3 acepta PUT', function () {",
+              "  pm.expect([200, 201, 204]).to.include(pm.response.code);",
+              "});",
+              "",
+              "console.log('Status S3 PUT:', pm.response.code);",
+              "console.log('ETag:', pm.response.headers.get('ETag'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "{{contentType}}"
+          }
+        ],
+        "body": {
+          "mode": "file",
+          "file": {
+            "src": ""
+          }
+        },
+        "url": {
+          "raw": "{{uploadUrl}}",
+          "host": [
+            "{{uploadUrl}}"
+          ]
+        },
+        "description": "Selecciona un archivo real en Body > binary/file antes de enviar. Debe coincidir con contentType. Este request NO debe mandar Authorization."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Ver archivo publico",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Public URL responde OK o AccessDenied controlado', function () {",
+              "  pm.expect([200, 403]).to.include(pm.response.code);",
+              "});",
+              "",
+              "if (pm.response.code === 403) {",
+              "  console.warn('El objeto se subio, pero no es publico. Esto puede ser esperado si el bucket bloquea acceso publico. La app aun podria guardar la URL, pero no renderizaria sin CloudFront/politica publica.');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{publicUrl}}",
+          "host": [
+            "{{publicUrl}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Caso negativo - tipo no permitido debe dar 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tipo no permitido responde 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const data = pm.response.json();",
+              "pm.test('Mensaje de validacion', function () {",
+              "  pm.expect(data.message).to.eql('Datos invalidos');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fileName\": \"archivo.pdf\",\n  \"contentType\": \"application/pdf\",\n  \"folder\": \"covers\",\n  \"size\": 1000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/assets/upload-url",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "assets",
+            "upload-url"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": []
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": []
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "email",
+      "value": "demo@invitaciones.mx"
+    },
+    {
+      "key": "password",
+      "value": "Password123"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "fileName",
+      "value": "test-cover.png"
+    },
+    {
+      "key": "contentType",
+      "value": "image/png"
+    },
+    {
+      "key": "folder",
+      "value": "covers"
+    },
+    {
+      "key": "fileSize",
+      "value": "1000"
+    },
+    {
+      "key": "uploadUrl",
+      "value": ""
+    },
+    {
+      "key": "publicUrl",
+      "value": ""
+    },
+    {
+      "key": "s3Key",
+      "value": ""
+    }
+  ]
+}

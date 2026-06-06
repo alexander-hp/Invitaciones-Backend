@@ -3,6 +3,7 @@ const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');
 const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
+const emailService = require('../services/emailService');
 
 async function buildUniqueSlug(source) {
   const base = slugify(source || 'invitacion', { lower: true, strict: true });
@@ -54,7 +55,15 @@ exports.publish = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  res.json({ invitation, publicUrl: `${env.publicBaseUrl}/i/${invitation.slug}` });
+  const publicUrl = `${env.publicBaseUrl}/i/${invitation.slug}`;
+  if (req.user.email) {
+    try {
+      await emailService.sendInvitationPublishedEmail({ to: req.user.email, invitation, publicUrl });
+    } catch (error) {
+      console.warn('Invitation published email failed:', error.message);
+    }
+  }
+  res.json({ invitation, publicUrl });
 });
 
 exports.unpublish = asyncHandler(async (req, res) => {

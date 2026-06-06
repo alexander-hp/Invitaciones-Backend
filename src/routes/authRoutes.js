@@ -7,7 +7,8 @@ const router = express.Router();
 
 router.post('/register', validate(z.object({ body: z.object({ name: z.string().min(2), email: z.string().email(), password: z.string().min(8), role: z.enum(['client', 'organizer']).optional() }) })), controller.register);
 router.post('/login', validate(z.object({ body: z.object({ email: z.string().email(), password: z.string().min(1) }) })), controller.login);
-router.post('/password-reset', controller.requestPasswordReset);
+router.post('/password-reset', validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.requestPasswordReset);
+router.post('/password-reset/confirm', validate(z.object({ body: z.object({ token: z.string().min(32), password: z.string().min(8) }).strict() })), controller.confirmPasswordReset);
 router.get('/me', protect, controller.me);
 
 module.exports = router;

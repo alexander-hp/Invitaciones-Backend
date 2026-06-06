@@ -7,7 +7,8 @@
         "dev": "nodemon src/server.js",
         "start": "node src/server.js",
         "check": "node --check src/server.js && node --check src/app.js",
-        "seed:templates": "node scripts/seedTemplates.js"
+        "seed:templates": "node scripts/seedTemplates.js",
+        "test:smtp": "node scripts/testSmtp.js"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.600.0",

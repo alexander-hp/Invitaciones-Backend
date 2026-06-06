@@ -2,11 +2,12 @@ const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
+const emailService = require('../services/emailService');
 const asyncHandler = require('../utils/asyncHandler');
 
 exports.submitPublic = asyncHandler(async (req, res) => {
   const payload = req.validated.body;
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' });
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).populate('owner', 'email name');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
@@ -26,12 +27,14 @@ exports.submitPublic = asyncHandler(async (req, res) => {
       error.statusCode = 400;
       throw error;
     }
+  } else if (payload.email) {
+    guest = await Guest.findOne({ event: invitation.event, email: payload.email.toLowerCase().trim() });
   }
 
   const rsvp = await Rsvp.create({
     invitation: invitation._id,
     event: invitation.event,
-    guest: payload.guest,
+    guest: guest?._id,
     name: payload.name,
     email: payload.email,
     response: payload.response,
@@ -42,6 +45,14 @@ exports.submitPublic = asyncHandler(async (req, res) => {
 
   if (guest) {
     await Guest.findByIdAndUpdate(guest._id, { status: payload.response });
+  }
+
+  if (invitation.owner?.email) {
+    try {
+      await emailService.sendRsvpNotification({ to: invitation.owner.email, invitation, rsvp });
+    } catch (error) {
+      console.warn('RSVP notification email failed:', error.message);
+    }
   }
 
   res.status(201).json({ rsvp });

@@ -34,7 +34,7 @@ Modulos y comportamiento implementados:
   - Registro con nombre, email, password y rol opcional.
   - Login con JWT.
   - Endpoint `me` protegido.
-  - Password reset solo responde mensaje simulado.
+  - Password reset real con token hasheado, expiracion y envio por Nodemailer SMTP.
 - Eventos:
   - Listar eventos del usuario.
   - Crear evento.
@@ -126,14 +126,13 @@ Acuerdo cerrado el 2026-06-06 para el flujo Auth + MVP conectado:
 - `POST /api/rsvps/public/:slug` responde `400 Invitado no pertenece a esta invitacion` si `guest` no pertenece al evento de la invitacion publicada.
 - `POST /api/rsvps/public/:slug` responde `400 El numero de acompanantes excede lo permitido` si `companions` supera `Guest.allowedCompanions`.
 
-## Que esta simulado
+## Que sigue parcial o inicial
 
-- Recuperacion de password: no genera token, no guarda reset token y no envia email.
-- Emails transaccionales: Resend esta instalado/configurado como dependencia, pero no hay servicio real de envio.
-- S3: solo genera presigned URL; no hay persistencia formal de assets, validacion de tipos, limites por plan ni borrado.
+- Emails transaccionales: ya usan Nodemailer SMTP; siguen siendo best-effort y con contenido simple.
+- S3: ya genera presigned URL y el frontend persiste URLs en `Invitation.content`; falta metadata formal de assets, limites por plan y borrado.
 - Stripe: checkout y webhook son iniciales; falta robustecer ownership, estados, idempotencia y desbloqueo granular de features premium.
 - Dashboard: metricas basicas, sin series temporales, filtros por evento ni analitica avanzada.
-- Plantillas: modelo y endpoint existen, pero no hay seed ni versionado de configuraciones.
+- Plantillas: modelo, endpoint y seed inicial existen; falta versionado de configuraciones.
 - WhatsApp Business API: esta fuera del MVP actual.
 
 ## Que falta
@@ -144,8 +143,6 @@ Acuerdo cerrado el 2026-06-06 para el flujo Auth + MVP conectado:
 - Reemplazar updates con `req.body` directo por allowlists/DTOs en los modulos restantes.
 - Aplicar validacion Zod a todos los endpoints mutantes.
 - Implementar delete/archivar donde aplique.
-- Implementar password reset real.
-- Implementar servicio de email con Resend.
 - Crear seed de plantillas gratuitas y premium.
 - Guardar metadata de assets subidos.
 - Implementar control real de planes premium.
@@ -168,11 +165,9 @@ Acuerdo cerrado el 2026-06-06 para el flujo Auth + MVP conectado:
 1. Corregir ownership y validaciones del backend antes de conectar mas pantallas.
 2. Agregar DTOs/allowlists por modulo.
 3. Crear tests de integracion con base de datos de prueba.
-4. Crear seed inicial de plantillas.
-5. Conectar frontend a flujo real: registro/login, crear evento, crear invitacion, publicar y RSVP.
-6. Implementar emails transaccionales.
-7. Integrar S3 real con validacion de tipo/tamano.
-8. Robustecer Stripe y control de premium.
+4. Completar metadata/limpieza de assets S3 si se requiere administrarlos.
+5. Robustecer Stripe y control de premium.
+6. Preparar despliegue beta con variables seguras, Mongo administrado y CORS/SMTP/S3 documentados.
 
 ## Comandos utiles
 
@@ -249,3 +244,39 @@ Siguientes pasos de email:
 1. Probar `POST /api/contact` con las credenciales SMTP reales.
 2. Implementar password reset real con token y email.
 3. Agregar emails de RSVP/publicacion cuando el flujo de invitaciones este mas cerrado.
+
+## Actualizacion 2026-06-06 - Password reset real y emails transaccionales
+
+- Password reset dejo de ser simulado:
+  - `POST /api/auth/password-reset` valida `{ email }`, genera token seguro, guarda hash SHA-256 y expiracion de 1 hora en `User`.
+  - `POST /api/auth/password-reset/confirm` valida `{ token, password }`, actualiza `passwordHash` y limpia los campos de reset.
+  - La solicitud responde siempre `Si el email existe, se enviara un enlace de recuperacion.` para no enumerar usuarios.
+- `User` ahora incluye `passwordResetTokenHash` y `passwordResetExpiresAt`.
+- Se agrego `FRONTEND_URL` para construir links de recuperacion hacia `/password-reset/confirm?token=...`; si no existe, usa `CLIENT_URL` y luego `http://localhost:4200`.
+- `emailService` ahora tambien envia:
+  - email de recuperacion de password,
+  - notificacion al owner cuando llega un RSVP publico,
+  - aviso al owner cuando una invitacion se publica.
+- Los emails de RSVP/publicacion son best-effort: si SMTP falla o no esta configurado, solo se registra `console.warn` y no se rompe la accion principal.
+- `sendMail` ya no requiere `EMAIL_TO` cuando se pasa un destinatario explicito; contacto sigue requiriendo destinatario por default.
+
+Siguientes pasos:
+
+1. Probar reset completo con SMTP real: solicitar, abrir enlace, confirmar password nuevo y login.
+2. Probar RSVP/publicacion con SMTP real y revisar que no se expongan secretos en logs.
+
+## Actualizacion 2026-06-06 - QA beta RSVP, SMTP y S3
+
+- RSVP publico ahora intenta vincular automaticamente por email si el payload no trae `guest`:
+  - busca `Guest` del mismo evento con el email enviado,
+  - guarda `rsvp.guest` cuando hay match,
+  - actualiza `Guest.status` a `confirmed` o `declined`.
+- La creacion de `Rsvp` se mantiene siempre para conservar `companions`, `mealPreference` y `message`.
+- Password reset mantiene respuesta generica publica, pero el backend ahora registra detalles SMTP utiles sin secretos: email destino, code, command, responseCode y message.
+- Se agrego `npm run test:smtp` para probar Nodemailer con la misma configuracion SMTP. Usa `SMTP_TEST_TO`, `EMAIL_TO` o `SMTP_USER` como destinatario.
+- Assets S3 ahora registran fallos al generar presigned URL con bucket/region/codigo sin exponer credenciales y devuelven mensaje claro si falla firma/configuracion.
+
+Notas QA:
+
+- Si `POST /api/assets/upload-url` responde OK pero el `PUT` a S3 falla desde frontend, revisar CORS del bucket y permisos `s3:PutObject`.
+- Si password reset responde generico pero no llega correo, correr `npm run test:smtp` y revisar logs del backend.

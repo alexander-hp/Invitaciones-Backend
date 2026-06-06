@@ -16,7 +16,20 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
   const key = `${folder}/${req.user._id}/${Date.now()}-${safeName}`;
   const command = new PutObjectCommand({ Bucket: env.s3Bucket, Key: key, ContentType: contentType });
-  const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+  let uploadUrl;
+  try {
+    uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+  } catch (error) {
+    console.warn('S3 presigned URL failed:', {
+      bucketConfigured: Boolean(env.s3Bucket),
+      region: env.awsRegion,
+      code: error.code,
+      message: error.message
+    });
+    const signingError = new Error('No se pudo preparar la subida a S3. Revisa region, bucket y credenciales AWS.');
+    signingError.statusCode = 502;
+    throw signingError;
+  }
   const publicUrl = `https://${env.s3Bucket}.s3.${env.awsRegion}.amazonaws.com/${key}`;
 
   res.json({ key, uploadUrl, publicUrl });
