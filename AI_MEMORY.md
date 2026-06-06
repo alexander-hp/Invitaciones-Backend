@@ -231,3 +231,21 @@ curl http://localhost:4000/health
 - Templates tienen DTO en creacion admin y seed inicial con `npm run seed:templates`.
 - Assets validan `fileName`, `contentType`, `folder` y `size`; si S3 no esta configurado responden `501 AWS_S3_BUCKET no configurado`.
 - Checkout valida DTO y ownership de invitacion antes de crear sesion; webhook evita reprocesar pagos ya `paid`.
+
+## Actualizacion 2026-06-06 - Nodemailer SMTP
+
+- Se eligio Nodemailer SMTP para emails transaccionales por ahora, en lugar de Resend, para reutilizar el enfoque conocido de AllFitness y evitar crear otra cuenta.
+- `nodemailer` quedo instalado como dependencia.
+- Se agrego `src/services/emailService.js` como servicio central de correo.
+- Se agrego `POST /api/contact` con validacion Zod para `{ name, email, message }`.
+- El correo usa `EMAIL_FROM` como remitente del sistema y `replyTo` con el email del visitante. No usar `from: email` del visitante para evitar spoofing/rechazos SMTP.
+- Variables soportadas: `SMTP_SERVICE`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `EMAIL_TO`.
+- Tambien se soportan aliases legacy de AllFitness: `emailAddress` y `emailPssw`.
+- Si SMTP no esta configurado, el servicio responde `501 SMTP no configurado`.
+- `RESEND_API_KEY` queda como legado opcional; no se usa en el flujo activo.
+
+Siguientes pasos de email:
+
+1. Probar `POST /api/contact` con las credenciales SMTP reales.
+2. Implementar password reset real con token y email.
+3. Agregar emails de RSVP/publicacion cuando el flujo de invitaciones este mas cerrado.

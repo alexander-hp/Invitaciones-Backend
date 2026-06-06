@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const auth = require('./authRoutes');
 const events = require('./eventRoutes');
 const invitations = require('./invitationRoutes');
@@ -8,6 +8,7 @@ const templates = require('./templateRoutes');
 const dashboard = require('./dashboardRoutes');
 const assets = require('./assetRoutes');
 const payments = require('./paymentRoutes');
+const contact = require('./contactRoutes');
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/templates', templates);
 router.use('/dashboard', dashboard);
 router.use('/assets', assets);
 router.use('/payments', payments);
+router.use('/contact', contact);
 
 module.exports = router;

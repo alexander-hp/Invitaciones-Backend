@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 
 module.exports = {
   port: Number(process.env.PORT || 4000),
@@ -13,5 +13,12 @@ module.exports = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   resendApiKey: process.env.RESEND_API_KEY || '',
-  emailFrom: process.env.EMAIL_FROM || 'Invitaciones <hola@tudominio.com>'
+  emailFrom: process.env.EMAIL_FROM || 'Invitaciones <hola@tudominio.com>',
+  emailTo: process.env.EMAIL_TO || process.env.emailAddress || '',
+  smtpHost: process.env.SMTP_HOST || '',
+  smtpPort: Number(process.env.SMTP_PORT || 587),
+  smtpSecure: String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true',
+  smtpService: process.env.SMTP_SERVICE || '',
+  smtpUser: process.env.SMTP_USER || process.env.emailAddress || '',
+  smtpPass: process.env.SMTP_PASS || process.env.emailPssw || ''
 };
