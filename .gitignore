@@ -3,3 +3,4 @@
 .DS_Store
 coverage
 uploads
+graphify-out/cache/

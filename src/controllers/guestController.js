@@ -2,9 +2,12 @@ const readXlsxFile = require('read-excel-file/node');
 const { parse } = require('csv-parse/sync');
 const Guest = require('../models/Guest');
 const Event = require('../models/Event');
+const Invitation = require('../models/Invitation');
 const Rsvp = require('../models/Rsvp');
+const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
 const { getPlanLimits, assertPlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const whatsappService = require('../services/whatsappService');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -116,7 +119,7 @@ function buildGuestFilters(query) {
     filters.$or = [{ name: pattern }, { email: pattern }, { phone: pattern }, { group: pattern }];
   }
   if (['pending', 'confirmed', 'declined'].includes(status)) filters.status = status;
-  if (['pending', 'sent', 'opened', 'confirmed'].includes(communicationStatus)) filters.communicationStatus = communicationStatus;
+  if (['pending', 'sent', 'delivered', 'read', 'opened', 'failed', 'confirmed'].includes(communicationStatus)) filters.communicationStatus = communicationStatus;
   if (group) filters.group = group;
 
   return filters;
@@ -244,6 +247,126 @@ exports.markCommunication = asyncHandler(async (req, res) => {
   await guest.save();
 
   res.json({ guest });
+});
+
+async function primaryInvitationForEvent(eventId, owner) {
+  const published = await Invitation.findOne({ event: eventId, owner, status: 'published' }).sort('-publishedAt');
+  if (published) return published;
+  return Invitation.findOne({ event: eventId, owner }).sort('-createdAt');
+}
+
+function applyWhatsAppGuestStatus(guest, { status, type }) {
+  guest.lastMessageType = type;
+  guest.lastMessageChannel = 'whatsapp';
+  if (status === 'sent') {
+    guest.communicationStatus = 'sent';
+    guest.lastMessageSentAt = new Date();
+  } else if (status === 'delivered' || status === 'read' || status === 'failed') {
+    guest.communicationStatus = status;
+  }
+}
+
+exports.whatsappStatus = asyncHandler(async (_req, res) => {
+  res.json({
+    provider: whatsappService.activeProvider(),
+    enabled: whatsappService.isEnabled()
+  });
+});
+
+exports.sendWhatsApp = asyncHandler(async (req, res) => {
+  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!guest) {
+    const error = new Error('Invitado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const event = await Event.findOne({ _id: guest.event, owner: req.user._id });
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const invitation = await primaryInvitationForEvent(event._id, req.user._id);
+  if (!invitation) {
+    const error = new Error('Crea una invitacion antes de enviar WhatsApp');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const type = req.validated.body.messageType;
+  const result = await whatsappService.sendMessage({
+    owner: req.user._id,
+    guest,
+    event,
+    invitation,
+    type,
+    text: req.validated.body.text
+  });
+  applyWhatsAppGuestStatus(guest, { status: result.status, type });
+  await guest.save();
+  res.json({ guest, messageLog: result.log, provider: result.provider, status: result.status, manualText: result.manualText });
+});
+
+exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
+  if (!req.validated.body.confirm) {
+    const error = new Error('Confirma el envio masivo antes de continuar');
+    error.statusCode = 400;
+    throw error;
+  }
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id });
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const invitation = await primaryInvitationForEvent(event._id, req.user._id);
+  if (!invitation) {
+    const error = new Error('Crea una invitacion antes de enviar WhatsApp');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const filters = buildGuestFilters(req.validated.body.filters || {});
+  const query = { owner: req.user._id, event: event._id, phone: { $exists: true, $ne: '' }, ...filters };
+  if (req.validated.body.guestIds?.length) query._id = { $in: req.validated.body.guestIds };
+  const guests = await Guest.find(query).sort('name').limit(200);
+  const type = req.validated.body.messageType;
+  const results = [];
+
+  for (const guest of guests) {
+    try {
+      const result = await whatsappService.sendMessage({ owner: req.user._id, guest, event, invitation, type });
+      applyWhatsAppGuestStatus(guest, { status: result.status, type });
+      await guest.save();
+      results.push({ guest: guest._id, status: result.status, provider: result.provider, log: result.log._id });
+    } catch (error) {
+      guest.communicationStatus = 'failed';
+      guest.lastMessageType = type;
+      guest.lastMessageChannel = 'whatsapp';
+      await guest.save();
+      results.push({ guest: guest._id, status: 'failed', error: error.message });
+    }
+  }
+
+  res.json({
+    provider: whatsappService.activeProvider(),
+    requested: guests.length,
+    sent: results.filter((item) => item.status === 'sent').length,
+    skipped: results.filter((item) => item.status === 'skipped').length,
+    failed: results.filter((item) => item.status === 'failed').length,
+    results
+  });
+});
+
+exports.listWhatsAppLogs = asyncHandler(async (req, res) => {
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const logs = await WhatsAppMessageLog.find({ owner: req.user._id, event: event._id }).sort('-createdAt').limit(100);
+  res.json({ logs });
 });
 
 exports.checkIn = asyncHandler(async (req, res) => {

@@ -30,18 +30,39 @@ const importBody = z.object({
 }).strict();
 
 const communicationBody = z.object({
-  communicationStatus: z.enum(['pending', 'sent', 'opened', 'confirmed']),
-  messageType: z.enum(['invitation', 'reminder', 'location_change', 'thanks']).optional(),
+  communicationStatus: z.enum(['pending', 'sent', 'delivered', 'read', 'opened', 'failed', 'confirmed']),
+  messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional(),
   channel: z.enum(['whatsapp', 'email']).optional()
 }).strict();
 
+const whatsappSendBody = z.object({
+  messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']),
+  text: z.string().max(3000).optional()
+}).strict();
+
+const whatsappBulkBody = z.object({
+  confirm: z.boolean(),
+  messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']),
+  guestIds: z.array(z.string().min(12)).max(200).optional(),
+  filters: z.object({
+    search: z.string().optional(),
+    status: z.string().optional(),
+    communicationStatus: z.string().optional(),
+    group: z.string().optional()
+  }).strict().optional()
+}).strict();
+
 router.use(protect);
+router.get('/whatsapp/status', controller.whatsappStatus);
 router.get('/event/:eventId', controller.list);
 router.get('/event/:eventId/export', controller.exportGuests);
+router.get('/event/:eventId/whatsapp/logs', controller.listWhatsAppLogs);
+router.post('/event/:eventId/whatsapp/bulk', validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: whatsappBulkBody })), controller.sendWhatsAppBulk);
 router.post('/check-in', validate(z.object({ body: z.object({ code: z.string().min(4) }).strict() })), controller.checkIn);
 router.post('/', validate(z.object({ body: guestBody })), controller.create);
 router.patch('/:id', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: guestUpdateBody })), controller.update);
 router.patch('/:id/communication', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: communicationBody })), controller.markCommunication);
+router.post('/:id/whatsapp', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: whatsappSendBody })), controller.sendWhatsApp);
 router.delete('/:id', validate(z.object({ params: z.object({ id: z.string().min(12) }) })), controller.remove);
 router.post('/import', upload.single('file'), validate(z.object({ body: importBody })), controller.importGuests);
 

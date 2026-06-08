@@ -27,8 +27,8 @@ const guestSchema = new mongoose.Schema({
   checkedIn: { type: Boolean, default: false },
   checkedInAt: Date,
   status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' },
-  communicationStatus: { type: String, enum: ['pending', 'sent', 'opened', 'confirmed'], default: 'pending' },
-  lastMessageType: { type: String, enum: ['invitation', 'reminder', 'location_change', 'thanks'] },
+  communicationStatus: { type: String, enum: ['pending', 'sent', 'delivered', 'read', 'opened', 'failed', 'confirmed'], default: 'pending' },
+  lastMessageType: { type: String, enum: ['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks'] },
   lastMessageChannel: { type: String, enum: ['whatsapp', 'email'] },
   lastMessageSentAt: Date
 }, { timestamps: true });

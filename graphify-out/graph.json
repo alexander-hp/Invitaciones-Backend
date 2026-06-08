@@ -10,7 +10,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_seedtemplates",
-      "community": 10,
+      "community": 21,
       "norm_label": "seedtemplates.js"
     },
     {
@@ -20,7 +20,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_seedtemplates_mongoose",
-      "community": 10,
+      "community": 21,
       "norm_label": "mongoose"
     },
     {
@@ -30,7 +30,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "scripts_seedtemplates_env",
-      "community": 10,
+      "community": 21,
       "norm_label": "env"
     },
     {
@@ -40,7 +40,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_seedtemplates_template",
-      "community": 10,
+      "community": 21,
       "norm_label": "template"
     },
     {
@@ -50,7 +50,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_seedtemplates_templates",
-      "community": 10,
+      "community": 21,
       "norm_label": "templates"
     },
     {
@@ -60,7 +60,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "scripts_seedtemplates_main",
-      "community": 10,
+      "community": 21,
       "norm_label": "main()"
     },
     {
@@ -104,10 +104,20 @@
       "norm_label": "invitation"
     },
     {
-      "label": "Guest",
+      "label": "Event",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
       "source_location": "L4",
+      "_origin": "ast",
+      "id": "scripts_sendrsvpreminders_event",
+      "community": 8,
+      "norm_label": "event"
+    },
+    {
+      "label": "Guest",
+      "file_type": "code",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_guest",
       "community": 8,
@@ -117,7 +127,7 @@
       "label": "Rsvp",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
-      "source_location": "L5",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_rsvp",
       "community": 8,
@@ -127,17 +137,27 @@
       "label": "emailService",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_emailservice",
       "community": 8,
       "norm_label": "emailservice"
     },
     {
-      "label": "reminderWindowStart()",
+      "label": "whatsappService",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
       "source_location": "L8",
+      "_origin": "ast",
+      "id": "scripts_sendrsvpreminders_whatsappservice",
+      "community": 8,
+      "norm_label": "whatsappservice"
+    },
+    {
+      "label": "reminderWindowStart()",
+      "file_type": "code",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_reminderwindowstart",
       "community": 8,
@@ -147,17 +167,27 @@
       "label": "sendReminder()",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_sendreminder",
       "community": 8,
       "norm_label": "sendreminder()"
     },
     {
+      "label": "sendGuestWhatsAppReminder()",
+      "file_type": "code",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "scripts_sendrsvpreminders_sendguestwhatsappreminder",
+      "community": 8,
+      "norm_label": "sendguestwhatsappreminder()"
+    },
+    {
       "label": "processInvitation()",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
-      "source_location": "L17",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_processinvitation",
       "community": 8,
@@ -167,7 +197,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "scripts/sendRsvpReminders.js",
-      "source_location": "L61",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "scripts_sendrsvpreminders_main",
       "community": 8,
@@ -244,6 +274,16 @@
       "norm_label": "main()"
     },
     {
+      "label": "startLocalDb.ps1",
+      "file_type": "code",
+      "source_file": "scripts/startLocalDb.ps1",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scripts_startlocaldb",
+      "community": 19,
+      "norm_label": "startlocaldb.ps1"
+    },
+    {
       "label": "testSmtp.js",
       "file_type": "code",
       "source_file": "scripts/testSmtp.js",
@@ -284,13 +324,93 @@
       "norm_label": "main()"
     },
     {
+      "label": "testWhatsAppProviders.js",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders",
+      "community": 1,
+      "norm_label": "testwhatsappproviders.js"
+    },
+    {
+      "label": "assert",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_assert",
+      "community": 1,
+      "norm_label": "assert"
+    },
+    {
+      "label": "whatsappService",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_whatsappservice",
+      "community": 1,
+      "norm_label": "whatsappservice"
+    },
+    {
+      "label": "guest",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_guest",
+      "community": 1,
+      "norm_label": "guest"
+    },
+    {
+      "label": "event",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_event",
+      "community": 1,
+      "norm_label": "event"
+    },
+    {
+      "label": "invitation",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_invitation",
+      "community": 1,
+      "norm_label": "invitation"
+    },
+    {
+      "label": "text",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_text",
+      "community": 1,
+      "norm_label": "text"
+    },
+    {
+      "label": "payload",
+      "file_type": "code",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "scripts_testwhatsappproviders_payload",
+      "community": 1,
+      "norm_label": "payload"
+    },
+    {
       "label": "app.js",
       "file_type": "code",
       "source_file": "src/app.js",
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app",
-      "community": 2,
+      "community": 12,
       "norm_label": "app.js"
     },
     {
@@ -300,7 +420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_express",
-      "community": 2,
+      "community": 12,
       "norm_label": "express"
     },
     {
@@ -310,7 +430,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "src_app_cors",
-      "community": 2,
+      "community": 12,
       "norm_label": "cors"
     },
     {
@@ -320,7 +440,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_helmet",
-      "community": 2,
+      "community": 12,
       "norm_label": "helmet"
     },
     {
@@ -330,7 +450,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_morgan",
-      "community": 2,
+      "community": 12,
       "norm_label": "morgan"
     },
     {
@@ -340,7 +460,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_ratelimit",
-      "community": 2,
+      "community": 12,
       "norm_label": "ratelimit"
     },
     {
@@ -350,7 +470,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_env",
-      "community": 2,
+      "community": 12,
       "norm_label": "env"
     },
     {
@@ -360,7 +480,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_app_routes",
-      "community": 2,
+      "community": 12,
       "norm_label": "routes"
     },
     {
@@ -370,7 +490,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_app_notfound_errorhandler",
-      "community": 2,
+      "community": 12,
       "norm_label": "{ notfound, errorhandler }"
     },
     {
@@ -380,7 +500,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_app",
-      "community": 2,
+      "community": 12,
       "norm_label": "app"
     },
     {
@@ -510,7 +630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_albumcontroller",
-      "community": 1,
+      "community": 0,
       "norm_label": "albumcontroller.js"
     },
     {
@@ -520,7 +640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_albumcontroller_putobjectcommand_s3client",
-      "community": 1,
+      "community": 0,
       "norm_label": "{ putobjectcommand, s3client }"
     },
     {
@@ -530,7 +650,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_albumcontroller_albumasset",
-      "community": 1,
+      "community": 0,
       "norm_label": "albumasset"
     },
     {
@@ -540,7 +660,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_albumcontroller_event",
-      "community": 1,
+      "community": 0,
       "norm_label": "event"
     },
     {
@@ -550,7 +670,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_albumcontroller_guest",
-      "community": 1,
+      "community": 0,
       "norm_label": "guest"
     },
     {
@@ -560,7 +680,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_albumcontroller_invitation",
-      "community": 1,
+      "community": 0,
       "norm_label": "invitation"
     },
     {
@@ -570,7 +690,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_albumcontroller_env",
-      "community": 1,
+      "community": 0,
       "norm_label": "env"
     },
     {
@@ -580,7 +700,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_albumcontroller_asynchandler",
-      "community": 1,
+      "community": 0,
       "norm_label": "asynchandler"
     },
     {
@@ -590,7 +710,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_albumcontroller_s3",
-      "community": 1,
+      "community": 0,
       "norm_label": "s3"
     },
     {
@@ -600,7 +720,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "controllers_albumcontroller_image_types",
-      "community": 1,
+      "community": 0,
       "norm_label": "image_types"
     },
     {
@@ -610,7 +730,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "controllers_albumcontroller_buildpublicurl",
-      "community": 1,
+      "community": 0,
       "norm_label": "buildpublicurl()"
     },
     {
@@ -620,7 +740,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "controllers_albumcontroller_uploadalbumfile",
-      "community": 1,
+      "community": 0,
       "norm_label": "uploadalbumfile()"
     },
     {
@@ -1094,20 +1214,40 @@
       "norm_label": "event"
     },
     {
-      "label": "Rsvp",
+      "label": "Invitation",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
       "source_location": "L5",
+      "_origin": "ast",
+      "id": "controllers_guestcontroller_invitation",
+      "community": 7,
+      "norm_label": "invitation"
+    },
+    {
+      "label": "Rsvp",
+      "file_type": "code",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_guestcontroller_rsvp",
       "community": 7,
       "norm_label": "rsvp"
     },
     {
+      "label": "WhatsAppMessageLog",
+      "file_type": "code",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "controllers_guestcontroller_whatsappmessagelog",
+      "community": 7,
+      "norm_label": "whatsappmessagelog"
+    },
+    {
       "label": "{ getPlanLimits, assertPlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L6",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "controllers_guestcontroller_getplanlimits_assertplanfeature",
       "community": 7,
@@ -1117,17 +1257,27 @@
       "label": "asyncHandler",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L7",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_guestcontroller_asynchandler",
       "community": 7,
       "norm_label": "asynchandler"
     },
     {
+      "label": "whatsappService",
+      "file_type": "code",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "controllers_guestcontroller_whatsappservice",
+      "community": 7,
+      "norm_label": "whatsappservice"
+    },
+    {
       "label": "normalizeEmail()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L9",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "controllers_guestcontroller_normalizeemail",
       "community": 7,
@@ -1137,7 +1287,7 @@
       "label": "normalizePhone()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L13",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "controllers_guestcontroller_normalizephone",
       "community": 7,
@@ -1147,7 +1297,7 @@
       "label": "normalizeGuestPayload()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L17",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "controllers_guestcontroller_normalizeguestpayload",
       "community": 7,
@@ -1157,7 +1307,7 @@
       "label": "companionRows()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L42",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "controllers_guestcontroller_companionrows",
       "community": 7,
@@ -1167,7 +1317,7 @@
       "label": "normalizeGuestRow()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L50",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "controllers_guestcontroller_normalizeguestrow",
       "community": 7,
@@ -1177,7 +1327,7 @@
       "label": "buildDuplicateError()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L67",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicateerror",
       "community": 7,
@@ -1187,7 +1337,7 @@
       "label": "buildDuplicateKeyError()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L78",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicatekeyerror",
       "community": 7,
@@ -1197,7 +1347,7 @@
       "label": "buildDuplicateQuery()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L85",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicatequery",
       "community": 7,
@@ -1207,7 +1357,7 @@
       "label": "escapeCsv()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L96",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "controllers_guestcontroller_escapecsv",
       "community": 7,
@@ -1217,7 +1367,7 @@
       "label": "csvResponse()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L101",
+      "source_location": "L104",
       "_origin": "ast",
       "id": "controllers_guestcontroller_csvresponse",
       "community": 7,
@@ -1227,7 +1377,7 @@
       "label": "buildGuestFilters()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L107",
+      "source_location": "L110",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildguestfilters",
       "community": 7,
@@ -1237,11 +1387,31 @@
       "label": "findDuplicateGuest()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L125",
+      "source_location": "L128",
       "_origin": "ast",
       "id": "controllers_guestcontroller_findduplicateguest",
       "community": 7,
       "norm_label": "findduplicateguest()"
+    },
+    {
+      "label": "primaryInvitationForEvent()",
+      "file_type": "code",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L252",
+      "_origin": "ast",
+      "id": "controllers_guestcontroller_primaryinvitationforevent",
+      "community": 7,
+      "norm_label": "primaryinvitationforevent()"
+    },
+    {
+      "label": "applyWhatsAppGuestStatus()",
+      "file_type": "code",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L258",
+      "_origin": "ast",
+      "id": "controllers_guestcontroller_applywhatsappgueststatus",
+      "community": 7,
+      "norm_label": "applywhatsappgueststatus()"
     },
     {
       "label": "invitationController.js",
@@ -1790,7 +1960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_templatecontroller",
-      "community": 15,
+      "community": 21,
       "norm_label": "templatecontroller.js"
     },
     {
@@ -1800,7 +1970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_templatecontroller_template",
-      "community": 15,
+      "community": 21,
       "norm_label": "template"
     },
     {
@@ -1810,8 +1980,78 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_templatecontroller_asynchandler",
-      "community": 15,
+      "community": 21,
       "norm_label": "asynchandler"
+    },
+    {
+      "label": "whatsappWebhookController.js",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller",
+      "community": 9,
+      "norm_label": "whatsappwebhookcontroller.js"
+    },
+    {
+      "label": "Guest",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller_guest",
+      "community": 9,
+      "norm_label": "guest"
+    },
+    {
+      "label": "asyncHandler",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller_asynchandler",
+      "community": 9,
+      "norm_label": "asynchandler"
+    },
+    {
+      "label": "whatsappService",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller_whatsappservice",
+      "community": 9,
+      "norm_label": "whatsappservice"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller_env",
+      "community": 9,
+      "norm_label": "env"
+    },
+    {
+      "label": "mapMetaStatus()",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller_mapmetastatus",
+      "community": 9,
+      "norm_label": "mapmetastatus()"
+    },
+    {
+      "label": "updateGuestFromLog()",
+      "file_type": "code",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "controllers_whatsappwebhookcontroller_updateguestfromlog",
+      "community": 9,
+      "norm_label": "updateguestfromlog()"
     },
     {
       "label": "auth.js",
@@ -1890,7 +2130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "middleware_error",
-      "community": 2,
+      "community": 12,
       "norm_label": "error.js"
     },
     {
@@ -1900,7 +2140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "middleware_error_notfound",
-      "community": 2,
+      "community": 12,
       "norm_label": "notfound()"
     },
     {
@@ -1910,7 +2150,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "middleware_error_errorhandler",
-      "community": 2,
+      "community": 12,
       "norm_label": "errorhandler()"
     },
     {
@@ -1920,7 +2160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_albumasset",
-      "community": 1,
+      "community": 0,
       "norm_label": "albumasset.js"
     },
     {
@@ -1930,7 +2170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_albumasset_mongoose",
-      "community": 1,
+      "community": 0,
       "norm_label": "mongoose"
     },
     {
@@ -1940,7 +2180,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_albumasset_albumassetschema",
-      "community": 1,
+      "community": 0,
       "norm_label": "albumassetschema"
     },
     {
@@ -2010,7 +2250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_guest",
-      "community": 8,
+      "community": 9,
       "norm_label": "guest.js"
     },
     {
@@ -2020,7 +2260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_guest_mongoose",
-      "community": 8,
+      "community": 9,
       "norm_label": "mongoose"
     },
     {
@@ -2030,7 +2270,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "models_guest_crypto",
-      "community": 8,
+      "community": 9,
       "norm_label": "crypto"
     },
     {
@@ -2040,7 +2280,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "models_guest_guestschema",
-      "community": 8,
+      "community": 9,
       "norm_label": "guestschema"
     },
     {
@@ -2200,7 +2440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_template",
-      "community": 10,
+      "community": 21,
       "norm_label": "template.js"
     },
     {
@@ -2210,7 +2450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_template_mongoose",
-      "community": 10,
+      "community": 21,
       "norm_label": "mongoose"
     },
     {
@@ -2220,7 +2460,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_template_templateschema",
-      "community": 10,
+      "community": 21,
       "norm_label": "templateschema"
     },
     {
@@ -2262,6 +2502,36 @@
       "id": "models_user_userschema",
       "community": 5,
       "norm_label": "userschema"
+    },
+    {
+      "label": "WhatsAppMessageLog.js",
+      "file_type": "code",
+      "source_file": "src/models/WhatsAppMessageLog.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "models_whatsappmessagelog",
+      "community": 7,
+      "norm_label": "whatsappmessagelog.js"
+    },
+    {
+      "label": "mongoose",
+      "file_type": "code",
+      "source_file": "src/models/WhatsAppMessageLog.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "models_whatsappmessagelog_mongoose",
+      "community": 7,
+      "norm_label": "mongoose"
+    },
+    {
+      "label": "whatsappMessageLogSchema",
+      "file_type": "code",
+      "source_file": "src/models/WhatsAppMessageLog.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "models_whatsappmessagelog_whatsappmessagelogschema",
+      "community": 7,
+      "norm_label": "whatsappmessagelogschema"
     },
     {
       "label": "assetRoutes.js",
@@ -2560,7 +2830,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_eventroutes",
-      "community": 9,
+      "community": 15,
       "norm_label": "eventroutes.js"
     },
     {
@@ -2570,7 +2840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_eventroutes_express",
-      "community": 9,
+      "community": 15,
       "norm_label": "express"
     },
     {
@@ -2580,7 +2850,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "routes_eventroutes_controller",
-      "community": 9,
+      "community": 15,
       "norm_label": "controller"
     },
     {
@@ -2590,7 +2860,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "routes_eventroutes_albumcontroller",
-      "community": 9,
+      "community": 15,
       "norm_label": "albumcontroller"
     },
     {
@@ -2600,7 +2870,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "routes_eventroutes_checkincontroller",
-      "community": 9,
+      "community": 15,
       "norm_label": "checkincontroller"
     },
     {
@@ -2610,7 +2880,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "routes_eventroutes_tablecontroller",
-      "community": 9,
+      "community": 15,
       "norm_label": "tablecontroller"
     },
     {
@@ -2620,7 +2890,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "routes_eventroutes_protect",
-      "community": 9,
+      "community": 15,
       "norm_label": "{ protect }"
     },
     {
@@ -2630,7 +2900,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "routes_eventroutes_validate_z",
-      "community": 9,
+      "community": 15,
       "norm_label": "{ validate, z }"
     },
     {
@@ -2640,7 +2910,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "routes_eventroutes_router",
-      "community": 9,
+      "community": 15,
       "norm_label": "router"
     },
     {
@@ -2650,7 +2920,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "routes_eventroutes_eventbody",
-      "community": 9,
+      "community": 15,
       "norm_label": "eventbody"
     },
     {
@@ -2660,7 +2930,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "routes_eventroutes_eventupdatebody",
-      "community": 9,
+      "community": 15,
       "norm_label": "eventupdatebody"
     },
     {
@@ -2670,7 +2940,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "routes_eventroutes_checkinlinkbody",
-      "community": 9,
+      "community": 15,
       "norm_label": "checkinlinkbody"
     },
     {
@@ -2680,7 +2950,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "routes_eventroutes_tablebody",
-      "community": 9,
+      "community": 15,
       "norm_label": "tablebody"
     },
     {
@@ -2690,7 +2960,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "routes_eventroutes_tableupdatebody",
-      "community": 9,
+      "community": 15,
       "norm_label": "tableupdatebody"
     },
     {
@@ -2700,7 +2970,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "routes_eventroutes_albumstatusbody",
-      "community": 9,
+      "community": 15,
       "norm_label": "albumstatusbody"
     },
     {
@@ -2822,6 +3092,26 @@
       "id": "routes_guestroutes_communicationbody",
       "community": 13,
       "norm_label": "communicationbody"
+    },
+    {
+      "label": "whatsappSendBody",
+      "file_type": "code",
+      "source_file": "src/routes/guestRoutes.js",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "routes_guestroutes_whatsappsendbody",
+      "community": 13,
+      "norm_label": "whatsappsendbody"
+    },
+    {
+      "label": "whatsappBulkBody",
+      "file_type": "code",
+      "source_file": "src/routes/guestRoutes.js",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "routes_guestroutes_whatsappbulkbody",
+      "community": 13,
+      "norm_label": "whatsappbulkbody"
     },
     {
       "label": "index.js",
@@ -2954,10 +3244,20 @@
       "norm_label": "checkin"
     },
     {
+      "label": "whatsappWebhooks",
+      "file_type": "code",
+      "source_file": "src/routes/index.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "routes_index_whatsappwebhooks",
+      "community": 11,
+      "norm_label": "whatsappwebhooks"
+    },
+    {
       "label": "router",
       "file_type": "code",
       "source_file": "src/routes/index.js",
-      "source_location": "L14",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "routes_index_router",
       "community": 11,
@@ -3364,6 +3664,46 @@
       "norm_label": "templatebody"
     },
     {
+      "label": "whatsappWebhookRoutes.js",
+      "file_type": "code",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "routes_whatsappwebhookroutes",
+      "community": 9,
+      "norm_label": "whatsappwebhookroutes.js"
+    },
+    {
+      "label": "express",
+      "file_type": "code",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "routes_whatsappwebhookroutes_express",
+      "community": 9,
+      "norm_label": "express"
+    },
+    {
+      "label": "controller",
+      "file_type": "code",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "routes_whatsappwebhookroutes_controller",
+      "community": 9,
+      "norm_label": "controller"
+    },
+    {
+      "label": "router",
+      "file_type": "code",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "routes_whatsappwebhookroutes_router",
+      "community": 9,
+      "norm_label": "router"
+    },
+    {
       "label": "server.js",
       "file_type": "code",
       "source_file": "src/server.js",
@@ -3420,7 +3760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_emailservice",
-      "community": 12,
+      "community": 2,
       "norm_label": "emailservice.js"
     },
     {
@@ -3430,7 +3770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_emailservice_nodemailer",
-      "community": 12,
+      "community": 2,
       "norm_label": "nodemailer"
     },
     {
@@ -3440,7 +3780,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "services_emailservice_env",
-      "community": 12,
+      "community": 2,
       "norm_label": "env"
     },
     {
@@ -3450,7 +3790,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "services_emailservice_isemailconfigured",
-      "community": 12,
+      "community": 2,
       "norm_label": "isemailconfigured()"
     },
     {
@@ -3460,7 +3800,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "services_emailservice_createtransporter",
-      "community": 12,
+      "community": 2,
       "norm_label": "createtransporter()"
     },
     {
@@ -3470,7 +3810,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "services_emailservice_escapehtml",
-      "community": 12,
+      "community": 2,
       "norm_label": "escapehtml()"
     },
     {
@@ -3480,7 +3820,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "services_emailservice_sendmail",
-      "community": 12,
+      "community": 2,
       "norm_label": "sendmail()"
     },
     {
@@ -3490,7 +3830,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "services_emailservice_sendcontactmessage",
-      "community": 12,
+      "community": 2,
       "norm_label": "sendcontactmessage()"
     },
     {
@@ -3500,7 +3840,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "services_emailservice_sendpasswordresetemail",
-      "community": 12,
+      "community": 2,
       "norm_label": "sendpasswordresetemail()"
     },
     {
@@ -3510,7 +3850,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "services_emailservice_sendrsvpnotification",
-      "community": 12,
+      "community": 2,
       "norm_label": "sendrsvpnotification()"
     },
     {
@@ -3520,7 +3860,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "services_emailservice_sendinvitationpublishedemail",
-      "community": 12,
+      "community": 2,
       "norm_label": "sendinvitationpublishedemail()"
     },
     {
@@ -3530,8 +3870,188 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "services_emailservice_sendrsvpreminderemail",
-      "community": 12,
+      "community": 2,
       "norm_label": "sendrsvpreminderemail()"
+    },
+    {
+      "label": "whatsappService.js",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "services_whatsappservice",
+      "community": 1,
+      "norm_label": "whatsappservice.js"
+    },
+    {
+      "label": "crypto",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "services_whatsappservice_crypto",
+      "community": 1,
+      "norm_label": "crypto"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "services_whatsappservice_env",
+      "community": 1,
+      "norm_label": "env"
+    },
+    {
+      "label": "WhatsAppMessageLog",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "services_whatsappservice_whatsappmessagelog",
+      "community": 1,
+      "norm_label": "whatsappmessagelog"
+    },
+    {
+      "label": "TEMPLATE_BY_TYPE",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "services_whatsappservice_template_by_type",
+      "community": 1,
+      "norm_label": "template_by_type"
+    },
+    {
+      "label": "activeProvider()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "services_whatsappservice_activeprovider",
+      "community": 1,
+      "norm_label": "activeprovider()"
+    },
+    {
+      "label": "isEnabled()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "services_whatsappservice_isenabled",
+      "community": 1,
+      "norm_label": "isenabled()"
+    },
+    {
+      "label": "normalizePhone()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "services_whatsappservice_normalizephone",
+      "community": 1,
+      "norm_label": "normalizephone()"
+    },
+    {
+      "label": "publicInvitationUrl()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "services_whatsappservice_publicinvitationurl",
+      "community": 1,
+      "norm_label": "publicinvitationurl()"
+    },
+    {
+      "label": "eventDateText()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "services_whatsappservice_eventdatetext",
+      "community": 1,
+      "norm_label": "eventdatetext()"
+    },
+    {
+      "label": "eventLocationText()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "services_whatsappservice_eventlocationtext",
+      "community": 1,
+      "norm_label": "eventlocationtext()"
+    },
+    {
+      "label": "buildText()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "services_whatsappservice_buildtext",
+      "community": 1,
+      "norm_label": "buildtext()"
+    },
+    {
+      "label": "buildMetaTemplatePayload()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L84",
+      "_origin": "ast",
+      "id": "services_whatsappservice_buildmetatemplatepayload",
+      "community": 1,
+      "norm_label": "buildmetatemplatepayload()"
+    },
+    {
+      "label": "sendMeta()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L109",
+      "_origin": "ast",
+      "id": "services_whatsappservice_sendmeta",
+      "community": 1,
+      "norm_label": "sendmeta()"
+    },
+    {
+      "label": "sendOpenWa()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L134",
+      "_origin": "ast",
+      "id": "services_whatsappservice_sendopenwa",
+      "community": 1,
+      "norm_label": "sendopenwa()"
+    },
+    {
+      "label": "sendMessage()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L160",
+      "_origin": "ast",
+      "id": "services_whatsappservice_sendmessage",
+      "community": 1,
+      "norm_label": "sendmessage()"
+    },
+    {
+      "label": "updateMessageStatus()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L213",
+      "_origin": "ast",
+      "id": "services_whatsappservice_updatemessagestatus",
+      "community": 1,
+      "norm_label": "updatemessagestatus()"
+    },
+    {
+      "label": "verifyMetaSignature()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L226",
+      "_origin": "ast",
+      "id": "services_whatsappservice_verifymetasignature",
+      "community": 1,
+      "norm_label": "verifymetasignature()"
     },
     {
       "label": "asyncHandler.js",
@@ -3675,6 +4195,17 @@
       "source_file": "scripts/sendRsvpReminders.js",
       "source_location": "L4",
       "weight": 1.0,
+      "source": "scripts_sendrsvpreminders",
+      "target": "models_event",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L4",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "scripts_sendrsvpreminders",
       "target": "models_guest"
@@ -3720,6 +4251,16 @@
       "confidence_score": 1.0,
       "source": "scripts_sendrsvpreminders",
       "target": "scripts_sendrsvpreminders_env"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_sendrsvpreminders",
+      "target": "scripts_sendrsvpreminders_event",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3795,11 +4336,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "scripts_sendrsvpreminders",
+      "target": "scripts_sendrsvpreminders_sendguestwhatsappreminder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sendRsvpReminders.js",
       "source_location": "L12",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "scripts_sendrsvpreminders",
       "target": "scripts_sendrsvpreminders_sendreminder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "scripts_sendrsvpreminders",
+      "target": "scripts_sendrsvpreminders_whatsappservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -3811,6 +4372,17 @@
       "confidence_score": 1.0,
       "source": "scripts_sendrsvpreminders",
       "target": "services_emailservice"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "scripts_sendrsvpreminders",
+      "target": "services_whatsappservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -3833,6 +4405,17 @@
       "confidence_score": 1.0,
       "source": "scripts_sendrsvpreminders_processinvitation",
       "target": "scripts_sendrsvpreminders_sendreminder"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/sendRsvpReminders.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "scripts_sendrsvpreminders_processinvitation",
+      "target": "scripts_sendrsvpreminders_sendguestwhatsappreminder",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -3989,6 +4572,87 @@
       "confidence_score": 1.0,
       "source": "scripts_testsmtp",
       "target": "services_emailservice"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_assert",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_event",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_guest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_invitation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_payload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_text",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "scripts_testwhatsappproviders_whatsappservice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testWhatsAppProviders.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "scripts_testwhatsappproviders",
+      "target": "services_whatsappservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -4290,6 +4954,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "config_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/middleware/auth.js",
       "source_location": "L3",
       "weight": 1.0,
@@ -4307,6 +4982,17 @@
       "confidence_score": 1.0,
       "source": "services_emailservice",
       "target": "config_env"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "config_env",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5392,6 +6078,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
+      "source_location": "L258",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "controllers_guestcontroller_applywhatsappgueststatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -5512,6 +6208,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "controllers_guestcontroller_invitation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -5562,6 +6268,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
+      "source_location": "L252",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "controllers_guestcontroller_primaryinvitationforevent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
       "source_location": "L1",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -5577,6 +6293,26 @@
       "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
       "target": "controllers_guestcontroller_rsvp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "controllers_guestcontroller_whatsappmessagelog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "controllers_guestcontroller_whatsappservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5607,9 +6343,42 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "models_invitation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L5",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
       "target": "models_rsvp"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "models_whatsappmessagelog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "services_whatsappservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5805,9 +6574,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_publicguest",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_publicguest"
     },
     {
       "relation": "contains",
@@ -6090,9 +6859,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
-      "target": "controllers_rsvpcontroller_assertcustomanswers",
-      "confidence_score": 1.0
+      "target": "controllers_rsvpcontroller_assertcustomanswers"
     },
     {
       "relation": "contains",
@@ -6614,6 +7383,110 @@
       "confidence_score": 1.0,
       "source": "routes_templateroutes",
       "target": "controllers_templatecontroller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "controllers_whatsappwebhookcontroller_asynchandler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "controllers_whatsappwebhookcontroller_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "controllers_whatsappwebhookcontroller_guest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "controllers_whatsappwebhookcontroller_mapmetastatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "controllers_whatsappwebhookcontroller_updateguestfromlog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "controllers_whatsappwebhookcontroller_whatsappservice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "models_guest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "services_whatsappservice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/whatsappWebhookController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "controllers_whatsappwebhookcontroller",
+      "target": "utils_asynchandler",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "routes_whatsappwebhookroutes",
+      "target": "controllers_whatsappwebhookcontroller",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7175,6 +8048,37 @@
       "confidence_score": 1.0,
       "source": "models_user",
       "target": "models_user_userschema"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/WhatsAppMessageLog.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "models_whatsappmessagelog",
+      "target": "models_whatsappmessagelog_mongoose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/WhatsAppMessageLog.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "models_whatsappmessagelog",
+      "target": "models_whatsappmessagelog_whatsappmessagelogschema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "models_whatsappmessagelog",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7898,6 +8802,26 @@
       "target": "routes_guestroutes_validate_z"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/guestRoutes.js",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "routes_guestroutes",
+      "target": "routes_guestroutes_whatsappbulkbody",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/guestRoutes.js",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "routes_guestroutes",
+      "target": "routes_guestroutes_whatsappsendbody",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -8072,6 +8996,16 @@
       "target": "routes_index_templates"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/index.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "routes_index",
+      "target": "routes_index_whatsappwebhooks",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -8114,6 +9048,17 @@
       "confidence_score": 1.0,
       "source": "routes_index",
       "target": "routes_templateroutes"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/index.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "routes_index",
+      "target": "routes_whatsappwebhookroutes",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8610,6 +9555,36 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "routes_whatsappwebhookroutes",
+      "target": "routes_whatsappwebhookroutes_controller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "routes_whatsappwebhookroutes",
+      "target": "routes_whatsappwebhookroutes_express",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/whatsappWebhookRoutes.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "routes_whatsappwebhookroutes",
+      "target": "routes_whatsappwebhookroutes_router",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/server.js",
       "source_location": "L1",
       "weight": 1.0,
@@ -8870,6 +9845,308 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_activeprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_buildmetatemplatepayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_buildtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_crypto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_env",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_eventdatetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_eventlocationtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_isenabled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_normalizephone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_publicinvitationurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L160",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_sendmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_sendmeta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_sendopenwa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_template_by_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_updatemessagestatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L226",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_verifymetasignature",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_whatsappmessagelog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "services_whatsappservice_isenabled",
+      "target": "services_whatsappservice_activeprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L161",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_activeprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L162",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_normalizephone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "services_whatsappservice_buildmetatemplatepayload",
+      "target": "services_whatsappservice_publicinvitationurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "services_whatsappservice_buildtext",
+      "target": "services_whatsappservice_publicinvitationurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "services_whatsappservice_buildmetatemplatepayload",
+      "target": "services_whatsappservice_eventdatetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "services_whatsappservice_buildtext",
+      "target": "services_whatsappservice_eventdatetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "services_whatsappservice_buildtext",
+      "target": "services_whatsappservice_eventlocationtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L163",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_buildtext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L192",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_buildmetatemplatepayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_sendmeta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_sendopenwa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/utils/validate.js",
       "source_location": "L17",
       "weight": 1.0,
@@ -8899,5 +10176,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "8067ff7e76179bd653ac666c7f1c7db262adb545"
+  "built_at_commit": "25cac99db8213e6ce1c19f579303e889ceebabb2"
 }

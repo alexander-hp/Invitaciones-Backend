@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 const env = require('../src/config/env');
 const Invitation = require('../src/models/Invitation');
+const Event = require('../src/models/Event');
 const Guest = require('../src/models/Guest');
 const Rsvp = require('../src/models/Rsvp');
 const emailService = require('../src/services/emailService');
+const whatsappService = require('../src/services/whatsappService');
 
 function reminderWindowStart(deadline, daysBefore) {
   return new Date(new Date(deadline).getTime() - daysBefore * 24 * 60 * 60 * 1000);
@@ -12,6 +14,23 @@ function reminderWindowStart(deadline, daysBefore) {
 async function sendReminder({ to, name, invitation, deadline }) {
   const publicUrl = `${env.publicBaseUrl}/i/${invitation.slug}`;
   await emailService.sendRsvpReminderEmail({ to, name, invitation, deadline, publicUrl });
+}
+
+async function sendGuestWhatsAppReminder({ guest, event, invitation }) {
+  if (!whatsappService.isEnabled() || !guest.phone) return false;
+  await whatsappService.sendMessage({
+    owner: invitation.owner,
+    guest,
+    event,
+    invitation,
+    type: 'reminder'
+  });
+  guest.communicationStatus = 'sent';
+  guest.lastMessageType = 'reminder';
+  guest.lastMessageChannel = 'whatsapp';
+  guest.lastMessageSentAt = new Date();
+  await guest.save();
+  return true;
 }
 
 async function processInvitation(invitation) {
@@ -27,6 +46,7 @@ async function processInvitation(invitation) {
   let sent = 0;
   let skipped = 0;
   const publicUrl = `${env.publicBaseUrl}/i/${invitation.slug}`;
+  const event = await Event.findById(invitation.event);
 
   const maybeRsvps = await Rsvp.find({ invitation: invitation._id, response: 'maybe', email: { $exists: true, $ne: '' } });
   for (const rsvp of maybeRsvps) {
@@ -39,7 +59,14 @@ async function processInvitation(invitation) {
     }
   }
 
-  const pendingGuests = await Guest.find({ event: invitation.event, status: 'pending', email: { $exists: true, $ne: '' } });
+  const pendingGuests = await Guest.find({
+    event: invitation.event,
+    status: 'pending',
+    $or: [
+      { email: { $exists: true, $ne: '' } },
+      { phone: { $exists: true, $ne: '' } }
+    ]
+  });
   for (const guest of pendingGuests) {
     const hasRsvp = await Rsvp.exists({ invitation: invitation._id, guest: guest._id });
     if (hasRsvp) {
@@ -47,7 +74,13 @@ async function processInvitation(invitation) {
       continue;
     }
     try {
-      await sendReminder({ to: guest.email, name: guest.name, invitation, deadline });
+      const whatsappSent = await sendGuestWhatsAppReminder({ guest, event, invitation });
+      if (!whatsappSent && guest.email) {
+        await sendReminder({ to: guest.email, name: guest.name, invitation, deadline });
+      } else if (!whatsappSent) {
+        skipped += 1;
+        continue;
+      }
       sent += 1;
     } catch (error) {
       skipped += 1;

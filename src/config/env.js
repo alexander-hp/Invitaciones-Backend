@@ -29,5 +29,14 @@ module.exports = {
   smtpSecure: String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true',
   smtpService: process.env.SMTP_SERVICE || '',
   smtpUser: process.env.SMTP_USER || process.env.emailAddress || '',
-  smtpPass: process.env.SMTP_PASS || process.env.emailPssw || ''
+  smtpPass: process.env.SMTP_PASS || process.env.emailPssw || '',
+  whatsappProvider: process.env.WHATSAPP_PROVIDER || 'disabled',
+  whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+  whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
+  whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v22.0',
+  whatsappWebhookVerifyToken: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || '',
+  whatsappAppSecret: process.env.WHATSAPP_APP_SECRET || '',
+  openWaBaseUrl: process.env.OPENWA_BASE_URL || '',
+  openWaApiKey: process.env.OPENWA_API_KEY || '',
+  openWaSessionId: process.env.OPENWA_SESSION_ID || ''
 };
