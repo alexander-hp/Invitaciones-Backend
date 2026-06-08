@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const guestSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -12,7 +12,13 @@ const guestSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' }
 }, { timestamps: true });
 
-guestSchema.index({ owner: 1, event: 1, email: 1 });
-guestSchema.index({ owner: 1, event: 1, phone: 1 });
+guestSchema.index(
+  { owner: 1, event: 1, email: 1 },
+  { unique: true, partialFilterExpression: { email: { $type: 'string' } } }
+);
+guestSchema.index(
+  { owner: 1, event: 1, phone: 1 },
+  { unique: true, partialFilterExpression: { phone: { $type: 'string' } } }
+);
 
 module.exports = mongoose.model('Guest', guestSchema);

@@ -1,9 +1,12 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const controller = require('../controllers/invitationController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
 const router = express.Router();
+const publicInvitationLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false });
+const guestAccessLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 const invitationContentBody = z.object({
   headline: z.string().optional(),
   subheadline: z.string().optional(),
@@ -40,8 +43,8 @@ const invitationUpdateBody = z.object({
   content: invitationContentBody.optional()
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 
-router.get('/public/:slug', controller.publicBySlug);
-router.post('/public/:slug/guest-access', validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
+router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
+router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
 router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);

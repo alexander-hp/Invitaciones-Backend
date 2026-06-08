@@ -17,6 +17,45 @@ async function buildUniqueSlug(source) {
   return slug;
 }
 
+function publicEvent(event) {
+  if (!event || typeof event === 'string') return event;
+  return {
+    id: event._id,
+    type: event.type,
+    title: event.title,
+    hosts: event.hosts,
+    date: event.date,
+    venue: event.venue,
+    agenda: event.agenda
+  };
+}
+
+function publicTemplate(template) {
+  if (!template || typeof template === 'string') return template;
+  return {
+    id: template._id,
+    name: template.name,
+    eventType: template.eventType,
+    tier: template.tier,
+    previewImageUrl: template.previewImageUrl,
+    config: template.config
+  };
+}
+
+function publicInvitation(invitation) {
+  return {
+    id: invitation._id,
+    slug: invitation.slug,
+    status: invitation.status,
+    accessMode: invitation.accessMode,
+    rsvpSettings: invitation.rsvpSettings,
+    content: invitation.content,
+    publishedAt: invitation.publishedAt,
+    event: publicEvent(invitation.event),
+    template: publicTemplate(invitation.template)
+  };
+}
+
 exports.list = asyncHandler(async (req, res) => {
   const invitations = await Invitation.find({ owner: req.user._id }).populate('event template').sort('-createdAt');
   res.json({ invitations });
@@ -84,7 +123,7 @@ exports.publicBySlug = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  res.json({ invitation });
+  res.json({ invitation: publicInvitation(invitation) });
 });
 
 exports.guestAccess = asyncHandler(async (req, res) => {

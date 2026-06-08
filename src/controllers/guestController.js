@@ -44,10 +44,17 @@ function buildDuplicateError(duplicate, field) {
   error.statusCode = 409;
   error.details = {
     field,
-    guestId: duplicate._id,
-    guestName: duplicate.name
+    guestId: duplicate?._id,
+    guestName: duplicate?.name
   };
   return error;
+}
+
+function buildDuplicateKeyError(error) {
+  if (error?.code !== 11000) return error;
+  const key = error.keyPattern || error.keyValue || {};
+  const field = key.phone ? 'phone' : 'email';
+  return buildDuplicateError(null, field);
 }
 
 function buildDuplicateQuery({ owner, event, email, phone, excludeGuestId }) {
@@ -102,7 +109,12 @@ exports.create = asyncHandler(async (req, res) => {
   });
   if (duplicate) throw buildDuplicateError(duplicate.guest, duplicate.field);
 
-  const guest = await Guest.create({ ...payload, owner: req.user._id, event: event._id });
+  let guest;
+  try {
+    guest = await Guest.create({ ...payload, owner: req.user._id, event: event._id });
+  } catch (error) {
+    throw buildDuplicateKeyError(error);
+  }
   res.status(201).json({ guest });
 });
 
@@ -129,7 +141,11 @@ exports.update = asyncHandler(async (req, res) => {
   guest.phone = payload.phone;
   guest.group = payload.group;
   guest.allowedCompanions = payload.allowedCompanions;
-  await guest.save();
+  try {
+    await guest.save();
+  } catch (error) {
+    throw buildDuplicateKeyError(error);
+  }
 
   res.json({ guest });
 });
@@ -201,6 +217,11 @@ exports.importGuests = asyncHandler(async (req, res) => {
     if (guest.phone) seenByPhone.set(guest.phone, guest);
   }
 
-  const guests = guestsToCreate.length ? await Guest.insertMany(guestsToCreate, { ordered: false }) : [];
+  let guests = [];
+  try {
+    guests = guestsToCreate.length ? await Guest.insertMany(guestsToCreate, { ordered: false }) : [];
+  } catch (error) {
+    throw buildDuplicateKeyError(error);
+  }
   res.status(201).json({ imported: guests.length, invalidRows, duplicateRows: duplicates.length, duplicates, guests });
 });

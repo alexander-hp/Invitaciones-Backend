@@ -109,6 +109,52 @@ async function updateGuestStatus(guest, response) {
   await Guest.findByIdAndUpdate(guest._id, { status });
 }
 
+async function saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings }) {
+  const existingRsvp = await findExistingRsvp(invitation, guest, emailNormalized);
+  let rsvp;
+  let statusCode = 201;
+  let previousSnapshot;
+
+  if (existingRsvp) {
+    if (!settings.allowChangesUntilDeadline) {
+      await createRsvpActivity({
+        invitation,
+        guest,
+        rsvp: existingRsvp,
+        action: 'blocked_duplicate',
+        previous: snapshotRsvp(existingRsvp),
+        metadata: { email: emailNormalized }
+      });
+      const error = new Error('Ya existe una respuesta para esta invitacion');
+      error.statusCode = 409;
+      throw error;
+    }
+    previousSnapshot = snapshotRsvp(existingRsvp);
+    Object.assign(existingRsvp, rsvpData);
+    rsvp = await existingRsvp.save();
+    statusCode = 200;
+    return { rsvp, statusCode, previousSnapshot };
+  }
+
+  try {
+    rsvp = await Rsvp.create(rsvpData);
+    return { rsvp, statusCode, previousSnapshot };
+  } catch (error) {
+    if (error?.code !== 11000) throw error;
+    const duplicate = await findExistingRsvp(invitation, guest, emailNormalized);
+    if (!duplicate || !settings.allowChangesUntilDeadline) {
+      const conflict = new Error('Ya existe una respuesta para esta invitacion');
+      conflict.statusCode = 409;
+      throw conflict;
+    }
+    previousSnapshot = snapshotRsvp(duplicate);
+    Object.assign(duplicate, rsvpData);
+    rsvp = await duplicate.save();
+    statusCode = 200;
+    return { rsvp, statusCode, previousSnapshot };
+  }
+}
+
 exports.submitPublic = asyncHandler(async (req, res) => {
   const payload = req.validated.body;
   const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).populate('owner', 'email name');
@@ -167,32 +213,7 @@ exports.submitPublic = asyncHandler(async (req, res) => {
   }
 
   const rsvpData = buildRsvpData({ invitation, guest, payload, emailNormalized });
-  const existingRsvp = await findExistingRsvp(invitation, guest, emailNormalized);
-
-  let rsvp;
-  let statusCode = 201;
-  let previousSnapshot;
-  if (existingRsvp) {
-    if (!settings.allowChangesUntilDeadline) {
-      await createRsvpActivity({
-        invitation,
-        guest,
-        rsvp: existingRsvp,
-        action: 'blocked_duplicate',
-        previous: snapshotRsvp(existingRsvp),
-        metadata: { email: emailNormalized }
-      });
-      const error = new Error('Ya existe una respuesta para esta invitacion');
-      error.statusCode = 409;
-      throw error;
-    }
-    previousSnapshot = snapshotRsvp(existingRsvp);
-    Object.assign(existingRsvp, rsvpData);
-    rsvp = await existingRsvp.save();
-    statusCode = 200;
-  } else {
-    rsvp = await Rsvp.create(rsvpData);
-  }
+  const { rsvp, statusCode, previousSnapshot } = await saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings });
 
   await createRsvpActivity({
     invitation,

@@ -1,4 +1,4 @@
-﻿const DEFAULT_API_URL = 'http://localhost:4000/api';
+const DEFAULT_API_URL = 'http://localhost:4000/api';
 const apiUrl = (process.env.SMOKE_API_URL || DEFAULT_API_URL).replace(/\/$/, '');
 const runId = Date.now();
 const email = `smoke.${runId}@example.com`;
@@ -34,6 +34,14 @@ async function request(path, { method = 'GET', token, body, expected = [200] } =
 
 function idOf(document) {
   return document?._id || document?.id;
+}
+
+function assertPublicInvitationPayload(invitation) {
+  if (!invitation) throw new Error('Public invitation payload missing invitation');
+  if (invitation.owner || invitation.owner === null) throw new Error('Public invitation leaks owner');
+  if (invitation.createdAt || invitation.updatedAt) throw new Error('Public invitation leaks internal timestamps');
+  if (invitation.event?.owner) throw new Error('Public event leaks owner');
+  if (!invitation.id || !invitation.slug || !invitation.event?.title) throw new Error('Public invitation missing required public fields');
 }
 
 async function main() {
@@ -112,8 +120,9 @@ async function main() {
   await request(`/invitations/${invitationId}/publish`, { method: 'POST', token });
   console.log('[smoke:mvp] invitation published');
 
-  await request(`/invitations/public/${invitation.slug}`);
-  console.log('[smoke:mvp] public invitation loads');
+  const publicInvitation = await request(`/invitations/public/${invitation.slug}`);
+  assertPublicInvitationPayload(publicInvitation.invitation);
+  console.log('[smoke:mvp] public invitation loads with safe payload');
 
   const access = await request(`/invitations/public/${invitation.slug}/guest-access`, {
     method: 'POST',
@@ -122,20 +131,29 @@ async function main() {
   if (!access.guest?.id) throw new Error('Guest access did not return guest id');
   console.log('[smoke:mvp] guest access ok');
 
+  const rsvpPayload = {
+    guest: access.guest.id,
+    name: access.guest.name,
+    email: access.guest.email,
+    response: 'confirmed',
+    companions: 1,
+    message: 'Smoke RSVP confirmed'
+  };
   const rsvpResult = await request(`/rsvps/public/${invitation.slug}`, {
     method: 'POST',
     expected: [201, 200],
-    body: {
-      guest: access.guest.id,
-      name: access.guest.name,
-      email: access.guest.email,
-      response: 'confirmed',
-      companions: 1,
-      message: 'Smoke RSVP confirmed'
-    }
+    body: rsvpPayload
   });
   if (!idOf(rsvpResult.rsvp)) throw new Error('RSVP did not return id');
   console.log('[smoke:mvp] rsvp submitted');
+
+  const updatedRsvp = await request(`/rsvps/public/${invitation.slug}`, {
+    method: 'POST',
+    expected: [200],
+    body: { ...rsvpPayload, message: 'Smoke RSVP updated' }
+  });
+  if (!updatedRsvp.updated) throw new Error('Duplicate RSVP did not update existing RSVP');
+  console.log('[smoke:mvp] duplicate rsvp updates existing response');
 
   const rsvps = await request(`/rsvps/event/${eventId}`, { token });
   if (!Array.isArray(rsvps.rsvps) || !rsvps.rsvps.some((item) => idOf(item) === idOf(rsvpResult.rsvp))) {
