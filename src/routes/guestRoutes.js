@@ -15,6 +15,11 @@ const guestBody = z.object({
   group: z.string().optional(),
   tableName: z.string().optional(),
   seatLabel: z.string().optional(),
+  companions: z.array(z.object({
+    name: z.string().optional(),
+    tableName: z.string().optional(),
+    seatLabel: z.string().optional()
+  }).strict()).optional(),
   allowedCompanions: z.number().int().min(0).max(20).optional()
 }).strict();
 

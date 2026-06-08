@@ -166,7 +166,7 @@ exports.guestAccess = asyncHandler(async (req, res) => {
   const guest = await Guest.findOne({
     event: invitation.event,
     email: req.validated.body.email.toLowerCase().trim()
-  }).select('name email allowedCompanions status');
+  }).select('name email allowedCompanions status checkInCode qrCode tableName seatLabel companions');
 
   if (!guest) {
     const error = new Error('Este correo no esta en la lista de invitados');
@@ -180,7 +180,12 @@ exports.guestAccess = asyncHandler(async (req, res) => {
       name: guest.name,
       email: guest.email,
       allowedCompanions: guest.allowedCompanions,
-      status: guest.status
+      status: guest.status,
+      checkInCode: guest.checkInCode,
+      qrCode: guest.qrCode,
+      tableName: guest.tableName,
+      seatLabel: guest.seatLabel,
+      companions: guest.companions || []
     }
   });
 });

@@ -10,6 +10,13 @@ const guestSchema = new mongoose.Schema({
   group: String,
   tableName: { type: String, trim: true },
   seatLabel: { type: String, trim: true },
+  companions: [{
+    name: { type: String, trim: true },
+    tableName: { type: String, trim: true },
+    seatLabel: { type: String, trim: true },
+    checkedIn: { type: Boolean, default: false },
+    checkedInAt: Date
+  }],
   allowedCompanions: { type: Number, default: 0 },
   qrCode: String,
   checkInCode: { type: String, unique: true, sparse: true, index: true },

@@ -17,6 +17,15 @@ function normalizePhone(phone) {
 function normalizeGuestPayload(payload) {
   const email = normalizeEmail(payload.email);
   const phone = normalizePhone(payload.phone);
+  const companions = Array.isArray(payload.companions)
+    ? payload.companions
+        .filter((companion) => companion?.name || companion?.seatLabel || companion?.tableName)
+        .map((companion) => ({
+          name: companion.name ? String(companion.name).trim() : undefined,
+          tableName: companion.tableName ? String(companion.tableName).trim() : undefined,
+          seatLabel: companion.seatLabel ? String(companion.seatLabel).trim() : undefined
+        }))
+    : undefined;
   return {
     ...payload,
     name: String(payload.name || '').trim(),
@@ -25,8 +34,17 @@ function normalizeGuestPayload(payload) {
     group: payload.group ? String(payload.group).trim() : undefined,
     tableName: payload.tableName ? String(payload.tableName).trim() : undefined,
     seatLabel: payload.seatLabel ? String(payload.seatLabel).trim() : undefined,
+    companions,
     allowedCompanions: Number(payload.allowedCompanions || 0)
   };
+}
+
+function companionRows(row) {
+  return [1, 2, 3, 4, 5, 6, 7, 8].map((index) => ({
+    name: row[`acompanante${index}`] || row[`companion${index}`],
+    tableName: row[`mesaAcompanante${index}`] || row[`companionTable${index}`],
+    seatLabel: row[`asientoAcompanante${index}`] || row[`companionSeat${index}`]
+  })).filter((companion) => companion.name || companion.tableName || companion.seatLabel);
 }
 
 function normalizeGuestRow(row, event, owner) {
@@ -41,6 +59,7 @@ function normalizeGuestRow(row, event, owner) {
     group: row.group || row.grupo || row.Grupo || undefined,
     tableName: row.tableName || row.mesa || row.Mesa || undefined,
     seatLabel: row.seatLabel || row.asiento || row.Asiento || undefined,
+    companions: companionRows(row),
     allowedCompanions: Number(row.allowedCompanions || row.acompanantes || row.Acompanantes || 0)
   });
 }
@@ -185,6 +204,7 @@ exports.update = asyncHandler(async (req, res) => {
   guest.group = payload.group;
   guest.tableName = payload.tableName;
   guest.seatLabel = payload.seatLabel;
+  guest.companions = payload.companions || [];
   guest.allowedCompanions = payload.allowedCompanions;
   try {
     await guest.save();
@@ -356,7 +376,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
   const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Check-in', 'Codigo QR', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Acompanantes RSVP', 'Comida', 'Mensaje'],
+    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Acompanantes RSVP', 'Comida', 'Mensaje'],
     ...guests.map((guest) => {
       const rsvp = rsvpByGuest.get(String(guest._id));
       return [
@@ -366,6 +386,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
         guest.group || 'General',
         guest.tableName || '',
         guest.seatLabel || '',
+        (guest.companions || []).map((companion) => [companion.name, companion.tableName, companion.seatLabel].filter(Boolean).join(' / ')).join('; '),
         guest.checkedIn ? 'Si' : 'No',
         guest.checkInCode || '',
         guest.allowedCompanions || 0,
