@@ -21,5 +21,6 @@ const publicRsvpBody = z.object({
 
 router.post('/public/:slug', publicRsvpLimiter, validate(z.object({ body: publicRsvpBody })), controller.submitPublic);
 router.get('/event/:eventId', protect, controller.listByEvent);
+router.get('/event/:eventId/export', protect, controller.exportByEvent);
 
 module.exports = router;

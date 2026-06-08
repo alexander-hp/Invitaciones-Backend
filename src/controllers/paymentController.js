@@ -3,24 +3,20 @@ const Invitation = require('../models/Invitation');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const env = require('../config/env');
+const { PLAN_DEFINITIONS, normalizePlan, getPlanDefinition } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 const stripe = env.stripeSecretKey ? new Stripe(env.stripeSecretKey) : null;
-const packages = {
-  basic: { amount: 19900, name: 'Invitacion Basica' },
-  premium: { amount: 49900, name: 'Invitacion Premium' },
-  organizer: { amount: 149900, name: 'Plan Organizador' }
-};
+
+exports.listPlans = asyncHandler(async (_req, res) => {
+  res.json({ plans: Object.values(PLAN_DEFINITIONS) });
+});
 
 exports.createCheckout = asyncHandler(async (req, res) => {
-  if (!stripe) {
-    const error = new Error('STRIPE_SECRET_KEY no configurado');
-    error.statusCode = 501;
-    throw error;
-  }
   const payload = req.validated.body;
-  const selected = packages[payload.package];
-  if (!selected) {
+  const planKey = normalizePlan(payload.package);
+  const selected = getPlanDefinition(planKey);
+  if (!selected || selected.key === 'free') {
     const error = new Error('Paquete invalido');
     error.statusCode = 400;
     throw error;
@@ -35,13 +31,23 @@ exports.createCheckout = asyncHandler(async (req, res) => {
     }
   }
 
-  const payment = await Payment.create({ owner: req.user._id, invitation: payload.invitation, package: payload.package, amount: selected.amount });
+  const payment = await Payment.create({ owner: req.user._id, invitation: payload.invitation, package: selected.key, amount: selected.amount });
+  if (!stripe) {
+    return res.json({
+      checkoutUrl: null,
+      sessionId: null,
+      manualPayment: true,
+      payment,
+      message: 'Stripe no esta configurado. Registra este pago manualmente antes de activar el plan.'
+    });
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     success_url: `${env.clientUrl}/dashboard?payment=success`,
     cancel_url: `${env.clientUrl}/dashboard?payment=cancelled`,
     line_items: [{ price_data: { currency: 'mxn', unit_amount: selected.amount, product_data: { name: selected.name } }, quantity: 1 }],
-    metadata: { paymentId: String(payment._id), userId: String(req.user._id), package: payload.package }
+    metadata: { paymentId: String(payment._id), userId: String(req.user._id), package: selected.key }
   });
   payment.stripeSessionId = session.id;
   await payment.save();
@@ -58,7 +64,7 @@ exports.webhook = asyncHandler(async (req, res) => {
     if (payment && payment.status !== 'paid') {
       payment.status = 'paid';
       await payment.save();
-      await User.findByIdAndUpdate(payment.owner, { plan: payment.package });
+      await User.findByIdAndUpdate(payment.owner, { plan: normalizePlan(payment.package) });
     }
   }
   res.json({ received: true });

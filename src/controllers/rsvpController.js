@@ -4,10 +4,22 @@ const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
 const RsvpActivity = require('../models/RsvpActivity');
 const emailService = require('../services/emailService');
+const { assertPlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 function normalizeEmail(email) {
   return email ? email.toLowerCase().trim() : '';
+}
+
+function escapeCsv(value) {
+  const text = value === undefined || value === null ? '' : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function csvResponse(res, filename, rows) {
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(`\uFEFF${rows.map((row) => row.map(escapeCsv).join(',')).join('\n')}`);
 }
 
 function normalizePhone({ phoneCountryCode, phoneNationalNumber }) {
@@ -106,7 +118,9 @@ async function findExistingRsvp(invitation, guest, emailNormalized) {
 async function updateGuestStatus(guest, response) {
   if (!guest) return;
   const status = response === 'maybe' ? 'pending' : response;
-  await Guest.findByIdAndUpdate(guest._id, { status });
+  const update = { status };
+  if (response === 'confirmed') update.communicationStatus = 'confirmed';
+  await Guest.findByIdAndUpdate(guest._id, update);
 }
 
 async function saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings }) {
@@ -247,4 +261,31 @@ exports.listByEvent = asyncHandler(async (req, res) => {
   }
   const rsvps = await Rsvp.find({ event: req.params.eventId }).sort('-createdAt');
   res.json({ rsvps });
+});
+
+exports.exportByEvent = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const rsvps = await Rsvp.find({ event: event._id }).sort('-createdAt').lean();
+  const rows = [
+    ['Nombre', 'Email', 'Telefono', 'Respuesta', 'Acompanantes', 'Comida', 'Mensaje', 'Fecha'],
+    ...rsvps.map((rsvp) => [
+      rsvp.name,
+      rsvp.email,
+      rsvp.phoneE164,
+      rsvp.response,
+      rsvp.companions || 0,
+      rsvp.mealPreference || '',
+      rsvp.message || '',
+      rsvp.createdAt ? new Date(rsvp.createdAt).toISOString() : ''
+    ])
+  ];
+
+  csvResponse(res, `rsvps-${event._id}.csv`, rows);
 });

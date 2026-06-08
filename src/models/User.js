@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   passwordResetTokenHash: { type: String, index: true },
   passwordResetExpiresAt: Date,
   role: { type: String, enum: ['client', 'organizer', 'admin'], default: 'client' },
-  plan: { type: String, enum: ['free', 'basic', 'premium', 'organizer'], default: 'free' }
+  plan: { type: String, enum: ['free', 'event', 'pro', 'basic', 'premium', 'organizer'], default: 'free' }
 }, { timestamps: true });
 
 userSchema.methods.comparePassword = function comparePassword(password) {

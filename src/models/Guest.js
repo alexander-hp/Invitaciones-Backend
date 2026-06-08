@@ -9,7 +9,11 @@ const guestSchema = new mongoose.Schema({
   group: String,
   allowedCompanions: { type: Number, default: 0 },
   qrCode: String,
-  status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' }
+  status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' },
+  communicationStatus: { type: String, enum: ['pending', 'sent', 'confirmed'], default: 'pending' },
+  lastMessageType: { type: String, enum: ['invitation', 'reminder', 'location_change', 'thanks'] },
+  lastMessageChannel: { type: String, enum: ['whatsapp', 'email'] },
+  lastMessageSentAt: Date
 }, { timestamps: true });
 
 guestSchema.index(

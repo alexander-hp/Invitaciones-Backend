@@ -2,6 +2,8 @@ const readXlsxFile = require('read-excel-file/node');
 const { parse } = require('csv-parse/sync');
 const Guest = require('../models/Guest');
 const Event = require('../models/Event');
+const Rsvp = require('../models/Rsvp');
+const { getPlanLimits, assertPlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 function normalizeEmail(email) {
@@ -68,6 +70,35 @@ function buildDuplicateQuery({ owner, event, email, phone, excludeGuestId }) {
   return query;
 }
 
+function escapeCsv(value) {
+  const text = value === undefined || value === null ? '' : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function csvResponse(res, filename, rows) {
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(`\uFEFF${rows.map((row) => row.map(escapeCsv).join(',')).join('\n')}`);
+}
+
+function buildGuestFilters(query) {
+  const filters = {};
+  const search = String(query.search || '').trim();
+  const status = String(query.status || '').trim();
+  const communicationStatus = String(query.communicationStatus || '').trim();
+  const group = String(query.group || '').trim();
+
+  if (search) {
+    const pattern = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    filters.$or = [{ name: pattern }, { email: pattern }, { phone: pattern }, { group: pattern }];
+  }
+  if (['pending', 'confirmed', 'declined'].includes(status)) filters.status = status;
+  if (['pending', 'sent', 'confirmed'].includes(communicationStatus)) filters.communicationStatus = communicationStatus;
+  if (group) filters.group = group;
+
+  return filters;
+}
+
 async function findDuplicateGuest({ owner, event, email, phone, excludeGuestId }) {
   const query = buildDuplicateQuery({ owner, event, email, phone, excludeGuestId });
   if (!query) return null;
@@ -88,7 +119,7 @@ exports.list = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const guests = await Guest.find({ owner: req.user._id, event: event._id }).sort('name');
+  const guests = await Guest.find({ owner: req.user._id, event: event._id, ...buildGuestFilters(req.query) }).sort('name');
   res.json({ guests });
 });
 
@@ -108,6 +139,14 @@ exports.create = asyncHandler(async (req, res) => {
     phone: payload.phone
   });
   if (duplicate) throw buildDuplicateError(duplicate.guest, duplicate.field);
+
+  const limits = getPlanLimits(req.user);
+  const currentGuests = await Guest.countDocuments({ owner: req.user._id, event: event._id });
+  if (currentGuests >= limits.guests) {
+    const error = new Error(`Tu plan permite hasta ${limits.guests} invitados por evento`);
+    error.statusCode = 402;
+    throw error;
+  }
 
   let guest;
   try {
@@ -150,6 +189,37 @@ exports.update = asyncHandler(async (req, res) => {
   res.json({ guest });
 });
 
+exports.remove = asyncHandler(async (req, res) => {
+  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!guest) {
+    const error = new Error('Invitado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await Rsvp.updateMany({ guest: guest._id }, { $unset: { guest: '' } });
+  await Guest.deleteOne({ _id: guest._id });
+  res.json({ message: 'Invitado eliminado' });
+});
+
+exports.markCommunication = asyncHandler(async (req, res) => {
+  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!guest) {
+    const error = new Error('Invitado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { communicationStatus, messageType, channel } = req.validated.body;
+  guest.communicationStatus = communicationStatus;
+  if (messageType) guest.lastMessageType = messageType;
+  if (channel) guest.lastMessageChannel = channel;
+  if (communicationStatus === 'sent') guest.lastMessageSentAt = new Date();
+  await guest.save();
+
+  res.json({ guest });
+});
+
 exports.importGuests = asyncHandler(async (req, res) => {
   if (!req.file) {
     const error = new Error('Archivo requerido');
@@ -187,6 +257,12 @@ exports.importGuests = asyncHandler(async (req, res) => {
   const invalidRows = rows.length - payload.length;
 
   const existingGuests = await Guest.find({ owner: req.user._id, event: event._id }).select('_id name email phone');
+  const limits = getPlanLimits(req.user);
+  if (existingGuests.length >= limits.guests) {
+    const error = new Error(`Tu plan permite hasta ${limits.guests} invitados por evento`);
+    error.statusCode = 402;
+    throw error;
+  }
   const existingByEmail = new Map(existingGuests.filter((guest) => guest.email).map((guest) => [guest.email, guest]));
   const existingByPhone = new Map(existingGuests.filter((guest) => guest.phone).map((guest) => [guest.phone, guest]));
   const seenByEmail = new Map();
@@ -212,6 +288,16 @@ exports.importGuests = asyncHandler(async (req, res) => {
       continue;
     }
 
+    if (existingGuests.length + guestsToCreate.length >= limits.guests) {
+      duplicates.push({
+        row: row.rowNumber,
+        field: 'plan',
+        value: String(limits.guests),
+        guestName: 'Limite del plan'
+      });
+      continue;
+    }
+
     guestsToCreate.push(guest);
     if (guest.email) seenByEmail.set(guest.email, guest);
     if (guest.phone) seenByPhone.set(guest.phone, guest);
@@ -223,5 +309,53 @@ exports.importGuests = asyncHandler(async (req, res) => {
   } catch (error) {
     throw buildDuplicateKeyError(error);
   }
-  res.status(201).json({ imported: guests.length, invalidRows, duplicateRows: duplicates.length, duplicates, guests });
+  res.status(201).json({
+    created: guests.length,
+    updated: 0,
+    skipped: invalidRows + duplicates.length,
+    errors: invalidRows,
+    imported: guests.length,
+    invalidRows,
+    duplicateRows: duplicates.length,
+    duplicates,
+    guests
+  });
+});
+
+exports.exportGuests = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'exportData', 'La exportacion de datos requiere Evento Individual o Pro');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const guests = await Guest.find({ owner: req.user._id, event: event._id, ...buildGuestFilters(req.query) }).sort('name').lean();
+  const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
+  const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
+  const rows = [
+    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Acompanantes RSVP', 'Comida', 'Mensaje'],
+    ...guests.map((guest) => {
+      const rsvp = rsvpByGuest.get(String(guest._id));
+      return [
+        guest.name,
+        guest.email,
+        guest.phone,
+        guest.group || 'General',
+        guest.allowedCompanions || 0,
+        guest.status,
+        guest.communicationStatus || 'pending',
+        guest.lastMessageType || '',
+        guest.lastMessageChannel || '',
+        guest.lastMessageSentAt ? new Date(guest.lastMessageSentAt).toISOString() : '',
+        rsvp?.response || '',
+        rsvp?.companions || 0,
+        rsvp?.mealPreference || '',
+        rsvp?.message || ''
+      ];
+    })
+  ];
+
+  csvResponse(res, `invitados-${event._id}.csv`, rows);
 });

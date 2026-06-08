@@ -1,6 +1,7 @@
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const env = require('../config/env');
+const { getPlanLimits } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 const s3 = new S3Client({ region: env.awsRegion });
@@ -47,6 +48,12 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
 
   const { fileName, contentType, folder = 'assets', size } = req.validated.body;
   assertMediaAllowed({ folder, contentType, size });
+  const limits = getPlanLimits(req.user);
+  if (folder === 'music' && !limits.music) {
+    const error = new Error('La musica requiere Evento Individual o Pro');
+    error.statusCode = 402;
+    throw error;
+  }
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
   const key = `${folder}/${req.user._id}/${Date.now()}-${safeName}`;
