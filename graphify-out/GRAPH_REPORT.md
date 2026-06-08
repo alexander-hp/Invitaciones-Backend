@@ -1,16 +1,16 @@
 # Graph Report - Invitaciones-BackendExpress  (2026-06-07)
 
 ## Corpus Check
-- 42 files · ~7,415 words
+- 42 files · ~7,578 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 275 nodes · 391 edges · 21 communities
+- 279 nodes · 395 edges · 22 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `95067a05`
+- Built from commit: `543b0b36`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,6 +36,7 @@
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `protect` - 10 edges
@@ -56,7 +57,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (21 total, 0 thin omitted)
+## Communities (22 total, 0 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.15
@@ -83,8 +84,8 @@ Cohesion: 0.14
 Nodes (9): asyncHandler, crypto, emailService, env, jwt, User, bcrypt, mongoose (+1 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.10
-Nodes (16): asyncHandler, env, { getSignedUrl }, { PutObjectCommand, S3Client }, s3, asyncHandler, emailService, asyncHandler (+8 more)
+Cohesion: 0.18
+Nodes (9): asyncHandler, env, Invitation, packages, Payment, Stripe, User, mongoose (+1 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.20
@@ -142,8 +143,12 @@ Nodes (6): controller, express, { protect, requireRole }, router, templateBody, 
 Cohesion: 0.33
 Nodes (5): controller, express, { protect }, router, { validate, z }
 
+### Community 21 - "Community 21"
+Cohesion: 0.14
+Nodes (9): asyncHandler, AUDIO_TYPES, env, { getSignedUrl }, IMAGE_TYPES, { PutObjectCommand, S3Client }, s3, asyncHandler (+1 more)
+
 ## Knowledge Gaps
-- **180 isolated node(s):** `mongoose`, `env`, `Template`, `templates`, `mongoose` (+175 more)
+- **182 isolated node(s):** `mongoose`, `env`, `Template`, `templates`, `mongoose` (+177 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
@@ -156,7 +161,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `validate()` connect `Community 16` to `Community 0`, `Community 9`, `Community 13`, `Community 15`, `Community 17`, `Community 18`, `Community 19`, `Community 20`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **What connects `mongoose`, `env`, `Template` to the rest of the system?**
-  _180 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _182 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.09116809116809117 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**

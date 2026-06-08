@@ -18,6 +18,7 @@ module.exports = {
   publicBaseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:4200',
   awsRegion: process.env.AWS_REGION || 'us-east-1',
   s3Bucket: process.env.AWS_S3_BUCKET || '',
+  mediaPublicBaseUrl: process.env.MEDIA_PUBLIC_BASE_URL || '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   resendApiKey: process.env.RESEND_API_KEY || '',

@@ -440,7 +440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_assetcontroller",
-      "community": 6,
+      "community": 21,
       "norm_label": "assetcontroller.js"
     },
     {
@@ -450,7 +450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_assetcontroller_putobjectcommand_s3client",
-      "community": 6,
+      "community": 21,
       "norm_label": "{ putobjectcommand, s3client }"
     },
     {
@@ -460,7 +460,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_assetcontroller_getsignedurl",
-      "community": 6,
+      "community": 21,
       "norm_label": "{ getsignedurl }"
     },
     {
@@ -470,7 +470,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_assetcontroller_env",
-      "community": 6,
+      "community": 21,
       "norm_label": "env"
     },
     {
@@ -480,7 +480,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_assetcontroller_asynchandler",
-      "community": 6,
+      "community": 21,
       "norm_label": "asynchandler"
     },
     {
@@ -490,8 +490,48 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_assetcontroller_s3",
-      "community": 6,
+      "community": 21,
       "norm_label": "s3"
+    },
+    {
+      "label": "IMAGE_TYPES",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_image_types",
+      "community": 21,
+      "norm_label": "image_types"
+    },
+    {
+      "label": "AUDIO_TYPES",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_audio_types",
+      "community": 21,
+      "norm_label": "audio_types"
+    },
+    {
+      "label": "assertMediaAllowed()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_assertmediaallowed",
+      "community": 21,
+      "norm_label": "assertmediaallowed()"
+    },
+    {
+      "label": "buildPublicUrl()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_buildpublicurl",
+      "community": 21,
+      "norm_label": "buildpublicurl()"
     },
     {
       "label": "authController.js",
@@ -600,7 +640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_contactcontroller",
-      "community": 6,
+      "community": 21,
       "norm_label": "contactcontroller.js"
     },
     {
@@ -610,7 +650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_contactcontroller_asynchandler",
-      "community": 6,
+      "community": 21,
       "norm_label": "asynchandler"
     },
     {
@@ -620,7 +660,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_contactcontroller_emailservice",
-      "community": 6,
+      "community": 21,
       "norm_label": "emailservice"
     },
     {
@@ -2710,7 +2750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_asynchandler",
-      "community": 6,
+      "community": 21,
       "norm_label": "asynchandler.js"
     },
     {
@@ -3031,9 +3071,9 @@
       "source_file": "scripts/smokeMvpFlow.js",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_smokemvpflow",
-      "target": "scripts_smokemvpflow_assertpublicinvitationpayload",
-      "confidence_score": 1.0
+      "target": "scripts_smokemvpflow_assertpublicinvitationpayload"
     },
     {
       "relation": "contains",
@@ -3104,9 +3144,9 @@
       "source_file": "scripts/smokeMvpFlow.js",
       "source_location": "L124",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "scripts_smokemvpflow_main",
-      "target": "scripts_smokemvpflow_assertpublicinvitationpayload",
-      "confidence_score": 1.0
+      "target": "scripts_smokemvpflow_assertpublicinvitationpayload"
     },
     {
       "relation": "imports_from",
@@ -3471,11 +3511,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/assetController.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_assertmediaallowed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
       "target": "controllers_assetcontroller_asynchandler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_audio_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_buildpublicurl",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3496,6 +3566,16 @@
       "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
       "target": "controllers_assetcontroller_getsignedurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_image_types",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3921,9 +4001,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_buildduplicatekeyerror",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_buildduplicatekeyerror"
     },
     {
       "relation": "contains",
@@ -4109,9 +4189,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller_buildduplicatekeyerror",
-      "target": "controllers_guestcontroller_buildduplicateerror",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_buildduplicateerror"
     },
     {
       "relation": "calls",
@@ -4200,9 +4280,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_publicevent",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_publicevent"
     },
     {
       "relation": "contains",
@@ -4210,9 +4290,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_publicinvitation",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_publicinvitation"
     },
     {
       "relation": "contains",
@@ -4220,9 +4300,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_publictemplate",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_publictemplate"
     },
     {
       "relation": "contains",
@@ -4318,9 +4398,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller_publicinvitation",
-      "target": "controllers_invitationcontroller_publicevent",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_publicevent"
     },
     {
       "relation": "calls",
@@ -4329,9 +4409,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller_publicinvitation",
-      "target": "controllers_invitationcontroller_publictemplate",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_publictemplate"
     },
     {
       "relation": "contains",
@@ -4604,9 +4684,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
-      "target": "controllers_rsvpcontroller_saversvp",
-      "confidence_score": 1.0
+      "target": "controllers_rsvpcontroller_saversvp"
     },
     {
       "relation": "contains",
@@ -4745,9 +4825,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller_saversvp",
-      "target": "controllers_rsvpcontroller_snapshotrsvp",
-      "confidence_score": 1.0
+      "target": "controllers_rsvpcontroller_snapshotrsvp"
     },
     {
       "relation": "calls",
@@ -4756,9 +4836,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L120",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller_saversvp",
-      "target": "controllers_rsvpcontroller_creatersvpactivity",
-      "confidence_score": 1.0
+      "target": "controllers_rsvpcontroller_creatersvpactivity"
     },
     {
       "relation": "calls",
@@ -4767,9 +4847,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller_saversvp",
-      "target": "controllers_rsvpcontroller_findexistingrsvp",
-      "confidence_score": 1.0
+      "target": "controllers_rsvpcontroller_findexistingrsvp"
     },
     {
       "relation": "contains",
@@ -6106,9 +6186,9 @@
       "source_file": "src/routes/invitationRoutes.js",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_invitationroutes",
-      "target": "routes_invitationroutes_guestaccesslimiter",
-      "confidence_score": 1.0
+      "target": "routes_invitationroutes_guestaccesslimiter"
     },
     {
       "relation": "contains",
@@ -6156,9 +6236,9 @@
       "source_file": "src/routes/invitationRoutes.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_invitationroutes",
-      "target": "routes_invitationroutes_publicinvitationlimiter",
-      "confidence_score": 1.0
+      "target": "routes_invitationroutes_publicinvitationlimiter"
     },
     {
       "relation": "contains",
@@ -6166,9 +6246,9 @@
       "source_file": "src/routes/invitationRoutes.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_invitationroutes",
-      "target": "routes_invitationroutes_ratelimit",
-      "confidence_score": 1.0
+      "target": "routes_invitationroutes_ratelimit"
     },
     {
       "relation": "contains",
@@ -6372,9 +6452,9 @@
       "source_file": "src/routes/rsvpRoutes.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_rsvproutes",
-      "target": "routes_rsvproutes_publicrsvplimiter",
-      "confidence_score": 1.0
+      "target": "routes_rsvproutes_publicrsvplimiter"
     },
     {
       "relation": "contains",
@@ -6382,9 +6462,9 @@
       "source_file": "src/routes/rsvpRoutes.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_rsvproutes",
-      "target": "routes_rsvproutes_ratelimit",
-      "confidence_score": 1.0
+      "target": "routes_rsvproutes_ratelimit"
     },
     {
       "relation": "contains",
@@ -6824,5 +6904,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "95067a0590f28dd24269e57915c372e6b6647a03"
+  "built_at_commit": "543b0b36a745105ff65cdad21e3a4eb16b606796"
 }
