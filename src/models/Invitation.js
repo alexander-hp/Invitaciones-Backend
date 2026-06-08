@@ -21,7 +21,9 @@ const invitationSchema = new mongoose.Schema({
     palette: { primary: String, secondary: String, accent: String },
     musicUrl: String,
     coverImageUrl: String,
-    gallery: [String]
+    gallery: [String],
+    privateAlbum: [String],
+    privateAlbumEnabled: { type: Boolean, default: false }
   },
   premiumLocked: { type: Boolean, default: false },
   publishedAt: Date

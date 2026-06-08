@@ -13,6 +13,8 @@ const guestBody = z.object({
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
   group: z.string().optional(),
+  tableName: z.string().optional(),
+  seatLabel: z.string().optional(),
   allowedCompanions: z.number().int().min(0).max(20).optional()
 }).strict();
 
@@ -31,6 +33,7 @@ const communicationBody = z.object({
 router.use(protect);
 router.get('/event/:eventId', controller.list);
 router.get('/event/:eventId/export', controller.exportGuests);
+router.post('/check-in', validate(z.object({ body: z.object({ code: z.string().min(4) }).strict() })), controller.checkIn);
 router.post('/', validate(z.object({ body: guestBody })), controller.create);
 router.patch('/:id', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: guestUpdateBody })), controller.update);
 router.patch('/:id/communication', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: communicationBody })), controller.markCommunication);

@@ -23,6 +23,8 @@ function normalizeGuestPayload(payload) {
     email: email || undefined,
     phone: phone || undefined,
     group: payload.group ? String(payload.group).trim() : undefined,
+    tableName: payload.tableName ? String(payload.tableName).trim() : undefined,
+    seatLabel: payload.seatLabel ? String(payload.seatLabel).trim() : undefined,
     allowedCompanions: Number(payload.allowedCompanions || 0)
   };
 }
@@ -37,6 +39,8 @@ function normalizeGuestRow(row, event, owner) {
     email: row.email || row.correo || row.Correo || undefined,
     phone: row.phone || row.telefono || row.Telefono || undefined,
     group: row.group || row.grupo || row.Grupo || undefined,
+    tableName: row.tableName || row.mesa || row.Mesa || undefined,
+    seatLabel: row.seatLabel || row.asiento || row.Asiento || undefined,
     allowedCompanions: Number(row.allowedCompanions || row.acompanantes || row.Acompanantes || 0)
   });
 }
@@ -179,6 +183,8 @@ exports.update = asyncHandler(async (req, res) => {
   guest.email = payload.email;
   guest.phone = payload.phone;
   guest.group = payload.group;
+  guest.tableName = payload.tableName;
+  guest.seatLabel = payload.seatLabel;
   guest.allowedCompanions = payload.allowedCompanions;
   try {
     await guest.save();
@@ -217,6 +223,21 @@ exports.markCommunication = asyncHandler(async (req, res) => {
   if (communicationStatus === 'sent') guest.lastMessageSentAt = new Date();
   await guest.save();
 
+  res.json({ guest });
+});
+
+exports.checkIn = asyncHandler(async (req, res) => {
+  const code = String(req.validated.body.code || '').trim().toUpperCase();
+  const guest = await Guest.findOne({ owner: req.user._id, checkInCode: code });
+  if (!guest) {
+    const error = new Error('Codigo de check-in no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  guest.checkedIn = true;
+  guest.checkedInAt = guest.checkedInAt || new Date();
+  await guest.save();
   res.json({ guest });
 });
 
@@ -335,7 +356,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
   const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Acompanantes RSVP', 'Comida', 'Mensaje'],
+    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Check-in', 'Codigo QR', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Acompanantes RSVP', 'Comida', 'Mensaje'],
     ...guests.map((guest) => {
       const rsvp = rsvpByGuest.get(String(guest._id));
       return [
@@ -343,6 +364,10 @@ exports.exportGuests = asyncHandler(async (req, res) => {
         guest.email,
         guest.phone,
         guest.group || 'General',
+        guest.tableName || '',
+        guest.seatLabel || '',
+        guest.checkedIn ? 'Si' : 'No',
+        guest.checkInCode || '',
         guest.allowedCompanions || 0,
         guest.status,
         guest.communicationStatus || 'pending',

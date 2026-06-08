@@ -1,16 +1,16 @@
 # Graph Report - Invitaciones-BackendExpress  (2026-06-07)
 
 ## Corpus Check
-- 43 files · ~8,632 words
+- 43 files · ~8,834 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 299 nodes · 433 edges · 21 communities
+- 300 nodes · 434 edges · 20 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bb10535f`
+- Built from commit: `7f097eec`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,7 +35,6 @@
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
-- [[_COMMUNITY_Community 21|Community 21]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `protect` - 10 edges
@@ -58,7 +57,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (21 total, 0 thin omitted)
+## Communities (20 total, 0 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.15
@@ -85,8 +84,8 @@ Cohesion: 0.14
 Nodes (9): asyncHandler, crypto, emailService, env, jwt, User, bcrypt, mongoose (+1 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.14
-Nodes (16): assertPlanFeature(), getPlanDefinition(), getPlanLimits(), LEGACY_PLAN_ALIASES, normalizePlan(), PLAN_DEFINITIONS, assertInvitationPlanLimits(), asyncHandler (+8 more)
+Cohesion: 0.08
+Nodes (24): assertPlanFeature(), getPlanDefinition(), getPlanLimits(), LEGACY_PLAN_ALIASES, normalizePlan(), PLAN_DEFINITIONS, asyncHandler, AUDIO_TYPES (+16 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.13
@@ -94,15 +93,15 @@ Nodes (15): asyncHandler, buildDuplicateError(), buildDuplicateKeyError(), build
 
 ### Community 8 - "Community 8"
 Cohesion: 0.09
-Nodes (21): asyncHandler, Event, Guest, Invitation, Rsvp, guestSchema, mongoose, invitationSchema (+13 more)
+Nodes (22): asyncHandler, Event, Guest, Invitation, Rsvp, crypto, guestSchema, mongoose (+14 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.24
 Nodes (8): contactBody, controller, express, router, { validate, z }, idParam, validate(), { z }
 
 ### Community 10 - "Community 10"
-Cohesion: 0.17
-Nodes (8): asyncHandler, Template, mongoose, templateSchema, env, mongoose, Template, templates
+Cohesion: 0.12
+Nodes (10): asyncHandler, emailService, asyncHandler, Template, mongoose, templateSchema, env, mongoose (+2 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.09
@@ -140,12 +139,8 @@ Nodes (6): controller, express, { protect, requireRole }, router, templateBody, 
 Cohesion: 0.33
 Nodes (5): controller, express, { protect }, router, { validate, z }
 
-### Community 21 - "Community 21"
-Cohesion: 0.13
-Nodes (10): asyncHandler, AUDIO_TYPES, env, { getPlanLimits }, { getSignedUrl }, IMAGE_TYPES, { PutObjectCommand, S3Client }, s3 (+2 more)
-
 ## Knowledge Gaps
-- **190 isolated node(s):** `mongoose`, `env`, `Template`, `templates`, `mongoose` (+185 more)
+- **191 isolated node(s):** `mongoose`, `env`, `Template`, `templates`, `mongoose` (+186 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
@@ -156,9 +151,9 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `validate()` connect `Community 9` to `Community 0`, `Community 11`, `Community 13`, `Community 15`, `Community 16`, `Community 17`, `Community 18`, `Community 19`?**
   _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Why does `protect` connect `Community 3` to `Community 0`, `Community 11`, `Community 13`, `Community 15`, `Community 16`, `Community 17`, `Community 18`, `Community 19`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
 - **What connects `mongoose`, `env`, `Template` to the rest of the system?**
-  _190 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _191 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.09116809116809117 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**

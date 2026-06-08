@@ -510,7 +510,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_assetcontroller",
-      "community": 21,
+      "community": 6,
       "norm_label": "assetcontroller.js"
     },
     {
@@ -520,7 +520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_assetcontroller_putobjectcommand_s3client",
-      "community": 21,
+      "community": 6,
       "norm_label": "{ putobjectcommand, s3client }"
     },
     {
@@ -530,7 +530,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_assetcontroller_getsignedurl",
-      "community": 21,
+      "community": 6,
       "norm_label": "{ getsignedurl }"
     },
     {
@@ -540,7 +540,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_assetcontroller_env",
-      "community": 21,
+      "community": 6,
       "norm_label": "env"
     },
     {
@@ -550,7 +550,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_assetcontroller_getplanlimits",
-      "community": 21,
+      "community": 6,
       "norm_label": "{ getplanlimits }"
     },
     {
@@ -560,7 +560,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_assetcontroller_asynchandler",
-      "community": 21,
+      "community": 6,
       "norm_label": "asynchandler"
     },
     {
@@ -570,7 +570,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_assetcontroller_s3",
-      "community": 21,
+      "community": 6,
       "norm_label": "s3"
     },
     {
@@ -580,7 +580,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "controllers_assetcontroller_image_types",
-      "community": 21,
+      "community": 6,
       "norm_label": "image_types"
     },
     {
@@ -590,7 +590,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_assetcontroller_audio_types",
-      "community": 21,
+      "community": 6,
       "norm_label": "audio_types"
     },
     {
@@ -600,7 +600,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "controllers_assetcontroller_assertmediaallowed",
-      "community": 21,
+      "community": 6,
       "norm_label": "assertmediaallowed()"
     },
     {
@@ -610,7 +610,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "controllers_assetcontroller_buildpublicurl",
-      "community": 21,
+      "community": 6,
       "norm_label": "buildpublicurl()"
     },
     {
@@ -720,7 +720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_contactcontroller",
-      "community": 21,
+      "community": 10,
       "norm_label": "contactcontroller.js"
     },
     {
@@ -730,7 +730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_contactcontroller_asynchandler",
-      "community": 21,
+      "community": 10,
       "norm_label": "asynchandler"
     },
     {
@@ -740,7 +740,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_contactcontroller_emailservice",
-      "community": 21,
+      "community": 10,
       "norm_label": "emailservice"
     },
     {
@@ -947,7 +947,7 @@
       "label": "normalizeGuestRow()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L30",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "controllers_guestcontroller_normalizeguestrow",
       "community": 7,
@@ -957,7 +957,7 @@
       "label": "buildDuplicateError()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L44",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicateerror",
       "community": 7,
@@ -967,7 +967,7 @@
       "label": "buildDuplicateKeyError()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L55",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicatekeyerror",
       "community": 7,
@@ -977,7 +977,7 @@
       "label": "buildDuplicateQuery()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L62",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicatequery",
       "community": 7,
@@ -987,7 +987,7 @@
       "label": "escapeCsv()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L73",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "controllers_guestcontroller_escapecsv",
       "community": 7,
@@ -997,7 +997,7 @@
       "label": "csvResponse()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L78",
+      "source_location": "L82",
       "_origin": "ast",
       "id": "controllers_guestcontroller_csvresponse",
       "community": 7,
@@ -1007,7 +1007,7 @@
       "label": "buildGuestFilters()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L84",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildguestfilters",
       "community": 7,
@@ -1017,7 +1017,7 @@
       "label": "findDuplicateGuest()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L102",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "controllers_guestcontroller_findduplicateguest",
       "community": 7,
@@ -1167,7 +1167,7 @@
       "label": "assertInvitationPlanLimits()",
       "file_type": "code",
       "source_file": "src/controllers/invitationController.js",
-      "source_location": "L61",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_assertinvitationplanlimits",
       "community": 6,
@@ -1644,10 +1644,20 @@
       "norm_label": "mongoose"
     },
     {
+      "label": "crypto",
+      "file_type": "code",
+      "source_file": "src/models/Guest.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "models_guest_crypto",
+      "community": 8,
+      "norm_label": "crypto"
+    },
+    {
       "label": "guestSchema",
       "file_type": "code",
       "source_file": "src/models/Guest.js",
-      "source_location": "L3",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "models_guest_guestschema",
       "community": 8,
@@ -2257,7 +2267,7 @@
       "label": "guestUpdateBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L19",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "routes_guestroutes_guestupdatebody",
       "community": 13,
@@ -2267,7 +2277,7 @@
       "label": "importBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L21",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "routes_guestroutes_importbody",
       "community": 13,
@@ -2277,7 +2287,7 @@
       "label": "communicationBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "routes_guestroutes_communicationbody",
       "community": 13,
@@ -2517,7 +2527,7 @@
       "label": "rsvpSettingsBody",
       "file_type": "code",
       "source_file": "src/routes/invitationRoutes.js",
-      "source_location": "L23",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "routes_invitationroutes_rsvpsettingsbody",
       "community": 0,
@@ -2527,7 +2537,7 @@
       "label": "invitationCreateBody",
       "file_type": "code",
       "source_file": "src/routes/invitationRoutes.js",
-      "source_location": "L30",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "routes_invitationroutes_invitationcreatebody",
       "community": 0,
@@ -2537,7 +2547,7 @@
       "label": "invitationUpdateBody",
       "file_type": "code",
       "source_file": "src/routes/invitationRoutes.js",
-      "source_location": "L38",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "routes_invitationroutes_invitationupdatebody",
       "community": 0,
@@ -2950,7 +2960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_asynchandler",
-      "community": 21,
+      "community": 10,
       "norm_label": "asynchandler.js"
     },
     {
@@ -3713,9 +3723,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "config_plans_assertplanfeature"
     },
     {
       "relation": "contains",
@@ -3723,9 +3733,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans",
-      "target": "config_plans_getplandefinition",
-      "confidence_score": 1.0
+      "target": "config_plans_getplandefinition"
     },
     {
       "relation": "contains",
@@ -3733,9 +3743,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans",
-      "target": "config_plans_getplanlimits",
-      "confidence_score": 1.0
+      "target": "config_plans_getplanlimits"
     },
     {
       "relation": "contains",
@@ -3743,9 +3753,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans",
-      "target": "config_plans_legacy_plan_aliases",
-      "confidence_score": 1.0
+      "target": "config_plans_legacy_plan_aliases"
     },
     {
       "relation": "contains",
@@ -3753,9 +3763,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans",
-      "target": "config_plans_normalizeplan",
-      "confidence_score": 1.0
+      "target": "config_plans_normalizeplan"
     },
     {
       "relation": "contains",
@@ -3763,9 +3773,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans",
-      "target": "config_plans_plan_definitions",
-      "confidence_score": 1.0
+      "target": "config_plans_plan_definitions"
     },
     {
       "relation": "imports_from",
@@ -3774,9 +3784,9 @@
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports_from",
@@ -3785,9 +3795,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports_from",
@@ -3796,9 +3806,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports_from",
@@ -3807,9 +3817,9 @@
       "source_file": "src/controllers/paymentController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports_from",
@@ -3818,9 +3828,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports",
@@ -3829,9 +3839,9 @@
       "source_file": "src/controllers/paymentController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
-      "target": "config_plans_plan_definitions",
-      "confidence_score": 1.0
+      "target": "config_plans_plan_definitions"
     },
     {
       "relation": "calls",
@@ -3840,9 +3850,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans_getplandefinition",
-      "target": "config_plans_normalizeplan",
-      "confidence_score": 1.0
+      "target": "config_plans_normalizeplan"
     },
     {
       "relation": "imports",
@@ -3851,9 +3861,9 @@
       "source_file": "src/controllers/paymentController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
-      "target": "config_plans_normalizeplan",
-      "confidence_score": 1.0
+      "target": "config_plans_normalizeplan"
     },
     {
       "relation": "calls",
@@ -3862,9 +3872,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans_getplanlimits",
-      "target": "config_plans_getplandefinition",
-      "confidence_score": 1.0
+      "target": "config_plans_getplandefinition"
     },
     {
       "relation": "imports",
@@ -3873,9 +3883,9 @@
       "source_file": "src/controllers/paymentController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
-      "target": "config_plans_getplandefinition",
-      "confidence_score": 1.0
+      "target": "config_plans_getplandefinition"
     },
     {
       "relation": "calls",
@@ -3884,9 +3894,9 @@
       "source_file": "src/config/plans.js",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_plans_assertplanfeature",
-      "target": "config_plans_getplanlimits",
-      "confidence_score": 1.0
+      "target": "config_plans_getplanlimits"
     },
     {
       "relation": "imports",
@@ -3895,9 +3905,9 @@
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
-      "target": "config_plans_getplanlimits",
-      "confidence_score": 1.0
+      "target": "config_plans_getplanlimits"
     },
     {
       "relation": "imports",
@@ -3906,9 +3916,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "config_plans_getplanlimits",
-      "confidence_score": 1.0
+      "target": "config_plans_getplanlimits"
     },
     {
       "relation": "imports",
@@ -3917,9 +3927,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "config_plans_getplanlimits",
-      "confidence_score": 1.0
+      "target": "config_plans_getplanlimits"
     },
     {
       "relation": "calls",
@@ -3939,9 +3949,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "config_plans_assertplanfeature"
     },
     {
       "relation": "imports",
@@ -3950,9 +3960,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "config_plans_assertplanfeature"
     },
     {
       "relation": "contains",
@@ -4010,9 +4020,9 @@
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
-      "target": "controllers_assetcontroller_getplanlimits",
-      "confidence_score": 1.0
+      "target": "controllers_assetcontroller_getplanlimits"
     },
     {
       "relation": "contains",
@@ -4528,9 +4538,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_getplanlimits_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_getplanlimits_assertplanfeature"
     },
     {
       "relation": "contains",
@@ -4728,9 +4738,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_assertinvitationplanlimits",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_assertinvitationplanlimits"
     },
     {
       "relation": "contains",
@@ -4788,9 +4798,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_getplanlimits",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_getplanlimits"
     },
     {
       "relation": "contains",
@@ -4858,9 +4868,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_template",
-      "confidence_score": 1.0
+      "target": "controllers_invitationcontroller_template"
     },
     {
       "relation": "imports_from",
@@ -4902,9 +4912,9 @@
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "models_template",
-      "confidence_score": 1.0
+      "target": "models_template"
     },
     {
       "relation": "imports_from",
@@ -5018,9 +5028,9 @@
       "source_file": "src/controllers/paymentController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
-      "target": "controllers_paymentcontroller_plan_definitions_normalizeplan_getplandefinition",
-      "confidence_score": 1.0
+      "target": "controllers_paymentcontroller_plan_definitions_normalizeplan_getplandefinition"
     },
     {
       "relation": "contains",
@@ -5103,9 +5113,9 @@
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
-      "target": "controllers_rsvpcontroller_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "controllers_rsvpcontroller_assertplanfeature"
     },
     {
       "relation": "contains",
@@ -5823,6 +5833,16 @@
       "confidence_score": 1.0,
       "source": "models_event",
       "target": "models_event_mongoose"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/Guest.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "models_guest",
+      "target": "models_guest_crypto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -7503,5 +7523,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "bb10535f2b53f9f8134468c5c5652e355e0189de"
+  "built_at_commit": "7f097eec6c17ffbaef6b3aacfe4fe89f4fb1332b"
 }

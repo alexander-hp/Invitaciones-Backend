@@ -45,13 +45,15 @@ function publicTemplate(template) {
 }
 
 function publicInvitation(invitation) {
+  const content = invitation.content?.toObject ? invitation.content.toObject() : { ...(invitation.content || {}) };
+  delete content.privateAlbum;
   return {
     id: invitation._id,
     slug: invitation.slug,
     status: invitation.status,
     accessMode: invitation.accessMode,
     rsvpSettings: invitation.rsvpSettings,
-    content: invitation.content,
+    content,
     publishedAt: invitation.publishedAt,
     event: publicEvent(invitation.event),
     template: publicTemplate(invitation.template)

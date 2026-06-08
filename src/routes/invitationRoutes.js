@@ -18,7 +18,9 @@ const invitationContentBody = z.object({
   }).optional(),
   musicUrl: z.string().optional(),
   coverImageUrl: z.string().optional(),
-  gallery: z.array(z.string()).optional()
+  gallery: z.array(z.string()).optional(),
+  privateAlbum: z.array(z.string()).optional(),
+  privateAlbumEnabled: z.boolean().optional()
 }).strict();
 const rsvpSettingsBody = z.object({
   deadline: z.string().datetime().or(z.string().min(1)).or(z.date()).optional(),
