@@ -28,7 +28,7 @@ Health: `http://localhost:4000/health`
   - `SMTP_USER`
   - `SMTP_PASS`
 
-Para Gmail usa app password, no la contraseÃ±a normal. El backend tambien soporta los alias legacy `emailAddress` y `emailPssw`.
+Para Gmail usa app password, no la contraseña normal. El backend tambien soporta los alias legacy `emailAddress` y `emailPssw`.
 
 ## Endpoints MVP
 - `POST /api/auth/register`
