@@ -47,6 +47,7 @@ Modulos y comportamiento implementados:
   - Editar invitacion con DTO validado y allowlist.
   - Publicar y despublicar.
   - Obtener invitacion publica por slug si esta publicada.
+  - Soporta `accessMode`: `open` para RSVP libre y `guest_list` para RSVP restringido a invitados.
 - Invitados:
   - Listar invitados por evento.
   - Crear invitado.
@@ -54,6 +55,9 @@ Modulos y comportamiento implementados:
 - RSVP:
   - Enviar RSVP publico por slug con DTO validado.
   - Si el RSVP publico incluye `guest`, valida que el invitado pertenezca al mismo evento de la invitacion publicada antes de actualizar su estado.
+  - Si la invitacion usa `guest_list`, exige invitado registrado por `guest` o email y rechaza no autorizados con `403`.
+  - Soporta respuestas `confirmed`, `declined` y `maybe`.
+  - Evita respuestas duplicadas por invitado o email normalizado; actualiza la respuesta existente si la configuracion lo permite.
   - Listar RSVPs por evento con JWT y ownership del evento.
 - Plantillas:
   - Listar plantillas activas.
@@ -85,6 +89,7 @@ PATCH  /api/invitations/:id
 POST   /api/invitations/:id/publish
 POST   /api/invitations/:id/unpublish
 GET    /api/invitations/public/:slug
+POST   /api/invitations/public/:slug/guest-access
 
 GET  /api/guests/event/:eventId
 POST /api/guests
@@ -125,11 +130,16 @@ Acuerdo cerrado el 2026-06-06 para el flujo Auth + MVP conectado:
 - `GET /api/rsvps/event/:eventId` responde `404 Evento no encontrado` si el evento no existe o no pertenece al usuario autenticado.
 - `POST /api/rsvps/public/:slug` responde `400 Invitado no pertenece a esta invitacion` si `guest` no pertenece al evento de la invitacion publicada.
 - `POST /api/rsvps/public/:slug` responde `400 El numero de acompanantes excede lo permitido` si `companions` supera `Guest.allowedCompanions`.
+- `accessMode` controla RSVP publico:
+  - `open`: cualquiera con link puede responder; si el email coincide con un invitado, se vincula.
+  - `guest_list`: solo invitados del evento pueden responder; se valida por `guest` o email.
+- `rsvpSettings` controla fecha limite, cambios, opcion `maybe`, confirmacion al declinar y dias antes para recordatorio.
 
 ## Que sigue parcial o inicial
 
 - Emails transaccionales: ya usan Nodemailer SMTP; siguen siendo best-effort y con contenido simple.
 - S3: ya genera presigned URL y el frontend persiste URLs en `Invitation.content`; falta metadata formal de assets, limites por plan y borrado.
+- Invitaciones antiguas sin `accessMode` se tratan como `open` para no romper links existentes; el frontend crea nuevas invitaciones como `guest_list`.
 - Stripe: checkout y webhook son iniciales; falta robustecer ownership, estados, idempotencia y desbloqueo granular de features premium.
 - Dashboard: metricas basicas, sin series temporales, filtros por evento ni analitica avanzada.
 - Plantillas: modelo, endpoint y seed inicial existen; falta versionado de configuraciones.
@@ -280,3 +290,42 @@ Notas QA:
 
 - Si `POST /api/assets/upload-url` responde OK pero el `PUT` a S3 falla desde frontend, revisar CORS del bucket y permisos `s3:PutObject`.
 - Si password reset responde generico pero no llega correo, correr `npm run test:smtp` y revisar logs del backend.
+
+## Actualizacion 2026-06-06 - Reglas RSVP y respuesta unica
+
+- `Invitation` ahora incluye `rsvpSettings`:
+  - `deadline`,
+  - `allowMaybe`,
+  - `allowChangesUntilDeadline`,
+  - `declineRequiresConfirmation`,
+  - `reminderDaysBeforeDeadline`.
+- `Rsvp.response` acepta `confirmed`, `declined` y `maybe`.
+- `Rsvp` guarda `emailNormalized` para deduplicar respuestas abiertas por email.
+- `POST /api/rsvps/public/:slug`:
+  - exige email en modo `open`,
+  - busca respuesta existente por `guest` o `emailNormalized`,
+  - actualiza la misma respuesta si cambios estan permitidos y no vencio deadline,
+  - responde `409` si ya existe respuesta y no puede cambiarse,
+  - guarda `companions=0` y limpia comida para `declined`/`maybe`,
+  - mantiene `Guest.status=pending` cuando la respuesta es `maybe`.
+- Se agrego `npm run reminders:rsvp` para enviar recordatorios SMTP a invitados pendientes y RSVPs `maybe` dentro de la ventana previa al deadline.
+
+## Actualizacion 2026-06-06 - Telefono internacional para RSVP
+
+- `Rsvp` ahora guarda telefono opcional preparado para WhatsApp:
+  - `phoneCountryCode` como `+52`,
+  - `phoneNationalNumber`,
+  - `phoneE164`,
+  - `phoneVerified`,
+  - `phoneVerificationStatus`.
+- `POST /api/rsvps/public/:slug` valida codigo de pais con `+` y 1-4 digitos, y numero nacional solo numerico.
+- Si se envia telefono, backend normaliza `phoneE164 = phoneCountryCode + phoneNationalNumber`.
+- Se agrego modelo `RsvpActivity` para historial inicial de actividades RSVP, incluyendo snapshots con telefono.
+- Todavia no se envia WhatsApp; solo queda preparada la data para integrarlo despues.
+
+## Actualizacion 2026-06-07 - Duplicados y edicion de invitados
+
+- `Guest` ahora valida duplicados por `email` o `phone` dentro del mismo evento/owner.
+- `POST /api/guests` responde `409` con `details.field`, `details.guestId` y `details.guestName` si el contacto ya existe.
+- Se agrego `PATCH /api/guests/:id` para editar nombre, email, telefono, grupo y acompanantes sin permitir duplicados contra otros invitados del evento.
+- Importacion CSV/XLSX ahora importa filas validas y omite duplicadas; responde `duplicateRows` y `duplicates` con fila, campo, valor y nombre del invitado existente.

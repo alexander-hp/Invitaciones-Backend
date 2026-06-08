@@ -127,11 +127,37 @@ async function sendInvitationPublishedEmail({ to, invitation, publicUrl }) {
   return sendMail({ to, subject, text, html });
 }
 
+async function sendRsvpReminderEmail({ to, name, invitation, deadline, publicUrl }) {
+  const safeName = name || 'Invitado';
+  const title = invitation.content?.headline || invitation.slug || 'tu invitacion';
+  const htmlName = escapeHtml(safeName);
+  const htmlTitle = escapeHtml(title);
+  const htmlPublicUrl = escapeHtml(publicUrl);
+  const deadlineText = deadline ? new Date(deadline).toLocaleString('es-MX') : 'la fecha limite';
+  const subject = `Recordatorio RSVP - ${title}`;
+  const text = [
+    `${safeName}, te recordamos confirmar tu asistencia para ${title}.`,
+    '',
+    `Fecha limite: ${deadlineText}`,
+    '',
+    'Puedes responder aqui:',
+    publicUrl
+  ].join('\n');
+  const html = [
+    `<p>${htmlName}, te recordamos confirmar tu asistencia para <strong>${htmlTitle}</strong>.</p>`,
+    `<p>Fecha limite: ${escapeHtml(deadlineText)}</p>`,
+    `<p><a href="${htmlPublicUrl}">Responder invitacion</a></p>`
+  ].join('');
+
+  return sendMail({ to, subject, text, html });
+}
+
 module.exports = {
   isEmailConfigured,
   sendMail,
   sendContactMessage,
   sendPasswordResetEmail,
   sendRsvpNotification,
-  sendInvitationPublishedEmail
+  sendInvitationPublishedEmail,
+  sendRsvpReminderEmail
 };

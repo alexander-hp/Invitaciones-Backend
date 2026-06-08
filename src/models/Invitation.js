@@ -6,6 +6,14 @@ const invitationSchema = new mongoose.Schema({
   template: { type: mongoose.Schema.Types.ObjectId, ref: 'Template' },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
   status: { type: String, enum: ['draft', 'published', 'unpublished'], default: 'draft' },
+  accessMode: { type: String, enum: ['open', 'guest_list'], default: 'open' },
+  rsvpSettings: {
+    deadline: Date,
+    allowMaybe: { type: Boolean, default: true },
+    allowChangesUntilDeadline: { type: Boolean, default: true },
+    declineRequiresConfirmation: { type: Boolean, default: true },
+    reminderDaysBeforeDeadline: { type: Number, default: 3, min: 0 }
+  },
   content: {
     headline: String,
     subheadline: String,

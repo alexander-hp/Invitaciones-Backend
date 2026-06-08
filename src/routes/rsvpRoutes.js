@@ -8,10 +8,13 @@ const publicRsvpBody = z.object({
   guest: z.string().min(12).optional(),
   name: z.string().min(2),
   email: z.string().email().optional(),
-  response: z.enum(['confirmed', 'declined']),
+  response: z.enum(['confirmed', 'declined', 'maybe']),
   companions: z.number().int().min(0).optional(),
   mealPreference: z.string().optional(),
-  message: z.string().optional()
+  message: z.string().optional(),
+  declineConfirmed: z.boolean().optional(),
+  phoneCountryCode: z.string().regex(/^\+\d{1,4}$/, 'Codigo de pais invalido').optional(),
+  phoneNationalNumber: z.string().regex(/^\d+$/, 'Numero de telefono invalido').min(6).max(15).optional()
 }).strict();
 
 router.post('/public/:slug', validate(z.object({ body: publicRsvpBody })), controller.submitPublic);

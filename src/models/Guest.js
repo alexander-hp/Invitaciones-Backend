@@ -12,4 +12,7 @@ const guestSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' }
 }, { timestamps: true });
 
+guestSchema.index({ owner: 1, event: 1, email: 1 });
+guestSchema.index({ owner: 1, event: 1, phone: 1 });
+
 module.exports = mongoose.model('Guest', guestSchema);

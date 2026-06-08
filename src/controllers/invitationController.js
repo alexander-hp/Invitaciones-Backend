@@ -1,6 +1,7 @@
-﻿const slugify = require('slugify');
+const slugify = require('slugify');
 const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');
+const Guest = require('../models/Guest');
 const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
 const emailService = require('../services/emailService');
@@ -84,4 +85,34 @@ exports.publicBySlug = asyncHandler(async (req, res) => {
     throw error;
   }
   res.json({ invitation });
+});
+
+exports.guestAccess = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const guest = await Guest.findOne({
+    event: invitation.event,
+    email: req.validated.body.email.toLowerCase().trim()
+  }).select('name email allowedCompanions status');
+
+  if (!guest) {
+    const error = new Error('Este correo no esta en la lista de invitados');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  res.json({
+    guest: {
+      id: guest._id,
+      name: guest.name,
+      email: guest.email,
+      allowedCompanions: guest.allowedCompanions,
+      status: guest.status
+    }
+  });
 });

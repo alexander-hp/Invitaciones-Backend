@@ -17,19 +17,31 @@ const invitationContentBody = z.object({
   coverImageUrl: z.string().optional(),
   gallery: z.array(z.string()).optional()
 }).strict();
+const rsvpSettingsBody = z.object({
+  deadline: z.string().datetime().or(z.string().min(1)).or(z.date()).optional(),
+  allowMaybe: z.boolean().optional(),
+  allowChangesUntilDeadline: z.boolean().optional(),
+  declineRequiresConfirmation: z.boolean().optional(),
+  reminderDaysBeforeDeadline: z.number().int().min(0).max(60).optional()
+}).strict();
 const invitationCreateBody = z.object({
   event: z.string().min(12),
   template: z.string().min(12).optional(),
   slug: z.string().min(1).optional(),
+  accessMode: z.enum(['open', 'guest_list']).optional(),
+  rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict();
 const invitationUpdateBody = z.object({
   template: z.string().min(12).optional(),
   slug: z.string().min(1).optional(),
+  accessMode: z.enum(['open', 'guest_list']).optional(),
+  rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 
 router.get('/public/:slug', controller.publicBySlug);
+router.post('/public/:slug/guest-access', validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
 router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);
