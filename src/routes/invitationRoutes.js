@@ -23,6 +23,21 @@ const invitationContentBody = z.object({
   musicUrl: z.string().optional(),
   coverImageUrl: z.string().optional(),
   gallery: z.array(z.string()).optional(),
+  itinerary: z.array(z.object({
+    time: z.string().optional(),
+    title: z.string().optional(),
+    description: z.string().optional()
+  }).strict()).optional(),
+  dressCode: z.string().optional(),
+  giftRegistry: z.array(z.object({
+    label: z.string().optional(),
+    url: z.string().url().or(z.literal('')).optional()
+  }).strict()).optional(),
+  lodging: z.array(z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    url: z.string().url().or(z.literal('')).optional()
+  }).strict()).optional(),
   privateAlbum: z.array(z.string()).optional(),
   privateAlbumEnabled: z.boolean().optional()
 }).strict();
@@ -31,7 +46,14 @@ const rsvpSettingsBody = z.object({
   allowMaybe: z.boolean().optional(),
   allowChangesUntilDeadline: z.boolean().optional(),
   declineRequiresConfirmation: z.boolean().optional(),
-  reminderDaysBeforeDeadline: z.number().int().min(0).max(60).optional()
+  reminderDaysBeforeDeadline: z.number().int().min(0).max(60).optional(),
+  customQuestions: z.array(z.object({
+    key: z.string().min(1).optional(),
+    label: z.string().min(1),
+    type: z.enum(['text', 'textarea', 'select', 'boolean']).optional(),
+    required: z.boolean().optional(),
+    options: z.array(z.string()).optional()
+  }).strict()).max(20).optional()
 }).strict();
 const invitationCreateBody = z.object({
   event: z.string().min(12),
@@ -50,6 +72,7 @@ const invitationUpdateBody = z.object({
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 
 router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
+router.get('/public/:slug/guest-token/:token', guestAccessLimiter, controller.guestByToken);
 router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
 router.use(protect);

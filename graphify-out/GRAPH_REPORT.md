@@ -1,16 +1,16 @@
 # Graph Report - Invitaciones-BackendExpress  (2026-06-08)
 
 ## Corpus Check
-- 50 files · ~10,432 words
+- 50 files · ~11,119 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 356 nodes · 509 edges · 21 communities
+- 358 nodes · 511 edges · 20 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7cc2517b`
+- Built from commit: `8067ff7e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,7 +34,6 @@
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -58,23 +57,23 @@
 ## Import Cycles
 - None detected.
 
-## Communities (21 total, 0 thin omitted)
+## Communities (20 total, 0 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (29): AlbumAsset, asyncHandler, buildPublicUrl(), env, Event, Guest, IMAGE_TYPES, Invitation (+21 more)
+Cohesion: 0.12
+Nodes (16): albumController, albumUploadLimiter, controller, express, guestAccessLimiter, invitationContentBody, invitationCreateBody, invitationUpdateBody (+8 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.17
-Nodes (8): asyncHandler, crypto, env, Event, Guest, StaffAccessToken, mongoose, staffAccessTokenSchema
+Cohesion: 0.14
+Nodes (13): AlbumAsset, asyncHandler, buildPublicUrl(), env, Event, Guest, IMAGE_TYPES, Invitation (+5 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.09
 Nodes (20): connectDatabase(), env, mongoose, errorHandler(), notFound(), emailService, env, app (+12 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.18
-Nodes (10): asyncHandler, env, jwt, protect, requireRole(), User, controller, express (+2 more)
+Cohesion: 0.12
+Nodes (16): asyncHandler, env, jwt, protect, requireRole(), User, controller, express (+8 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.10
@@ -97,12 +96,12 @@ Cohesion: 0.09
 Nodes (22): asyncHandler, Event, Guest, Invitation, Rsvp, crypto, guestSchema, mongoose (+14 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.33
-Nodes (5): contactBody, controller, express, router, { validate, z }
+Cohesion: 0.13
+Nodes (14): albumController, albumStatusBody, checkInController, checkInLinkBody, controller, eventBody, eventUpdateBody, express (+6 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.08
-Nodes (23): asyncHandler, emailService, asyncHandler, buildUniqueSlug(), emailService, env, Event, { getPlanLimits } (+15 more)
+Cohesion: 0.09
+Nodes (19): asyncHandler, buildUniqueSlug(), emailService, env, Event, { getPlanLimits }, Guest, Invitation (+11 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.14
@@ -122,23 +121,19 @@ Nodes (6): apiUrl, assertPublicInvitationPayload(), idOf(), main(), request(), r
 
 ### Community 15 - "Community 15"
 Cohesion: 0.06
-Nodes (24): asyncHandler, Event, asyncHandler, Event, EventTable, Guest, eventSchema, mongoose (+16 more)
+Nodes (22): asyncHandler, crypto, env, Event, Guest, StaffAccessToken, asyncHandler, emailService (+14 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.29
 Nodes (6): controller, express, { protect }, router, uploadUrlBody, { validate, z }
 
 ### Community 17 - "Community 17"
-Cohesion: 0.16
-Nodes (13): controller, express, router, { validate, z }, checkoutBody, controller, express, { protect } (+5 more)
+Cohesion: 0.12
+Nodes (17): controller, express, { protect }, router, { validate, z }, controller, express, router (+9 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.29
-Nodes (6): controller, express, { protect, requireRole }, router, templateBody, { validate, z }
-
-### Community 19 - "Community 19"
-Cohesion: 0.33
-Nodes (5): controller, express, { protect }, router, { validate, z }
+Nodes (6): checkoutBody, controller, express, { protect }, router, { validate, z }
 
 ### Community 20 - "Community 20"
 Cohesion: 0.22
@@ -151,17 +146,17 @@ Nodes (8): controller, express, { protect }, publicRsvpBody, publicRsvpLimiter, 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `{ z }` connect `Community 17` to `Community 0`, `Community 9`, `Community 13`, `Community 15`, `Community 16`, `Community 18`, `Community 19`, `Community 20`?**
+- **Why does `{ z }` connect `Community 17` to `Community 0`, `Community 3`, `Community 9`, `Community 13`, `Community 16`, `Community 18`, `Community 20`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `validate()` connect `Community 17` to `Community 0`, `Community 9`, `Community 13`, `Community 15`, `Community 16`, `Community 18`, `Community 19`, `Community 20`?**
+- **Why does `validate()` connect `Community 17` to `Community 0`, `Community 3`, `Community 9`, `Community 13`, `Community 16`, `Community 18`, `Community 20`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `protect` connect `Community 3` to `Community 0`, `Community 13`, `Community 15`, `Community 16`, `Community 17`, `Community 18`, `Community 19`, `Community 20`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `protect` connect `Community 3` to `Community 0`, `Community 9`, `Community 13`, `Community 16`, `Community 17`, `Community 18`, `Community 20`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **What connects `mongoose`, `env`, `Template` to the rest of the system?**
   _232 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.09116809116809117 - nodes in this community are weakly interconnected._
-- **Should `Community 4` be split into smaller, more focused modules?**
-  _Cohesion score 0.10144927536231885 - nodes in this community are weakly interconnected._

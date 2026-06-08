@@ -116,7 +116,7 @@ function buildGuestFilters(query) {
     filters.$or = [{ name: pattern }, { email: pattern }, { phone: pattern }, { group: pattern }];
   }
   if (['pending', 'confirmed', 'declined'].includes(status)) filters.status = status;
-  if (['pending', 'sent', 'confirmed'].includes(communicationStatus)) filters.communicationStatus = communicationStatus;
+  if (['pending', 'sent', 'opened', 'confirmed'].includes(communicationStatus)) filters.communicationStatus = communicationStatus;
   if (group) filters.group = group;
 
   return filters;
@@ -376,7 +376,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
   const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Acompanantes RSVP', 'Comida', 'Mensaje'],
+    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Token link', 'Link generado', 'Abierta en', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Asistentes totales', 'Acompanantes RSVP', 'Nombres acompanantes', 'Comida', 'Menu', 'Restricciones', 'Respuestas personalizadas', 'Mensaje'],
     ...guests.map((guest) => {
       const rsvp = rsvpByGuest.get(String(guest._id));
       return [
@@ -389,6 +389,9 @@ exports.exportGuests = asyncHandler(async (req, res) => {
         (guest.companions || []).map((companion) => [companion.name, companion.tableName, companion.seatLabel].filter(Boolean).join(' / ')).join('; '),
         guest.checkedIn ? 'Si' : 'No',
         guest.checkInCode || '',
+        guest.invitationToken || '',
+        guest.personalizedLinkGeneratedAt ? new Date(guest.personalizedLinkGeneratedAt).toISOString() : '',
+        guest.invitationOpenedAt ? new Date(guest.invitationOpenedAt).toISOString() : '',
         guest.allowedCompanions || 0,
         guest.status,
         guest.communicationStatus || 'pending',
@@ -396,8 +399,13 @@ exports.exportGuests = asyncHandler(async (req, res) => {
         guest.lastMessageChannel || '',
         guest.lastMessageSentAt ? new Date(guest.lastMessageSentAt).toISOString() : '',
         rsvp?.response || '',
+        rsvp?.attendingCount || '',
         rsvp?.companions || 0,
+        (rsvp?.companionNames || []).join('; '),
         rsvp?.mealPreference || '',
+        rsvp?.menuSelection || '',
+        rsvp?.dietaryRestrictions || '',
+        (rsvp?.customAnswers || []).map((answer) => `${answer.label || answer.key}: ${answer.value ?? ''}`).join('; '),
         rsvp?.message || ''
       ];
     })

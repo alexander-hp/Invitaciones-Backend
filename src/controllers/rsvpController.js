@@ -41,7 +41,8 @@ function getRsvpSettings(invitation) {
     allowMaybe: invitation.rsvpSettings?.allowMaybe !== false,
     allowChangesUntilDeadline: invitation.rsvpSettings?.allowChangesUntilDeadline !== false,
     declineRequiresConfirmation: invitation.rsvpSettings?.declineRequiresConfirmation !== false,
-    reminderDaysBeforeDeadline: invitation.rsvpSettings?.reminderDaysBeforeDeadline ?? 3
+    reminderDaysBeforeDeadline: invitation.rsvpSettings?.reminderDaysBeforeDeadline ?? 3,
+    customQuestions: invitation.rsvpSettings?.customQuestions || []
   };
 }
 
@@ -51,6 +52,11 @@ function snapshotRsvp(rsvp) {
     response: rsvp.response,
     companions: rsvp.companions,
     mealPreference: rsvp.mealPreference,
+    companionNames: rsvp.companionNames,
+    attendingCount: rsvp.attendingCount,
+    dietaryRestrictions: rsvp.dietaryRestrictions,
+    menuSelection: rsvp.menuSelection,
+    customAnswers: rsvp.customAnswers,
     message: rsvp.message,
     email: rsvp.email,
     phoneCountryCode: rsvp.phoneCountryCode,
@@ -87,8 +93,33 @@ function assertResponseAllowed(payload, settings) {
   }
 }
 
+function assertCustomAnswers(payload, settings) {
+  const questions = settings.customQuestions || [];
+  if (!questions.length) return;
+  const answersByKey = new Map((payload.customAnswers || []).map((answer) => [answer.key, answer]));
+
+  for (const question of questions) {
+    const key = question.key || question.label;
+    const answer = answersByKey.get(key);
+    if (question.required && (answer?.value === undefined || answer?.value === null || answer?.value === '')) {
+      const error = new Error(`La pregunta "${question.label}" es obligatoria`);
+      error.statusCode = 400;
+      throw error;
+    }
+    if (question.type === 'select' && answer?.value && question.options?.length && !question.options.includes(String(answer.value))) {
+      const error = new Error(`Respuesta invalida para "${question.label}"`);
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+}
+
 function buildRsvpData({ invitation, guest, payload, emailNormalized }) {
   const isFinalAttendance = payload.response === 'confirmed';
+  const companionNames = isFinalAttendance
+    ? (payload.companionNames || []).map((name) => String(name || '').trim()).filter(Boolean)
+    : [];
+  const companions = isFinalAttendance ? Number(payload.companions || companionNames.length || 0) : 0;
   return {
     invitation: invitation._id,
     event: invitation.event,
@@ -97,8 +128,13 @@ function buildRsvpData({ invitation, guest, payload, emailNormalized }) {
     email: guest?.email || payload.email,
     emailNormalized: guest?.email ? normalizeEmail(guest.email) : emailNormalized,
     response: payload.response,
-    companions: isFinalAttendance ? Number(payload.companions || 0) : 0,
+    companions,
+    companionNames,
+    attendingCount: isFinalAttendance ? 1 + companions : 0,
     mealPreference: isFinalAttendance ? payload.mealPreference : undefined,
+    dietaryRestrictions: isFinalAttendance ? payload.dietaryRestrictions : undefined,
+    menuSelection: isFinalAttendance ? payload.menuSelection : undefined,
+    customAnswers: Array.isArray(payload.customAnswers) ? payload.customAnswers : [],
     message: payload.message,
     ...normalizePhone(payload)
   };
@@ -189,6 +225,7 @@ exports.submitPublic = asyncHandler(async (req, res) => {
     throw error;
   }
   assertResponseAllowed(payload, settings);
+  assertCustomAnswers(payload, settings);
 
   if (accessMode === 'open' && !emailNormalized) {
     const error = new Error('El email es obligatorio para confirmar asistencia');
@@ -214,12 +251,13 @@ exports.submitPublic = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  if (payload.response === 'confirmed' && guest && Number(payload.companions || 0) > guest.allowedCompanions) {
+  const requestedCompanions = Number(payload.companions || (payload.companionNames || []).filter(Boolean).length || 0);
+  if (payload.response === 'confirmed' && guest && requestedCompanions > guest.allowedCompanions) {
     await createRsvpActivity({
       invitation,
       guest,
       action: 'blocked_capacity',
-      metadata: { companions: Number(payload.companions || 0), allowedCompanions: guest.allowedCompanions }
+      metadata: { companions: requestedCompanions, allowedCompanions: guest.allowedCompanions }
     });
     const error = new Error('El numero de acompanantes excede lo permitido');
     error.statusCode = 400;
@@ -274,14 +312,19 @@ exports.exportByEvent = asyncHandler(async (req, res) => {
 
   const rsvps = await Rsvp.find({ event: event._id }).sort('-createdAt').lean();
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Respuesta', 'Acompanantes', 'Comida', 'Mensaje', 'Fecha'],
+    ['Nombre', 'Email', 'Telefono', 'Respuesta', 'Asistentes totales', 'Acompanantes', 'Nombres acompanantes', 'Comida', 'Menu', 'Restricciones', 'Respuestas personalizadas', 'Mensaje', 'Fecha'],
     ...rsvps.map((rsvp) => [
       rsvp.name,
       rsvp.email,
       rsvp.phoneE164,
       rsvp.response,
+      rsvp.attendingCount || (rsvp.response === 'confirmed' ? 1 + Number(rsvp.companions || 0) : 0),
       rsvp.companions || 0,
+      (rsvp.companionNames || []).join('; '),
       rsvp.mealPreference || '',
+      rsvp.menuSelection || '',
+      rsvp.dietaryRestrictions || '',
+      (rsvp.customAnswers || []).map((answer) => `${answer.label || answer.key}: ${answer.value ?? ''}`).join('; '),
       rsvp.message || '',
       rsvp.createdAt ? new Date(rsvp.createdAt).toISOString() : ''
     ])

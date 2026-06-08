@@ -12,7 +12,15 @@ const publicRsvpBody = z.object({
   email: z.string().email().optional(),
   response: z.enum(['confirmed', 'declined', 'maybe']),
   companions: z.number().int().min(0).optional(),
+  companionNames: z.array(z.string()).optional(),
+  dietaryRestrictions: z.string().optional(),
   mealPreference: z.string().optional(),
+  menuSelection: z.string().optional(),
+  customAnswers: z.array(z.object({
+    key: z.string().min(1),
+    label: z.string().optional(),
+    value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional()
+  }).strict()).optional(),
   message: z.string().optional(),
   declineConfirmed: z.boolean().optional(),
   phoneCountryCode: z.string().regex(/^\+\d{1,4}$/, 'Codigo de pais invalido').optional(),

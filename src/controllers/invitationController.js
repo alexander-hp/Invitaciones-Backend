@@ -60,6 +60,21 @@ function publicInvitation(invitation) {
   };
 }
 
+function publicGuest(guest) {
+  return {
+    id: guest._id,
+    name: guest.name,
+    email: guest.email,
+    allowedCompanions: guest.allowedCompanions,
+    status: guest.status,
+    checkInCode: guest.checkInCode,
+    qrCode: guest.qrCode,
+    tableName: guest.tableName,
+    seatLabel: guest.seatLabel,
+    companions: guest.companions || []
+  };
+}
+
 async function assertInvitationPlanLimits(user, payload) {
   const limits = getPlanLimits(user);
   const galleryCount = payload.content?.gallery?.length || 0;
@@ -174,18 +189,31 @@ exports.guestAccess = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  res.json({
-    guest: {
-      id: guest._id,
-      name: guest.name,
-      email: guest.email,
-      allowedCompanions: guest.allowedCompanions,
-      status: guest.status,
-      checkInCode: guest.checkInCode,
-      qrCode: guest.qrCode,
-      tableName: guest.tableName,
-      seatLabel: guest.seatLabel,
-      companions: guest.companions || []
-    }
-  });
+  res.json({ guest: publicGuest(guest) });
+});
+
+exports.guestByToken = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const guest = await Guest.findOne({
+    event: invitation.event,
+    invitationToken: String(req.params.token || '').trim()
+  }).select('name email allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt');
+
+  if (!guest) {
+    const error = new Error('Link personalizado invalido');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  guest.invitationOpenedAt = guest.invitationOpenedAt || new Date();
+  if (guest.communicationStatus === 'sent') guest.communicationStatus = 'opened';
+  await guest.save();
+
+  res.json({ guest: publicGuest(guest) });
 });

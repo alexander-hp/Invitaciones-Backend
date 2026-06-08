@@ -92,7 +92,17 @@ async function main() {
         subheadline: 'Smoke invitation',
         message: 'Automated MVP smoke test',
         palette: { primary: '#1f2a44', secondary: '#f7f2ea', accent: '#b67b4b' },
-        gallery: []
+        gallery: [],
+        dressCode: 'Formal',
+        itinerary: [{ time: '18:00', title: 'Ceremonia', description: 'Jardin' }],
+        giftRegistry: [{ label: 'Mesa smoke', url: 'https://example.com/regalos' }],
+        lodging: [{ name: 'Hotel smoke', description: 'Tarifa preferente', url: 'https://example.com/hotel' }]
+      },
+      rsvpSettings: {
+        customQuestions: [
+          { key: 'song', label: 'Cancion sugerida', type: 'text', required: false },
+          { key: 'menu', label: 'Menu', type: 'select', required: true, options: ['Pollo', 'Vegetariano'] }
+        ]
       }
     }
   });
@@ -115,6 +125,7 @@ async function main() {
   });
   const guestId = idOf(guestResult.guest);
   if (!guestId) throw new Error('Create guest did not return id');
+  if (!guestResult.guest.invitationToken) throw new Error('Create guest did not return personalized invitation token');
   console.log('[smoke:mvp] guest created');
 
   await request(`/invitations/${invitationId}/publish`, { method: 'POST', token });
@@ -131,12 +142,24 @@ async function main() {
   if (!access.guest?.id) throw new Error('Guest access did not return guest id');
   console.log('[smoke:mvp] guest access ok');
 
+  const tokenAccess = await request(`/invitations/public/${invitation.slug}/guest-token/${guestResult.guest.invitationToken}`);
+  if (tokenAccess.guest?.id !== access.guest.id) throw new Error('Guest token access did not resolve the expected guest');
+  console.log('[smoke:mvp] personalized guest token ok');
+
   const rsvpPayload = {
     guest: access.guest.id,
     name: access.guest.name,
     email: access.guest.email,
     response: 'confirmed',
     companions: 1,
+    companionNames: ['Smoke Plus One'],
+    dietaryRestrictions: 'Sin nuez',
+    mealPreference: 'Pollo',
+    menuSelection: 'Pollo',
+    customAnswers: [
+      { key: 'song', label: 'Cancion sugerida', value: 'Smoke song' },
+      { key: 'menu', label: 'Menu', value: 'Pollo' }
+    ],
     message: 'Smoke RSVP confirmed'
   };
   const rsvpResult = await request(`/rsvps/public/${invitation.slug}`, {

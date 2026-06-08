@@ -30,7 +30,7 @@ const importBody = z.object({
 }).strict();
 
 const communicationBody = z.object({
-  communicationStatus: z.enum(['pending', 'sent', 'confirmed']),
+  communicationStatus: z.enum(['pending', 'sent', 'opened', 'confirmed']),
   messageType: z.enum(['invitation', 'reminder', 'location_change', 'thanks']).optional(),
   channel: z.enum(['whatsapp', 'email']).optional()
 }).strict();

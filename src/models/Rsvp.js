@@ -9,7 +9,16 @@ const rsvpSchema = new mongoose.Schema({
   emailNormalized: { type: String, lowercase: true, trim: true, index: true },
   response: { type: String, enum: ['confirmed', 'declined', 'maybe'], required: true },
   companions: { type: Number, default: 0 },
+  companionNames: [{ type: String, trim: true }],
+  attendingCount: { type: Number, default: 1 },
   mealPreference: String,
+  dietaryRestrictions: String,
+  menuSelection: String,
+  customAnswers: [{
+    key: { type: String, trim: true },
+    label: { type: String, trim: true },
+    value: mongoose.Schema.Types.Mixed
+  }],
   message: String,
   phoneCountryCode: { type: String, trim: true },
   phoneNationalNumber: { type: String, trim: true },

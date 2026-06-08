@@ -18,12 +18,16 @@ const guestSchema = new mongoose.Schema({
     checkedInAt: Date
   }],
   allowedCompanions: { type: Number, default: 0 },
+  invitationToken: { type: String, unique: true, sparse: true, index: true },
+  personalizedLinkGeneratedAt: Date,
+  invitationOpenedAt: Date,
+  lastLinkCopiedAt: Date,
   qrCode: String,
   checkInCode: { type: String, unique: true, sparse: true, index: true },
   checkedIn: { type: Boolean, default: false },
   checkedInAt: Date,
   status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' },
-  communicationStatus: { type: String, enum: ['pending', 'sent', 'confirmed'], default: 'pending' },
+  communicationStatus: { type: String, enum: ['pending', 'sent', 'opened', 'confirmed'], default: 'pending' },
   lastMessageType: { type: String, enum: ['invitation', 'reminder', 'location_change', 'thanks'] },
   lastMessageChannel: { type: String, enum: ['whatsapp', 'email'] },
   lastMessageSentAt: Date
@@ -32,6 +36,8 @@ const guestSchema = new mongoose.Schema({
 guestSchema.pre('validate', function ensureCheckInCode(next) {
   if (!this.checkInCode) this.checkInCode = crypto.randomBytes(5).toString('hex').toUpperCase();
   if (!this.qrCode) this.qrCode = this.checkInCode;
+  if (!this.invitationToken) this.invitationToken = crypto.randomBytes(16).toString('hex');
+  if (!this.personalizedLinkGeneratedAt) this.personalizedLinkGeneratedAt = new Date();
   next();
 });
 
