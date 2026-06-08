@@ -157,10 +157,82 @@ async function sendOpenWa({ phone, text }) {
   return data;
 }
 
-async function sendMessage({ owner, guest, event, invitation, type = 'invitation', text }) {
+function openWaMediaEndpoint(mediaType) {
+  return {
+    image: 'send-image',
+    video: 'send-video',
+    audio: 'send-audio',
+    document: 'send-document'
+  }[mediaType];
+}
+
+async function sendOpenWaMedia({ phone, media }) {
+  if (!env.openWaBaseUrl || !env.openWaApiKey || !env.openWaSessionId) {
+    const error = new Error('OpenWA no configurado');
+    error.statusCode = 501;
+    throw error;
+  }
+  const endpoint = openWaMediaEndpoint(media?.type);
+  if (!endpoint) {
+    const error = new Error('Tipo de media WhatsApp no soportado');
+    error.statusCode = 400;
+    throw error;
+  }
+  const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
+  const chatId = `${phone}@c.us`;
+  const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': env.openWaApiKey
+    },
+    body: JSON.stringify({
+      chatId,
+      url: media.url,
+      base64: media.base64,
+      mimetype: media.mimetype,
+      filename: media.filename,
+      caption: media.caption
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data?.message || 'OpenWA rechazo el archivo');
+    error.statusCode = response.status;
+    error.providerResponse = data;
+    throw error;
+  }
+  return data;
+}
+
+function normalizeMedia(media, fallbackCaption) {
+  if (!media) return undefined;
+  const normalized = {
+    type: media.type,
+    url: media.url ? String(media.url).trim() : undefined,
+    base64: media.base64 ? String(media.base64).trim() : undefined,
+    mimetype: media.mimetype ? String(media.mimetype).trim() : undefined,
+    filename: media.filename ? String(media.filename).trim() : undefined,
+    caption: media.caption ? String(media.caption).trim() : fallbackCaption
+  };
+  if (!normalized.url && !normalized.base64) {
+    const error = new Error('El archivo WhatsApp requiere url o base64');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (normalized.base64 && !normalized.mimetype) {
+    const error = new Error('El archivo WhatsApp en base64 requiere mimetype');
+    error.statusCode = 400;
+    throw error;
+  }
+  return normalized;
+}
+
+async function sendMessage({ owner, guest, event, invitation, type = 'invitation', text, media }) {
   const provider = activeProvider();
   const phone = normalizePhone(guest.phone);
   const finalText = buildText({ guest, event, invitation, type, text });
+  const normalizedMedia = normalizeMedia(media, finalText);
   const templateName = provider === 'meta' ? (TEMPLATE_BY_TYPE[type] || TEMPLATE_BY_TYPE.invitation) : undefined;
   const log = await WhatsAppMessageLog.create({
     owner,
@@ -172,6 +244,7 @@ async function sendMessage({ owner, guest, event, invitation, type = 'invitation
     phone,
     textPreview: finalText.slice(0, 500),
     templateName,
+    payload: normalizedMedia ? { media: { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } } : undefined,
     status: provider === 'disabled' ? 'skipped' : 'pending'
   });
 
@@ -188,12 +261,25 @@ async function sendMessage({ owner, guest, event, invitation, type = 'invitation
   }
 
   try {
+    if (normalizedMedia && provider === 'meta') {
+      const error = new Error('Media por Meta requiere plantillas/media aprobada; usa OpenWA o configura template oficial');
+      error.statusCode = 501;
+      throw error;
+    }
     const payload = provider === 'meta'
       ? buildMetaTemplatePayload({ phone, type, guest, event, invitation })
-      : { phone, text: finalText };
-    const providerResponse = provider === 'meta' ? await sendMeta(payload) : await sendOpenWa(payload);
-    const messageId = providerResponse?.messages?.[0]?.id || providerResponse?.id || providerResponse?.messageId;
-    log.payload = provider === 'meta' ? { templateName, to: phone } : { chatId: `${phone}@c.us` };
+      : normalizedMedia ? { phone, media: normalizedMedia } : { phone, text: finalText };
+    const providerResponse = provider === 'meta'
+      ? await sendMeta(payload)
+      : normalizedMedia ? await sendOpenWaMedia(payload) : await sendOpenWa(payload);
+    const messageId = providerResponse?.messages?.[0]?.id
+      || providerResponse?.data?.messageId
+      || providerResponse?.data?.id
+      || providerResponse?.id
+      || providerResponse?.messageId;
+    log.payload = provider === 'meta'
+      ? { templateName, to: phone }
+      : { chatId: `${phone}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined };
     log.providerResponse = providerResponse;
     log.messageId = messageId;
     log.status = 'sent';

@@ -35,14 +35,25 @@ const communicationBody = z.object({
   channel: z.enum(['whatsapp', 'email']).optional()
 }).strict();
 
+const whatsappMediaBody = z.object({
+  type: z.enum(['image', 'video', 'audio', 'document']),
+  url: z.string().url().optional(),
+  base64: z.string().min(1).optional(),
+  mimetype: z.string().min(3).max(120).optional(),
+  filename: z.string().max(180).optional(),
+  caption: z.string().max(1024).optional()
+}).strict().refine((media) => Boolean(media.url || media.base64), 'Media requiere url o base64');
+
 const whatsappSendBody = z.object({
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']),
-  text: z.string().max(3000).optional()
+  text: z.string().max(3000).optional(),
+  media: whatsappMediaBody.optional()
 }).strict();
 
 const whatsappBulkBody = z.object({
   confirm: z.boolean(),
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']),
+  media: whatsappMediaBody.optional(),
   guestIds: z.array(z.string().min(12)).max(200).optional(),
   filters: z.object({
     search: z.string().optional(),

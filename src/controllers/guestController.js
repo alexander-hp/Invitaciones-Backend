@@ -300,7 +300,8 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
     event,
     invitation,
     type,
-    text: req.validated.body.text
+    text: req.validated.body.text,
+    media: req.validated.body.media
   });
   applyWhatsAppGuestStatus(guest, { status: result.status, type });
   await guest.save();
@@ -331,11 +332,12 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
   if (req.validated.body.guestIds?.length) query._id = { $in: req.validated.body.guestIds };
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType;
+  const media = req.validated.body.media;
   const results = [];
 
   for (const guest of guests) {
     try {
-      const result = await whatsappService.sendMessage({ owner: req.user._id, guest, event, invitation, type });
+      const result = await whatsappService.sendMessage({ owner: req.user._id, guest, event, invitation, type, media });
       applyWhatsAppGuestStatus(guest, { status: result.status, type });
       await guest.save();
       results.push({ guest: guest._id, status: result.status, provider: result.provider, log: result.log._id });
