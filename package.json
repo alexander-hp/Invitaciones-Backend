@@ -9,7 +9,8 @@
         "check": "node --check src/server.js && node --check src/app.js",
         "seed:templates": "node scripts/seedTemplates.js",
         "test:smtp": "node scripts/testSmtp.js",
-        "reminders:rsvp": "node scripts/sendRsvpReminders.js"
+        "reminders:rsvp": "node scripts/sendRsvpReminders.js",
+        "smoke:mvp": "node scripts/smokeMvpFlow.js"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.600.0",
