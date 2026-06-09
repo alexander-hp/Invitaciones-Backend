@@ -152,6 +152,78 @@ async function sendRsvpReminderEmail({ to, name, invitation, deadline, publicUrl
   return sendMail({ to, subject, text, html });
 }
 
+function eventDateText(event) {
+  return event?.date ? new Date(event.date).toLocaleDateString('es-MX', { dateStyle: 'full' }) : '';
+}
+
+function eventLocationText(event) {
+  return [event?.venue?.name, event?.venue?.address].filter(Boolean).join(' - ');
+}
+
+function messageSubject(type, event) {
+  const title = event?.title || 'Invitacion';
+  if (type === 'reminder') return `Recordatorio RSVP - ${title}`;
+  if (type === 'event_reminder') return `Recordatorio del evento - ${title}`;
+  if (type === 'location_change') return `Actualizacion de ubicacion - ${title}`;
+  if (type === 'thanks') return `Gracias por confirmar - ${title}`;
+  return `Invitacion - ${title}`;
+}
+
+function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invitation' }) {
+  const eventTitle = event?.title || invitation?.content?.headline || 'nuestro evento';
+  const date = eventDateText(event);
+  const location = eventLocationText(event);
+  const greeting = `Hola ${guest.name},`;
+  const rowsByType = {
+    reminder: [
+      `${greeting} te recordamos confirmar tu asistencia a ${eventTitle}.`,
+      date ? `Fecha: ${date}` : '',
+      publicUrl,
+      'Tu confirmacion nos ayuda a organizar mejor el evento.'
+    ],
+    event_reminder: [
+      `${greeting} te compartimos un recordatorio para ${eventTitle}.`,
+      date ? `Fecha: ${date}` : '',
+      location ? `Lugar: ${location}` : '',
+      publicUrl,
+      'Te recomendamos revisar el enlace antes del evento.'
+    ],
+    location_change: [
+      `${greeting} te compartimos una actualizacion de ubicacion para ${eventTitle}.`,
+      location ? `Lugar: ${location}` : '',
+      publicUrl,
+      'Revisa el enlace para ver los detalles actualizados.'
+    ],
+    thanks: [
+      `${greeting} gracias por confirmar tu asistencia a ${eventTitle}.`,
+      date ? `Nos vemos el ${date}.` : '',
+      location ? `Lugar: ${location}` : '',
+      'Nos encantara verte ahi.'
+    ],
+    invitation: [
+      `${greeting} te compartimos tu invitacion digital para ${eventTitle}.`,
+      date ? `Fecha: ${date}` : '',
+      location ? `Lugar: ${location}` : '',
+      publicUrl,
+      'Por favor confirma tu asistencia desde el enlace.'
+    ]
+  };
+  return rowsByType[type] || rowsByType.invitation;
+}
+
+async function sendGuestInvitationEmail({ to, guest, event, invitation, publicUrl, type = 'invitation' }) {
+  const subject = messageSubject(type, event);
+  const rows = buildGuestMessage({ guest, event, invitation, publicUrl, type }).filter(Boolean);
+  const text = rows.join('\n\n');
+  const html = rows.map((row) => {
+    const safeRow = escapeHtml(row);
+    if (row === publicUrl) return `<p><a href="${escapeHtml(publicUrl)}">Abrir invitacion</a></p>`;
+    return `<p>${safeRow}</p>`;
+  }).join('');
+
+  return sendMail({ to, subject, text, html });
+}
+
 module.exports = {
   isEmailConfigured,
   sendMail,
@@ -159,5 +231,6 @@ module.exports = {
   sendPasswordResetEmail,
   sendRsvpNotification,
   sendInvitationPublishedEmail,
-  sendRsvpReminderEmail
+  sendRsvpReminderEmail,
+  sendGuestInvitationEmail
 };

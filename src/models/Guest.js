@@ -30,7 +30,8 @@ const guestSchema = new mongoose.Schema({
   communicationStatus: { type: String, enum: ['pending', 'sent', 'delivered', 'read', 'opened', 'failed', 'confirmed'], default: 'pending' },
   lastMessageType: { type: String, enum: ['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks'] },
   lastMessageChannel: { type: String, enum: ['whatsapp', 'email'] },
-  lastMessageSentAt: Date
+  lastMessageSentAt: Date,
+  lastMessageError: { type: String, trim: true }
 }, { timestamps: true });
 
 guestSchema.pre('validate', function ensureCheckInCode(next) {

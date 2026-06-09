@@ -11,6 +11,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 *
 const publicInvitationLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false });
 const guestAccessLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 const albumUploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
+const optionalHttpUrl = z.string().url().refine((url) => /^https?:\/\//i.test(url), 'URL debe iniciar con http o https').or(z.literal('')).optional();
 const invitationContentBody = z.object({
   headline: z.string().optional(),
   subheadline: z.string().optional(),
@@ -28,6 +29,14 @@ const invitationContentBody = z.object({
     title: z.string().optional(),
     description: z.string().optional()
   }).strict()).optional(),
+  locations: z.array(z.object({
+    type: z.string().optional(),
+    name: z.string().optional(),
+    address: z.string().optional(),
+    mapUrl: optionalHttpUrl,
+    wazeUrl: optionalHttpUrl,
+    notes: z.string().optional()
+  }).strict()).max(12).optional(),
   dressCode: z.string().optional(),
   giftRegistry: z.array(z.object({
     label: z.string().optional(),

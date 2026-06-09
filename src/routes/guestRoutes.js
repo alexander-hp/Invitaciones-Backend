@@ -35,6 +35,10 @@ const communicationBody = z.object({
   channel: z.enum(['whatsapp', 'email']).optional()
 }).strict();
 
+const emailSendBody = z.object({
+  messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional()
+}).strict();
+
 const whatsappMediaBody = z.object({
   type: z.enum(['image', 'video', 'audio', 'document']),
   url: z.string().url().optional(),
@@ -73,6 +77,7 @@ router.post('/check-in', validate(z.object({ body: z.object({ code: z.string().m
 router.post('/', validate(z.object({ body: guestBody })), controller.create);
 router.patch('/:id', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: guestUpdateBody })), controller.update);
 router.patch('/:id/communication', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: communicationBody })), controller.markCommunication);
+router.post('/:id/send-email', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: emailSendBody })), controller.sendEmail);
 router.post('/:id/whatsapp', validate(z.object({ params: z.object({ id: z.string().min(12) }), body: whatsappSendBody })), controller.sendWhatsApp);
 router.delete('/:id', validate(z.object({ params: z.object({ id: z.string().min(12) }) })), controller.remove);
 router.post('/import', upload.single('file'), validate(z.object({ body: importBody })), controller.importGuests);

@@ -34,6 +34,14 @@ const invitationSchema = new mongoose.Schema({
       title: String,
       description: String
     }],
+    locations: [{
+      type: { type: String, trim: true },
+      name: { type: String, trim: true },
+      address: { type: String, trim: true },
+      mapUrl: { type: String, trim: true },
+      wazeUrl: { type: String, trim: true },
+      notes: { type: String, trim: true }
+    }],
     dressCode: String,
     giftRegistry: [{
       label: String,

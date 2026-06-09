@@ -7,6 +7,11 @@ const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
 const router = express.Router();
+const messageTypeBody = z.object({
+  confirm: z.boolean().optional(),
+  messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional(),
+  guestIds: z.array(z.string().min(12)).max(200).optional()
+}).strict();
 const eventBody = z.object({
   type: z.enum(['boda', 'xv', 'graduacion', 'cumpleanos', 'bautizo', 'otro']),
   title: z.string().min(2),
@@ -35,6 +40,7 @@ router.get('/', controller.list);
 router.post('/', validate(z.object({ body: eventBody })), controller.create);
 router.get('/:id', controller.get);
 router.patch('/:id', validate(z.object({ body: eventUpdateBody })), controller.update);
+router.post('/:eventId/send-email', validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: messageTypeBody })), controller.sendEmailBulk);
 router.post('/:eventId/check-in-link', validate(z.object({ body: checkInLinkBody })), checkInController.createLink);
 router.get('/:eventId/tables', tableController.list);
 router.post('/:eventId/tables', validate(z.object({ body: tableBody })), tableController.create);

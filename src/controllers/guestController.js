@@ -8,6 +8,8 @@ const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
 const { getPlanLimits, assertPlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const whatsappService = require('../services/whatsappService');
+const emailService = require('../services/emailService');
+const env = require('../config/env');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -123,6 +125,11 @@ function buildGuestFilters(query) {
   if (group) filters.group = group;
 
   return filters;
+}
+
+function personalizedPublicUrl(invitation, guest) {
+  const baseUrl = `${env.publicBaseUrl}/i/${invitation.slug}`;
+  return guest.invitationToken ? `${baseUrl}?t=${encodeURIComponent(guest.invitationToken)}` : baseUrl;
 }
 
 async function findDuplicateGuest({ owner, event, email, phone, excludeGuestId }) {
@@ -266,6 +273,19 @@ function applyWhatsAppGuestStatus(guest, { status, type }) {
   }
 }
 
+function applyEmailGuestStatus(guest, { status, type, error }) {
+  guest.lastMessageType = type;
+  guest.lastMessageChannel = 'email';
+  if (status === 'sent') {
+    guest.communicationStatus = 'sent';
+    guest.lastMessageSentAt = new Date();
+    guest.lastMessageError = undefined;
+  } else {
+    guest.communicationStatus = 'failed';
+    guest.lastMessageError = String(error || 'No se pudo enviar el correo').slice(0, 240);
+  }
+}
+
 exports.whatsappStatus = asyncHandler(async (_req, res) => {
   res.json({
     provider: whatsappService.activeProvider(),
@@ -306,6 +326,51 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
   applyWhatsAppGuestStatus(guest, { status: result.status, type });
   await guest.save();
   res.json({ guest, messageLog: result.log, provider: result.provider, status: result.status, manualText: result.manualText });
+});
+
+exports.sendEmail = asyncHandler(async (req, res) => {
+  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
+  if (!guest) {
+    const error = new Error('Invitado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (!guest.email) {
+    const error = new Error('El invitado no tiene email');
+    error.statusCode = 400;
+    throw error;
+  }
+  const event = await Event.findOne({ _id: guest.event, owner: req.user._id });
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const invitation = await primaryInvitationForEvent(event._id, req.user._id);
+  if (!invitation) {
+    const error = new Error('Crea una invitacion antes de enviar email');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const type = req.validated.body.messageType || 'invitation';
+  try {
+    await emailService.sendGuestInvitationEmail({
+      to: guest.email,
+      guest,
+      event,
+      invitation,
+      publicUrl: personalizedPublicUrl(invitation, guest),
+      type
+    });
+    applyEmailGuestStatus(guest, { status: 'sent', type });
+    await guest.save();
+    res.json({ guest, status: 'sent' });
+  } catch (error) {
+    applyEmailGuestStatus(guest, { status: 'failed', type, error: error.message });
+    await guest.save();
+    throw error;
+  }
 });
 
 exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
