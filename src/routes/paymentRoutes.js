@@ -11,6 +11,7 @@ const checkoutBody = z.object({
 }).strict();
 
 router.get('/plans', protect, controller.listPlans);
+router.get('/status', protect, controller.status);
 router.post('/checkout', protect, validate(z.object({ body: checkoutBody })), controller.createCheckout);
 router.post('/webhook', controller.webhook);
 module.exports = router;

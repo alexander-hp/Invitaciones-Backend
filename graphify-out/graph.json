@@ -10,7 +10,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_seedtemplates",
-      "community": 21,
+      "community": 9,
       "norm_label": "seedtemplates.js"
     },
     {
@@ -20,7 +20,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_seedtemplates_mongoose",
-      "community": 21,
+      "community": 9,
       "norm_label": "mongoose"
     },
     {
@@ -30,7 +30,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "scripts_seedtemplates_env",
-      "community": 21,
+      "community": 9,
       "norm_label": "env"
     },
     {
@@ -40,7 +40,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_seedtemplates_template",
-      "community": 21,
+      "community": 9,
       "norm_label": "template"
     },
     {
@@ -50,17 +50,17 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_seedtemplates_templates",
-      "community": 21,
+      "community": 9,
       "norm_label": "templates"
     },
     {
       "label": "main()",
       "file_type": "code",
       "source_file": "scripts/seedTemplates.js",
-      "source_location": "L40",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "scripts_seedtemplates_main",
-      "community": 21,
+      "community": 9,
       "norm_label": "main()"
     },
     {
@@ -290,7 +290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testsmtp",
-      "community": 2,
+      "community": 12,
       "norm_label": "testsmtp.js"
     },
     {
@@ -300,7 +300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testsmtp_env",
-      "community": 2,
+      "community": 12,
       "norm_label": "env"
     },
     {
@@ -310,7 +310,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "scripts_testsmtp_emailservice",
-      "community": 2,
+      "community": 12,
       "norm_label": "emailservice"
     },
     {
@@ -320,7 +320,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "scripts_testsmtp_main",
-      "community": 2,
+      "community": 12,
       "norm_label": "main()"
     },
     {
@@ -330,7 +330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders",
-      "community": 1,
+      "community": 24,
       "norm_label": "testwhatsappproviders.js"
     },
     {
@@ -340,7 +340,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_assert",
-      "community": 1,
+      "community": 24,
       "norm_label": "assert"
     },
     {
@@ -350,7 +350,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_whatsappservice",
-      "community": 1,
+      "community": 24,
       "norm_label": "whatsappservice"
     },
     {
@@ -360,7 +360,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_guest",
-      "community": 1,
+      "community": 24,
       "norm_label": "guest"
     },
     {
@@ -370,7 +370,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_event",
-      "community": 1,
+      "community": 24,
       "norm_label": "event"
     },
     {
@@ -380,7 +380,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_invitation",
-      "community": 1,
+      "community": 24,
       "norm_label": "invitation"
     },
     {
@@ -390,7 +390,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_text",
-      "community": 1,
+      "community": 24,
       "norm_label": "text"
     },
     {
@@ -400,7 +400,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_payload",
-      "community": 1,
+      "community": 24,
       "norm_label": "payload"
     },
     {
@@ -630,7 +630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_albumcontroller",
-      "community": 0,
+      "community": 21,
       "norm_label": "albumcontroller.js"
     },
     {
@@ -640,7 +640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_albumcontroller_putobjectcommand_s3client",
-      "community": 0,
+      "community": 21,
       "norm_label": "{ putobjectcommand, s3client }"
     },
     {
@@ -650,7 +650,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_albumcontroller_albumasset",
-      "community": 0,
+      "community": 21,
       "norm_label": "albumasset"
     },
     {
@@ -660,7 +660,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_albumcontroller_event",
-      "community": 0,
+      "community": 21,
       "norm_label": "event"
     },
     {
@@ -670,7 +670,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_albumcontroller_guest",
-      "community": 0,
+      "community": 21,
       "norm_label": "guest"
     },
     {
@@ -680,7 +680,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_albumcontroller_invitation",
-      "community": 0,
+      "community": 21,
       "norm_label": "invitation"
     },
     {
@@ -690,7 +690,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_albumcontroller_env",
-      "community": 0,
+      "community": 21,
       "norm_label": "env"
     },
     {
@@ -700,7 +700,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_albumcontroller_asynchandler",
-      "community": 0,
+      "community": 21,
       "norm_label": "asynchandler"
     },
     {
@@ -710,7 +710,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_albumcontroller_s3",
-      "community": 0,
+      "community": 21,
       "norm_label": "s3"
     },
     {
@@ -720,7 +720,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "controllers_albumcontroller_image_types",
-      "community": 0,
+      "community": 21,
       "norm_label": "image_types"
     },
     {
@@ -730,7 +730,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "controllers_albumcontroller_buildpublicurl",
-      "community": 0,
+      "community": 21,
       "norm_label": "buildpublicurl()"
     },
     {
@@ -740,7 +740,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "controllers_albumcontroller_uploadalbumfile",
-      "community": 0,
+      "community": 21,
       "norm_label": "uploadalbumfile()"
     },
     {
@@ -1010,7 +1010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_checkincontroller",
-      "community": 15,
+      "community": 23,
       "norm_label": "checkincontroller.js"
     },
     {
@@ -1020,7 +1020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_checkincontroller_crypto",
-      "community": 15,
+      "community": 23,
       "norm_label": "crypto"
     },
     {
@@ -1030,7 +1030,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_checkincontroller_event",
-      "community": 15,
+      "community": 23,
       "norm_label": "event"
     },
     {
@@ -1040,7 +1040,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_checkincontroller_guest",
-      "community": 15,
+      "community": 23,
       "norm_label": "guest"
     },
     {
@@ -1050,7 +1050,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_checkincontroller_staffaccesstoken",
-      "community": 15,
+      "community": 23,
       "norm_label": "staffaccesstoken"
     },
     {
@@ -1060,7 +1060,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_checkincontroller_env",
-      "community": 15,
+      "community": 23,
       "norm_label": "env"
     },
     {
@@ -1070,7 +1070,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_checkincontroller_asynchandler",
-      "community": 15,
+      "community": 23,
       "norm_label": "asynchandler"
     },
     {
@@ -1080,7 +1080,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "controllers_checkincontroller_staffguest",
-      "community": 15,
+      "community": 23,
       "norm_label": "staffguest()"
     },
     {
@@ -1090,7 +1090,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "controllers_checkincontroller_getactivetoken",
-      "community": 15,
+      "community": 23,
       "norm_label": "getactivetoken()"
     },
     {
@@ -1174,10 +1174,20 @@
       "norm_label": "invitation"
     },
     {
-      "label": "asyncHandler",
+      "label": "WhatsAppMessageLog",
       "file_type": "code",
       "source_file": "src/controllers/dashboardController.js",
       "source_location": "L5",
+      "_origin": "ast",
+      "id": "controllers_dashboardcontroller_whatsappmessagelog",
+      "community": 8,
+      "norm_label": "whatsappmessagelog"
+    },
+    {
+      "label": "asyncHandler",
+      "file_type": "code",
+      "source_file": "src/controllers/dashboardController.js",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_dashboardcontroller_asynchandler",
       "community": 8,
@@ -2040,7 +2050,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_tablecontroller",
-      "community": 9,
+      "community": 15,
       "norm_label": "tablecontroller.js"
     },
     {
@@ -2050,7 +2060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_tablecontroller_event",
-      "community": 9,
+      "community": 15,
       "norm_label": "event"
     },
     {
@@ -2060,7 +2070,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_tablecontroller_eventtable",
-      "community": 9,
+      "community": 15,
       "norm_label": "eventtable"
     },
     {
@@ -2070,7 +2080,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_tablecontroller_guest",
-      "community": 9,
+      "community": 15,
       "norm_label": "guest"
     },
     {
@@ -2080,7 +2090,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_tablecontroller_asynchandler",
-      "community": 9,
+      "community": 15,
       "norm_label": "asynchandler"
     },
     {
@@ -2090,7 +2100,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_tablecontroller_seatcount",
-      "community": 9,
+      "community": 15,
       "norm_label": "seatcount()"
     },
     {
@@ -2100,7 +2110,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "controllers_tablecontroller_asserteventowner",
-      "community": 9,
+      "community": 15,
       "norm_label": "asserteventowner()"
     },
     {
@@ -2110,7 +2120,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "controllers_tablecontroller_tablesummary",
-      "community": 9,
+      "community": 15,
       "norm_label": "tablesummary()"
     },
     {
@@ -2120,7 +2130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_templatecontroller",
-      "community": 21,
+      "community": 9,
       "norm_label": "templatecontroller.js"
     },
     {
@@ -2130,7 +2140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_templatecontroller_template",
-      "community": 21,
+      "community": 9,
       "norm_label": "template"
     },
     {
@@ -2140,7 +2150,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_templatecontroller_asynchandler",
-      "community": 21,
+      "community": 9,
       "norm_label": "asynchandler"
     },
     {
@@ -2320,7 +2330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_albumasset",
-      "community": 0,
+      "community": 21,
       "norm_label": "albumasset.js"
     },
     {
@@ -2330,7 +2340,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_albumasset_mongoose",
-      "community": 0,
+      "community": 21,
       "norm_label": "mongoose"
     },
     {
@@ -2340,7 +2350,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_albumasset_albumassetschema",
-      "community": 0,
+      "community": 21,
       "norm_label": "albumassetschema"
     },
     {
@@ -2350,7 +2360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_event",
-      "community": 8,
+      "community": 23,
       "norm_label": "event.js"
     },
     {
@@ -2360,7 +2370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_event_mongoose",
-      "community": 8,
+      "community": 23,
       "norm_label": "mongoose"
     },
     {
@@ -2370,7 +2380,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_event_eventschema",
-      "community": 8,
+      "community": 23,
       "norm_label": "eventschema"
     },
     {
@@ -2380,7 +2390,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_eventtable",
-      "community": 9,
+      "community": 15,
       "norm_label": "eventtable.js"
     },
     {
@@ -2390,7 +2400,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_eventtable_mongoose",
-      "community": 9,
+      "community": 15,
       "norm_label": "mongoose"
     },
     {
@@ -2400,7 +2410,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_eventtable_eventtableschema",
-      "community": 9,
+      "community": 15,
       "norm_label": "eventtableschema"
     },
     {
@@ -2410,7 +2420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_guest",
-      "community": 9,
+      "community": 8,
       "norm_label": "guest.js"
     },
     {
@@ -2420,7 +2430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_guest_mongoose",
-      "community": 9,
+      "community": 8,
       "norm_label": "mongoose"
     },
     {
@@ -2430,7 +2440,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "models_guest_crypto",
-      "community": 9,
+      "community": 8,
       "norm_label": "crypto"
     },
     {
@@ -2440,7 +2450,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "models_guest_guestschema",
-      "community": 9,
+      "community": 8,
       "norm_label": "guestschema"
     },
     {
@@ -2570,7 +2580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_staffaccesstoken",
-      "community": 15,
+      "community": 23,
       "norm_label": "staffaccesstoken.js"
     },
     {
@@ -2580,7 +2590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_staffaccesstoken_mongoose",
-      "community": 15,
+      "community": 23,
       "norm_label": "mongoose"
     },
     {
@@ -2590,7 +2600,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_staffaccesstoken_staffaccesstokenschema",
-      "community": 15,
+      "community": 23,
       "norm_label": "staffaccesstokenschema"
     },
     {
@@ -2600,7 +2610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_template",
-      "community": 21,
+      "community": 9,
       "norm_label": "template.js"
     },
     {
@@ -2610,7 +2620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_template_mongoose",
-      "community": 21,
+      "community": 9,
       "norm_label": "mongoose"
     },
     {
@@ -2620,7 +2630,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_template_templateschema",
-      "community": 21,
+      "community": 9,
       "norm_label": "templateschema"
     },
     {
@@ -2700,7 +2710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_whatsappmessagelog",
-      "community": 7,
+      "community": 8,
       "norm_label": "whatsappmessagelog.js"
     },
     {
@@ -2710,7 +2720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_whatsappmessagelog_mongoose",
-      "community": 7,
+      "community": 8,
       "norm_label": "mongoose"
     },
     {
@@ -2720,7 +2730,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_whatsappmessagelog_whatsappmessagelogschema",
-      "community": 7,
+      "community": 8,
       "norm_label": "whatsappmessagelogschema"
     },
     {
@@ -3657,7 +3667,7 @@
       "label": "rsvpSettingsBody",
       "file_type": "code",
       "source_file": "src/routes/invitationRoutes.js",
-      "source_location": "L53",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "routes_invitationroutes_rsvpsettingsbody",
       "community": 0,
@@ -3667,7 +3677,7 @@
       "label": "invitationCreateBody",
       "file_type": "code",
       "source_file": "src/routes/invitationRoutes.js",
-      "source_location": "L67",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "routes_invitationroutes_invitationcreatebody",
       "community": 0,
@@ -3677,7 +3687,7 @@
       "label": "invitationUpdateBody",
       "file_type": "code",
       "source_file": "src/routes/invitationRoutes.js",
-      "source_location": "L75",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "routes_invitationroutes_invitationupdatebody",
       "community": 0,
@@ -4234,20 +4244,60 @@
       "norm_label": "activeprovider()"
     },
     {
-      "label": "isEnabled()",
+      "label": "fallbackProvider()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
       "source_location": "L17",
+      "_origin": "ast",
+      "id": "services_whatsappservice_fallbackprovider",
+      "community": 1,
+      "norm_label": "fallbackprovider()"
+    },
+    {
+      "label": "isMetaConfigured()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "services_whatsappservice_ismetaconfigured",
+      "community": 1,
+      "norm_label": "ismetaconfigured()"
+    },
+    {
+      "label": "isOpenWaConfigured()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "services_whatsappservice_isopenwaconfigured",
+      "community": 1,
+      "norm_label": "isopenwaconfigured()"
+    },
+    {
+      "label": "isEnabled()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "services_whatsappservice_isenabled",
       "community": 1,
       "norm_label": "isenabled()"
     },
     {
+      "label": "isFallbackEnabled()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "services_whatsappservice_isfallbackenabled",
+      "community": 1,
+      "norm_label": "isfallbackenabled()"
+    },
+    {
       "label": "normalizePhone()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L21",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "services_whatsappservice_normalizephone",
       "community": 1,
@@ -4257,7 +4307,7 @@
       "label": "publicInvitationUrl()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L27",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "services_whatsappservice_publicinvitationurl",
       "community": 1,
@@ -4267,7 +4317,7 @@
       "label": "eventDateText()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L33",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "services_whatsappservice_eventdatetext",
       "community": 1,
@@ -4277,7 +4327,7 @@
       "label": "eventLocationText()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L37",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "services_whatsappservice_eventlocationtext",
       "community": 1,
@@ -4287,7 +4337,7 @@
       "label": "buildText()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L41",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "services_whatsappservice_buildtext",
       "community": 1,
@@ -4297,7 +4347,7 @@
       "label": "buildMetaTemplatePayload()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L84",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "services_whatsappservice_buildmetatemplatepayload",
       "community": 1,
@@ -4307,7 +4357,7 @@
       "label": "sendMeta()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L109",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "services_whatsappservice_sendmeta",
       "community": 1,
@@ -4317,7 +4367,7 @@
       "label": "sendOpenWa()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L134",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "services_whatsappservice_sendopenwa",
       "community": 1,
@@ -4327,7 +4377,7 @@
       "label": "openWaMediaEndpoint()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L160",
+      "source_location": "L184",
       "_origin": "ast",
       "id": "services_whatsappservice_openwamediaendpoint",
       "community": 1,
@@ -4337,17 +4387,37 @@
       "label": "sendOpenWaMedia()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L169",
+      "source_location": "L193",
       "_origin": "ast",
       "id": "services_whatsappservice_sendopenwamedia",
       "community": 1,
       "norm_label": "sendopenwamedia()"
     },
     {
+      "label": "shouldFallbackFromOpenWa()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L235",
+      "_origin": "ast",
+      "id": "services_whatsappservice_shouldfallbackfromopenwa",
+      "community": 1,
+      "norm_label": "shouldfallbackfromopenwa()"
+    },
+    {
+      "label": "sendViaProvider()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L243",
+      "_origin": "ast",
+      "id": "services_whatsappservice_sendviaprovider",
+      "community": 1,
+      "norm_label": "sendviaprovider()"
+    },
+    {
       "label": "normalizeMedia()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L208",
+      "source_location": "L264",
       "_origin": "ast",
       "id": "services_whatsappservice_normalizemedia",
       "community": 1,
@@ -4357,7 +4427,7 @@
       "label": "sendMessage()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L231",
+      "source_location": "L287",
       "_origin": "ast",
       "id": "services_whatsappservice_sendmessage",
       "community": 1,
@@ -4367,7 +4437,7 @@
       "label": "updateMessageStatus()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L299",
+      "source_location": "L356",
       "_origin": "ast",
       "id": "services_whatsappservice_updatemessagestatus",
       "community": 1,
@@ -4377,7 +4447,7 @@
       "label": "verifyMetaSignature()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L312",
+      "source_location": "L369",
       "_origin": "ast",
       "id": "services_whatsappservice_verifymetasignature",
       "community": 1,
@@ -5265,9 +5335,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "config_env",
-      "confidence_score": 1.0
+      "target": "config_env"
     },
     {
       "relation": "imports_from",
@@ -5276,9 +5346,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "config_env",
-      "confidence_score": 1.0
+      "target": "config_env"
     },
     {
       "relation": "imports_from",
@@ -6391,6 +6461,16 @@
       "target": "controllers_dashboardcontroller_rsvp"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/dashboardController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "controllers_dashboardcontroller",
+      "target": "controllers_dashboardcontroller_whatsappmessagelog",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -6441,6 +6521,17 @@
       "source_file": "src/controllers/dashboardController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "source": "controllers_dashboardcontroller",
+      "target": "models_whatsappmessagelog",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/dashboardController.js",
+      "source_location": "L5",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_dashboardcontroller",
       "target": "utils_asynchandler"
@@ -6472,9 +6563,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_emailservice",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_emailservice"
     },
     {
       "relation": "contains",
@@ -6482,9 +6573,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_env",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_env"
     },
     {
       "relation": "contains",
@@ -6502,9 +6593,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_guest",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_guest"
     },
     {
       "relation": "contains",
@@ -6512,9 +6603,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_invitation",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_invitation"
     },
     {
       "relation": "contains",
@@ -6522,9 +6613,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_markemailresult",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_markemailresult"
     },
     {
       "relation": "contains",
@@ -6532,9 +6623,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_personalizedpublicurl",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_personalizedpublicurl"
     },
     {
       "relation": "contains",
@@ -6542,9 +6633,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "controllers_eventcontroller_primaryinvitationforevent",
-      "confidence_score": 1.0
+      "target": "controllers_eventcontroller_primaryinvitationforevent"
     },
     {
       "relation": "imports_from",
@@ -6564,9 +6655,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "models_guest",
-      "confidence_score": 1.0
+      "target": "models_guest"
     },
     {
       "relation": "imports_from",
@@ -6575,9 +6666,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "models_invitation",
-      "confidence_score": 1.0
+      "target": "models_invitation"
     },
     {
       "relation": "imports_from",
@@ -6586,9 +6677,9 @@
       "source_file": "src/controllers/eventController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
-      "target": "services_emailservice",
-      "confidence_score": 1.0
+      "target": "services_emailservice"
     },
     {
       "relation": "imports_from",
@@ -6618,9 +6709,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L276",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_applyemailgueststatus",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_applyemailgueststatus"
     },
     {
       "relation": "contains",
@@ -6708,9 +6799,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_emailservice",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_emailservice"
     },
     {
       "relation": "contains",
@@ -6718,9 +6809,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_env",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_env"
     },
     {
       "relation": "contains",
@@ -6838,9 +6929,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_personalizedpublicurl",
-      "confidence_score": 1.0
+      "target": "controllers_guestcontroller_personalizedpublicurl"
     },
     {
       "relation": "contains",
@@ -6954,9 +7045,9 @@
       "source_file": "src/controllers/guestController.js",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "services_emailservice",
-      "confidence_score": 1.0
+      "target": "services_emailservice"
     },
     {
       "relation": "imports_from",
@@ -9222,9 +9313,9 @@
       "source_file": "src/routes/eventRoutes.js",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_eventroutes",
-      "target": "routes_eventroutes_messagetypebody",
-      "confidence_score": 1.0
+      "target": "routes_eventroutes_messagetypebody"
     },
     {
       "relation": "contains",
@@ -9356,9 +9447,9 @@
       "source_file": "src/routes/guestRoutes.js",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_guestroutes",
-      "target": "routes_guestroutes_emailsendbody",
-      "confidence_score": 1.0
+      "target": "routes_guestroutes_emailsendbody"
     },
     {
       "relation": "contains",
@@ -9815,9 +9906,9 @@
       "source_file": "src/routes/invitationRoutes.js",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "routes_invitationroutes",
-      "target": "routes_invitationroutes_optionalhttpurl",
-      "confidence_score": 1.0
+      "target": "routes_invitationroutes_optionalhttpurl"
     },
     {
       "relation": "contains",
@@ -10297,9 +10388,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L172",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice",
-      "target": "services_emailservice_buildguestmessage",
-      "confidence_score": 1.0
+      "target": "services_emailservice_buildguestmessage"
     },
     {
       "relation": "contains",
@@ -10337,9 +10428,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice",
-      "target": "services_emailservice_eventdatetext",
-      "confidence_score": 1.0
+      "target": "services_emailservice_eventdatetext"
     },
     {
       "relation": "contains",
@@ -10347,9 +10438,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice",
-      "target": "services_emailservice_eventlocationtext",
-      "confidence_score": 1.0
+      "target": "services_emailservice_eventlocationtext"
     },
     {
       "relation": "contains",
@@ -10367,9 +10458,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L163",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice",
-      "target": "services_emailservice_messagesubject",
-      "confidence_score": 1.0
+      "target": "services_emailservice_messagesubject"
     },
     {
       "relation": "contains",
@@ -10397,9 +10488,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L214",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice",
-      "target": "services_emailservice_sendguestinvitationemail",
-      "confidence_score": 1.0
+      "target": "services_emailservice_sendguestinvitationemail"
     },
     {
       "relation": "contains",
@@ -10524,9 +10615,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L224",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice_sendguestinvitationemail",
-      "target": "services_emailservice_sendmail",
-      "confidence_score": 1.0
+      "target": "services_emailservice_sendmail"
     },
     {
       "relation": "calls",
@@ -10579,9 +10670,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L174",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice_buildguestmessage",
-      "target": "services_emailservice_eventdatetext",
-      "confidence_score": 1.0
+      "target": "services_emailservice_eventdatetext"
     },
     {
       "relation": "calls",
@@ -10590,9 +10681,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L175",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice_buildguestmessage",
-      "target": "services_emailservice_eventlocationtext",
-      "confidence_score": 1.0
+      "target": "services_emailservice_eventlocationtext"
     },
     {
       "relation": "calls",
@@ -10601,9 +10692,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L215",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice_sendguestinvitationemail",
-      "target": "services_emailservice_messagesubject",
-      "confidence_score": 1.0
+      "target": "services_emailservice_messagesubject"
     },
     {
       "relation": "calls",
@@ -10612,9 +10703,9 @@
       "source_file": "src/services/emailService.js",
       "source_location": "L216",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_emailservice_sendguestinvitationemail",
-      "target": "services_emailservice_buildguestmessage",
-      "confidence_score": 1.0
+      "target": "services_emailservice_buildguestmessage"
     },
     {
       "relation": "contains",
@@ -10692,9 +10783,49 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L17",
       "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_fallbackprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L17",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "services_whatsappservice",
       "target": "services_whatsappservice_isenabled"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_isfallbackenabled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_ismetaconfigured",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_isopenwaconfigured",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10780,6 +10911,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/services/whatsappService.js",
+      "source_location": "L243",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_sendviaprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_shouldfallbackfromopenwa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10821,6 +10972,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/services/whatsappService.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "services_whatsappservice_fallbackprovider",
+      "target": "services_whatsappservice_activeprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10837,6 +10999,72 @@
       "confidence_score": 1.0,
       "source": "services_whatsappservice_sendmessage",
       "target": "services_whatsappservice_activeprovider"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "services_whatsappservice_shouldfallbackfromopenwa",
+      "target": "services_whatsappservice_activeprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "services_whatsappservice_isfallbackenabled",
+      "target": "services_whatsappservice_fallbackprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "services_whatsappservice_shouldfallbackfromopenwa",
+      "target": "services_whatsappservice_fallbackprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "services_whatsappservice_isfallbackenabled",
+      "target": "services_whatsappservice_ismetaconfigured",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "services_whatsappservice_isfallbackenabled",
+      "target": "services_whatsappservice_isopenwaconfigured",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "services_whatsappservice_shouldfallbackfromopenwa",
+      "target": "services_whatsappservice_isfallbackenabled",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -10931,6 +11159,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/services/whatsappService.js",
+      "source_location": "L250",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendviaprovider",
+      "target": "services_whatsappservice_buildmetatemplatepayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
       "source_location": "L194",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10942,11 +11181,33 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/services/whatsappService.js",
+      "source_location": "L253",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendviaprovider",
+      "target": "services_whatsappservice_sendmeta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
       "source_location": "L194",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "services_whatsappservice_sendmessage",
       "target": "services_whatsappservice_sendopenwa"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L260",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendviaprovider",
+      "target": "services_whatsappservice_sendopenwa",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -10969,6 +11230,39 @@
       "confidence_score": 1.0,
       "source": "services_whatsappservice_sendmessage",
       "target": "services_whatsappservice_sendopenwamedia"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L260",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendviaprovider",
+      "target": "services_whatsappservice_sendopenwamedia",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L325",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_shouldfallbackfromopenwa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L323",
+      "weight": 1.0,
+      "source": "services_whatsappservice_sendmessage",
+      "target": "services_whatsappservice_sendviaprovider",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -11013,5 +11307,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "469dc7ccd73eb106fbe7fd3c565a90ecb2c9dab6"
+  "built_at_commit": "fe28cd8889c710f6bcc30e590e2a3589480e671e"
 }

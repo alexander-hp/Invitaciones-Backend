@@ -42,6 +42,15 @@ const invitationContentBody = z.object({
     label: z.string().optional(),
     url: z.string().url().or(z.literal('')).optional()
   }).strict()).optional(),
+  digitalEnvelope: z.object({
+    bank: z.string().optional(),
+    account: z.string().optional(),
+    clabe: z.string().optional(),
+    holder: z.string().optional(),
+    note: z.string().optional()
+  }).strict().optional(),
+  brandLogoUrl: z.string().url().or(z.literal('')).optional(),
+  hideBranding: z.boolean().optional(),
   lodging: z.array(z.object({
     name: z.string().optional(),
     description: z.string().optional(),
@@ -81,6 +90,7 @@ const invitationUpdateBody = z.object({
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 
 router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
+router.get('/public/:slug/album', publicInvitationLimiter, albumController.publicApproved);
 router.get('/public/:slug/guest-token/:token', guestAccessLimiter, controller.guestByToken);
 router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);

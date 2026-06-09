@@ -289,7 +289,11 @@ function applyEmailGuestStatus(guest, { status, type, error }) {
 exports.whatsappStatus = asyncHandler(async (_req, res) => {
   res.json({
     provider: whatsappService.activeProvider(),
-    enabled: whatsappService.isEnabled()
+    fallbackProvider: whatsappService.fallbackProvider(),
+    enabled: whatsappService.isEnabled(),
+    fallbackEnabled: whatsappService.isFallbackEnabled(),
+    openWaConfigured: whatsappService.isOpenWaConfigured(),
+    metaConfigured: whatsappService.isMetaConfigured()
   });
 });
 

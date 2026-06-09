@@ -47,6 +47,15 @@ const invitationSchema = new mongoose.Schema({
       label: String,
       url: String
     }],
+    digitalEnvelope: {
+      bank: String,
+      account: String,
+      clabe: String,
+      holder: String,
+      note: String
+    },
+    brandLogoUrl: String,
+    hideBranding: { type: Boolean, default: false },
     lodging: [{
       name: String,
       description: String,

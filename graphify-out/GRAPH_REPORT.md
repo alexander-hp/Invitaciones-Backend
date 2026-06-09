@@ -1,16 +1,16 @@
 # Graph Report - Invitaciones-BackendExpress  (2026-06-08)
 
 ## Corpus Check
-- 57 files · ~15,039 words
+- 57 files · ~15,832 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 443 nodes · 633 edges · 23 communities
+- 450 nodes · 654 edges · 25 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `469dc7cc`
+- Built from commit: `fe28cd88`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -37,18 +37,20 @@
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `{ z }` - 11 edges
-2. `validate()` - 11 edges
-3. `protect` - 10 edges
-4. `sendMessage()` - 9 edges
+1. `sendMessage()` - 11 edges
+2. `{ z }` - 11 edges
+3. `validate()` - 11 edges
+4. `protect` - 10 edges
 5. `sendMail()` - 8 edges
 6. `getPlanLimits()` - 7 edges
-7. `processInvitation()` - 5 edges
-8. `buildText()` - 5 edges
-9. `main()` - 4 edges
-10. `getPlanDefinition()` - 4 edges
+7. `sendViaProvider()` - 6 edges
+8. `processInvitation()` - 5 edges
+9. `activeProvider()` - 5 edges
+10. `isFallbackEnabled()` - 5 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `assertInvitationPlanLimits()` --calls--> `getPlanLimits()`  [EXTRACTED]
@@ -59,19 +61,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (23 total, 0 thin omitted)
+## Communities (25 total, 0 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (30): AlbumAsset, asyncHandler, buildPublicUrl(), env, Event, Guest, IMAGE_TYPES, Invitation (+22 more)
+Cohesion: 0.11
+Nodes (17): albumController, albumUploadLimiter, controller, express, guestAccessLimiter, invitationContentBody, invitationCreateBody, invitationUpdateBody (+9 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.11
-Nodes (25): assert, event, guest, invitation, payload, text, whatsappService, activeProvider() (+17 more)
+Cohesion: 0.15
+Nodes (24): activeProvider(), buildMetaTemplatePayload(), buildText(), crypto, env, eventDateText(), eventLocationText(), fallbackProvider() (+16 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.09
-Nodes (20): connectDatabase(), env, mongoose, errorHandler(), notFound(), emailService, env, app (+12 more)
+Cohesion: 0.11
+Nodes (18): connectDatabase(), env, mongoose, errorHandler(), notFound(), app, cors, env (+10 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.12
@@ -90,16 +92,16 @@ Cohesion: 0.08
 Nodes (29): assertPlanFeature(), getPlanDefinition(), getPlanLimits(), LEGACY_PLAN_ALIASES, normalizePlan(), PLAN_DEFINITIONS, assertInvitationPlanLimits(), asyncHandler (+21 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.07
-Nodes (23): asyncHandler, buildDuplicateError(), buildDuplicateKeyError(), buildDuplicateQuery(), companionRows(), emailService, env, Event (+15 more)
+Cohesion: 0.08
+Nodes (21): asyncHandler, buildDuplicateError(), buildDuplicateKeyError(), buildDuplicateQuery(), companionRows(), emailService, env, Event (+13 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.06
-Nodes (30): asyncHandler, Event, Guest, Invitation, Rsvp, asyncHandler, emailService, env (+22 more)
+Cohesion: 0.05
+Nodes (34): asyncHandler, Event, Guest, Invitation, Rsvp, WhatsAppMessageLog, asyncHandler, emailService (+26 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
-Nodes (18): asyncHandler, emailService, asyncHandler, Event, EventTable, Guest, asyncHandler, env (+10 more)
+Nodes (17): asyncHandler, emailService, asyncHandler, Template, asyncHandler, env, Guest, whatsappService (+9 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.11
@@ -110,8 +112,8 @@ Cohesion: 0.13
 Nodes (14): assets, auth, checkIn, contact, dashboard, events, express, guests (+6 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.23
-Nodes (16): buildGuestMessage(), createTransporter(), env, escapeHtml(), eventDateText(), eventLocationText(), isEmailConfigured(), messageSubject() (+8 more)
+Cohesion: 0.17
+Nodes (18): emailService, env, buildGuestMessage(), createTransporter(), env, escapeHtml(), eventDateText(), eventLocationText() (+10 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.12
@@ -123,7 +125,7 @@ Nodes (6): apiUrl, assertPublicInvitationPayload(), idOf(), main(), request(), r
 
 ### Community 15 - "Community 15"
 Cohesion: 0.07
-Nodes (23): asyncHandler, crypto, env, Event, Guest, StaffAccessToken, mongoose, staffAccessTokenSchema (+15 more)
+Nodes (21): asyncHandler, Event, EventTable, Guest, eventTableSchema, mongoose, albumController, albumStatusBody (+13 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.22
@@ -142,31 +144,39 @@ Cohesion: 0.22
 Nodes (8): controller, express, { protect }, publicRsvpBody, publicRsvpLimiter, rateLimit, router, { validate, z }
 
 ### Community 21 - "Community 21"
-Cohesion: 0.17
-Nodes (8): asyncHandler, Template, mongoose, templateSchema, env, mongoose, Template, templates
+Cohesion: 0.14
+Nodes (13): AlbumAsset, asyncHandler, buildPublicUrl(), env, Event, Guest, IMAGE_TYPES, Invitation (+5 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.33
 Nodes (5): controller, express, { protect }, router, { validate, z }
 
+### Community 23 - "Community 23"
+Cohesion: 0.13
+Nodes (10): asyncHandler, crypto, env, Event, Guest, StaffAccessToken, eventSchema, mongoose (+2 more)
+
+### Community 24 - "Community 24"
+Cohesion: 0.25
+Nodes (7): assert, event, guest, invitation, payload, text, whatsappService
+
 ## Knowledge Gaps
-- **278 isolated node(s):** `mongoose`, `env`, `Template`, `templates`, `mongoose` (+273 more)
+- **279 isolated node(s):** `mongoose`, `env`, `Template`, `templates`, `mongoose` (+274 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `{ z }` connect `Community 17` to `Community 0`, `Community 3`, `Community 13`, `Community 15`, `Community 16`, `Community 18`, `Community 20`, `Community 22`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `validate()` connect `Community 17` to `Community 0`, `Community 3`, `Community 13`, `Community 15`, `Community 16`, `Community 18`, `Community 20`, `Community 22`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `protect` connect `Community 3` to `Community 0`, `Community 13`, `Community 15`, `Community 16`, `Community 18`, `Community 20`, `Community 22`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `mongoose`, `env`, `Template` to the rest of the system?**
-  _278 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _279 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.0625 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.10591133004926108 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.09116809116809117 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11067193675889328 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.12280701754385964 - nodes in this community are weakly interconnected._

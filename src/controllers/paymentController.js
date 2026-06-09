@@ -12,6 +12,15 @@ exports.listPlans = asyncHandler(async (_req, res) => {
   res.json({ plans: Object.values(PLAN_DEFINITIONS) });
 });
 
+exports.status = asyncHandler(async (req, res) => {
+  const payments = await Payment.find({ owner: req.user._id }).sort('-createdAt').limit(10);
+  res.json({
+    plan: normalizePlan(req.user.plan),
+    planDefinition: getPlanDefinition(req.user.plan),
+    payments
+  });
+});
+
 exports.createCheckout = asyncHandler(async (req, res) => {
   const payload = req.validated.body;
   const planKey = normalizePlan(payload.package);
@@ -63,6 +72,7 @@ exports.webhook = asyncHandler(async (req, res) => {
     const payment = await Payment.findById(session.metadata.paymentId);
     if (payment && payment.status !== 'paid') {
       payment.status = 'paid';
+      payment.paidAt = new Date();
       await payment.save();
       await User.findByIdAndUpdate(payment.owner, { plan: normalizePlan(payment.package) });
     }

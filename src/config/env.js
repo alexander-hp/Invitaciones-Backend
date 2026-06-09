@@ -31,6 +31,8 @@ module.exports = {
   smtpUser: process.env.SMTP_USER || process.env.emailAddress || '',
   smtpPass: process.env.SMTP_PASS || process.env.emailPssw || '',
   whatsappProvider: process.env.WHATSAPP_PROVIDER || 'disabled',
+  whatsappFallbackProvider: process.env.WHATSAPP_FALLBACK_PROVIDER || '',
+  whatsappOpenWaTimeoutMs: Number(process.env.WHATSAPP_OPENWA_TIMEOUT_MS || 12000),
   whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
   whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v22.0',

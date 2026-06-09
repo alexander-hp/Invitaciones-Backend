@@ -6,6 +6,8 @@ const whatsappMessageLogSchema = new mongoose.Schema({
   invitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation', index: true },
   guest: { type: mongoose.Schema.Types.ObjectId, ref: 'Guest', index: true },
   provider: { type: String, enum: ['disabled', 'meta', 'openwa'], required: true, index: true },
+  fallbackFrom: { type: String, enum: ['meta', 'openwa'] },
+  fallbackError: String,
   type: { type: String, enum: ['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks', 'freeform'], required: true },
   phone: { type: String, trim: true },
   textPreview: String,

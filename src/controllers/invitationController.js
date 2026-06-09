@@ -88,6 +88,11 @@ async function assertInvitationPlanLimits(user, payload) {
     error.statusCode = 402;
     throw error;
   }
+  if (payload.content?.hideBranding && !limits.whiteLabel) {
+    const error = new Error('Ocultar la marca KyndraSoft requiere plan Pro');
+    error.statusCode = 402;
+    throw error;
+  }
   if (payload.template) {
     const template = await Template.findById(payload.template).select('tier');
     if (template?.tier === 'premium' && !limits.premiumTemplates) {

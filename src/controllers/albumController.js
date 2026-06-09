@@ -86,6 +86,20 @@ exports.list = asyncHandler(async (req, res) => {
   res.json({ assets });
 });
 
+exports.publicApproved = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id content');
+  if (!invitation || !invitation.content?.privateAlbumEnabled) {
+    const error = new Error('Album no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const assets = await AlbumAsset.find({ invitation: invitation._id, status: 'approved' })
+    .select('url uploaderName createdAt')
+    .sort('-createdAt')
+    .limit(100);
+  res.json({ assets });
+});
+
 exports.update = asyncHandler(async (req, res) => {
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
   if (!event) {

@@ -6,6 +6,7 @@ const paymentSchema = new mongoose.Schema({
   package: { type: String, enum: ['event', 'pro', 'basic', 'premium', 'organizer'], required: true },
   stripeSessionId: String,
   status: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
+  paidAt: Date,
   amount: Number,
   currency: { type: String, default: 'mxn' }
 }, { timestamps: true });

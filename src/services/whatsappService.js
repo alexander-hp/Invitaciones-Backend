@@ -14,8 +14,29 @@ function activeProvider() {
   return ['meta', 'openwa'].includes(env.whatsappProvider) ? env.whatsappProvider : 'disabled';
 }
 
+function fallbackProvider() {
+  const fallback = env.whatsappFallbackProvider;
+  const active = activeProvider();
+  return ['meta', 'openwa'].includes(fallback) && fallback !== active ? fallback : '';
+}
+
+function isMetaConfigured() {
+  return Boolean(env.whatsappPhoneNumberId && env.whatsappAccessToken);
+}
+
+function isOpenWaConfigured() {
+  return Boolean(env.openWaBaseUrl && env.openWaApiKey && env.openWaSessionId);
+}
+
 function isEnabled() {
   return activeProvider() !== 'disabled';
+}
+
+function isFallbackEnabled() {
+  const fallback = fallbackProvider();
+  if (fallback === 'meta') return isMetaConfigured();
+  if (fallback === 'openwa') return isOpenWaConfigured();
+  return false;
 }
 
 function normalizePhone(phone) {
@@ -139,14 +160,17 @@ async function sendOpenWa({ phone, text }) {
   }
   const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
   const chatId = `${phone}@c.us`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), env.whatsappOpenWaTimeoutMs);
   const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/send-text`, {
     method: 'POST',
+    signal: controller.signal,
     headers: {
       'Content-Type': 'application/json',
       'X-API-Key': env.openWaApiKey
     },
     body: JSON.stringify({ chatId, text })
-  });
+  }).finally(() => clearTimeout(timeout));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(data?.message || 'OpenWA rechazo el mensaje');
@@ -180,8 +204,11 @@ async function sendOpenWaMedia({ phone, media }) {
   }
   const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
   const chatId = `${phone}@c.us`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), env.whatsappOpenWaTimeoutMs);
   const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/${endpoint}`, {
     method: 'POST',
+    signal: controller.signal,
     headers: {
       'Content-Type': 'application/json',
       'X-API-Key': env.openWaApiKey
@@ -194,7 +221,7 @@ async function sendOpenWaMedia({ phone, media }) {
       filename: media.filename,
       caption: media.caption
     })
-  });
+  }).finally(() => clearTimeout(timeout));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(data?.message || 'OpenWA rechazo el archivo');
@@ -203,6 +230,35 @@ async function sendOpenWaMedia({ phone, media }) {
     throw error;
   }
   return data;
+}
+
+function shouldFallbackFromOpenWa(error, normalizedMedia) {
+  if (activeProvider() !== 'openwa' || fallbackProvider() !== 'meta' || !isFallbackEnabled()) return false;
+  if (normalizedMedia) return false;
+  if (error.name === 'AbortError') return true;
+  if (!error.statusCode) return true;
+  return error.statusCode === 501 || error.statusCode >= 500;
+}
+
+async function sendViaProvider(provider, { phone, type, guest, event, invitation, text, normalizedMedia }) {
+  if (provider === 'meta') {
+    if (normalizedMedia) {
+      const error = new Error('Media por Meta requiere plantillas/media aprobada; usa OpenWA o configura template oficial');
+      error.statusCode = 501;
+      throw error;
+    }
+    const payload = buildMetaTemplatePayload({ phone, type, guest, event, invitation });
+    return {
+      payload: { templateName: TEMPLATE_BY_TYPE[type] || TEMPLATE_BY_TYPE.invitation, to: phone },
+      providerResponse: await sendMeta(payload)
+    };
+  }
+
+  const payload = normalizedMedia ? { phone, media: normalizedMedia } : { phone, text };
+  return {
+    payload: { chatId: `${phone}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined },
+    providerResponse: normalizedMedia ? await sendOpenWaMedia(payload) : await sendOpenWa(payload)
+  };
 }
 
 function normalizeMedia(media, fallbackCaption) {
@@ -261,31 +317,32 @@ async function sendMessage({ owner, guest, event, invitation, type = 'invitation
   }
 
   try {
-    if (normalizedMedia && provider === 'meta') {
-      const error = new Error('Media por Meta requiere plantillas/media aprobada; usa OpenWA o configura template oficial');
-      error.statusCode = 501;
-      throw error;
+    let finalProvider = provider;
+    let sendResult;
+    try {
+      sendResult = await sendViaProvider(provider, { phone, type, guest, event, invitation, text: finalText, normalizedMedia });
+    } catch (error) {
+      if (!shouldFallbackFromOpenWa(error, normalizedMedia)) throw error;
+      log.fallbackFrom = 'openwa';
+      log.fallbackError = error.message;
+      finalProvider = 'meta';
+      sendResult = await sendViaProvider('meta', { phone, type, guest, event, invitation, text: finalText, normalizedMedia });
     }
-    const payload = provider === 'meta'
-      ? buildMetaTemplatePayload({ phone, type, guest, event, invitation })
-      : normalizedMedia ? { phone, media: normalizedMedia } : { phone, text: finalText };
-    const providerResponse = provider === 'meta'
-      ? await sendMeta(payload)
-      : normalizedMedia ? await sendOpenWaMedia(payload) : await sendOpenWa(payload);
+    const providerResponse = sendResult.providerResponse;
     const messageId = providerResponse?.messages?.[0]?.id
       || providerResponse?.data?.messageId
       || providerResponse?.data?.id
       || providerResponse?.id
       || providerResponse?.messageId;
-    log.payload = provider === 'meta'
-      ? { templateName, to: phone }
-      : { chatId: `${phone}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined };
+    log.provider = finalProvider;
+    log.templateName = finalProvider === 'meta' ? (TEMPLATE_BY_TYPE[type] || TEMPLATE_BY_TYPE.invitation) : undefined;
+    log.payload = sendResult.payload;
     log.providerResponse = providerResponse;
     log.messageId = messageId;
     log.status = 'sent';
     log.sentAt = new Date();
     await log.save();
-    return { log, provider, status: 'sent', messageId };
+    return { log, provider: finalProvider, status: 'sent', messageId };
   } catch (error) {
     log.status = 'failed';
     log.error = error.message;
@@ -320,7 +377,11 @@ function verifyMetaSignature(req) {
 
 module.exports = {
   activeProvider,
+  fallbackProvider,
   isEnabled,
+  isFallbackEnabled,
+  isMetaConfigured,
+  isOpenWaConfigured,
   normalizePhone,
   publicInvitationUrl,
   buildText,
