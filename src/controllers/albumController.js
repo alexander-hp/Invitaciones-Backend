@@ -3,7 +3,9 @@ const AlbumAsset = require('../models/AlbumAsset');
 const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Invitation = require('../models/Invitation');
+const User = require('../models/User');
 const env = require('../config/env');
+const { assertPlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 const s3 = new S3Client({ region: env.awsRegion });
@@ -51,6 +53,8 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+  const owner = await User.findById(invitation.owner).select('plan');
+  assertPlanFeature(owner, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
 
   let guest = null;
   const email = req.body.email ? String(req.body.email).toLowerCase().trim() : '';
@@ -76,6 +80,7 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
 });
 
 exports.list = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
   if (!event) {
     const error = new Error('Evento no encontrado');
@@ -87,12 +92,14 @@ exports.list = asyncHandler(async (req, res) => {
 });
 
 exports.publicApproved = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id content');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id owner content');
   if (!invitation || !invitation.content?.privateAlbumEnabled) {
     const error = new Error('Album no disponible');
     error.statusCode = 404;
     throw error;
   }
+  const owner = await User.findById(invitation.owner).select('plan');
+  assertPlanFeature(owner, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const assets = await AlbumAsset.find({ invitation: invitation._id, status: 'approved' })
     .select('url uploaderName createdAt')
     .sort('-createdAt')
@@ -101,6 +108,7 @@ exports.publicApproved = asyncHandler(async (req, res) => {
 });
 
 exports.update = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
   if (!event) {
     const error = new Error('Evento no encontrado');

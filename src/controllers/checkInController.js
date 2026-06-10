@@ -3,6 +3,7 @@ const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const StaffAccessToken = require('../models/StaffAccessToken');
 const env = require('../config/env');
+const { assertPlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 function staffGuest(guest) {
@@ -32,6 +33,7 @@ async function getActiveToken(token) {
 }
 
 exports.createLink = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'checkIn', 'El check-in con QR requiere Evento Individual o Pro');
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title');
   if (!event) {
     const error = new Error('Evento no encontrado');

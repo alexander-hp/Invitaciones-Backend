@@ -10,7 +10,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_seedtemplates",
-      "community": 9,
+      "community": 23,
       "norm_label": "seedtemplates.js"
     },
     {
@@ -20,7 +20,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_seedtemplates_mongoose",
-      "community": 9,
+      "community": 23,
       "norm_label": "mongoose"
     },
     {
@@ -30,7 +30,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "scripts_seedtemplates_env",
-      "community": 9,
+      "community": 23,
       "norm_label": "env"
     },
     {
@@ -40,7 +40,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_seedtemplates_template",
-      "community": 9,
+      "community": 23,
       "norm_label": "template"
     },
     {
@@ -50,7 +50,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_seedtemplates_templates",
-      "community": 9,
+      "community": 23,
       "norm_label": "templates"
     },
     {
@@ -60,7 +60,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "scripts_seedtemplates_main",
-      "community": 9,
+      "community": 23,
       "norm_label": "main()"
     },
     {
@@ -577,7 +577,7 @@
       "label": "LEGACY_PLAN_ALIASES",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L49",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "config_plans_legacy_plan_aliases",
       "community": 6,
@@ -587,7 +587,7 @@
       "label": "normalizePlan()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L55",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "config_plans_normalizeplan",
       "community": 6,
@@ -597,7 +597,7 @@
       "label": "getPlanDefinition()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L59",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "config_plans_getplandefinition",
       "community": 6,
@@ -607,7 +607,7 @@
       "label": "getPlanLimits()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L63",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "config_plans_getplanlimits",
       "community": 6,
@@ -617,7 +617,7 @@
       "label": "assertPlanFeature()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L67",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "config_plans_assertplanfeature",
       "community": 6,
@@ -684,20 +684,40 @@
       "norm_label": "invitation"
     },
     {
-      "label": "env",
+      "label": "User",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
       "source_location": "L6",
+      "_origin": "ast",
+      "id": "controllers_albumcontroller_user",
+      "community": 21,
+      "norm_label": "user"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_albumcontroller_env",
       "community": 21,
       "norm_label": "env"
     },
     {
+      "label": "{ assertPlanFeature }",
+      "file_type": "code",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "controllers_albumcontroller_assertplanfeature",
+      "community": 21,
+      "norm_label": "{ assertplanfeature }"
+    },
+    {
       "label": "asyncHandler",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
-      "source_location": "L7",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_albumcontroller_asynchandler",
       "community": 21,
@@ -707,7 +727,7 @@
       "label": "s3",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
-      "source_location": "L9",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "controllers_albumcontroller_s3",
       "community": 21,
@@ -717,7 +737,7 @@
       "label": "IMAGE_TYPES",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
-      "source_location": "L10",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "controllers_albumcontroller_image_types",
       "community": 21,
@@ -727,7 +747,7 @@
       "label": "buildPublicUrl()",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
-      "source_location": "L13",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "controllers_albumcontroller_buildpublicurl",
       "community": 21,
@@ -737,7 +757,7 @@
       "label": "uploadAlbumFile()",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
-      "source_location": "L19",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "controllers_albumcontroller_uploadalbumfile",
       "community": 21,
@@ -784,14 +804,14 @@
       "norm_label": "env"
     },
     {
-      "label": "{ getPlanLimits }",
+      "label": "{ getPlanLimits, assertPlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "_origin": "ast",
-      "id": "controllers_assetcontroller_getplanlimits",
+      "id": "controllers_assetcontroller_getplanlimits_assertplanfeature",
       "community": 10,
-      "norm_label": "{ getplanlimits }"
+      "norm_label": "{ getplanlimits, assertplanfeature }"
     },
     {
       "label": "Event",
@@ -897,7 +917,7 @@
       "label": "buildPublicUrl()",
       "file_type": "code",
       "source_file": "src/controllers/assetController.js",
-      "source_location": "L60",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "controllers_assetcontroller_buildpublicurl",
       "community": 10,
@@ -1010,7 +1030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_checkincontroller",
-      "community": 23,
+      "community": 15,
       "norm_label": "checkincontroller.js"
     },
     {
@@ -1020,7 +1040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_checkincontroller_crypto",
-      "community": 23,
+      "community": 15,
       "norm_label": "crypto"
     },
     {
@@ -1030,7 +1050,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_checkincontroller_event",
-      "community": 23,
+      "community": 15,
       "norm_label": "event"
     },
     {
@@ -1040,7 +1060,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_checkincontroller_guest",
-      "community": 23,
+      "community": 15,
       "norm_label": "guest"
     },
     {
@@ -1050,7 +1070,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_checkincontroller_staffaccesstoken",
-      "community": 23,
+      "community": 15,
       "norm_label": "staffaccesstoken"
     },
     {
@@ -1060,37 +1080,47 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_checkincontroller_env",
-      "community": 23,
+      "community": 15,
       "norm_label": "env"
+    },
+    {
+      "label": "{ assertPlanFeature }",
+      "file_type": "code",
+      "source_file": "src/controllers/checkInController.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "controllers_checkincontroller_assertplanfeature",
+      "community": 15,
+      "norm_label": "{ assertplanfeature }"
     },
     {
       "label": "asyncHandler",
       "file_type": "code",
       "source_file": "src/controllers/checkInController.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_checkincontroller_asynchandler",
-      "community": 23,
+      "community": 15,
       "norm_label": "asynchandler"
     },
     {
       "label": "staffGuest()",
       "file_type": "code",
       "source_file": "src/controllers/checkInController.js",
-      "source_location": "L8",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_checkincontroller_staffguest",
-      "community": 23,
+      "community": 15,
       "norm_label": "staffguest()"
     },
     {
       "label": "getActiveToken()",
       "file_type": "code",
       "source_file": "src/controllers/checkInController.js",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "controllers_checkincontroller_getactivetoken",
-      "community": 23,
+      "community": 15,
       "norm_label": "getactivetoken()"
     },
     {
@@ -2050,7 +2080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_tablecontroller",
-      "community": 15,
+      "community": 9,
       "norm_label": "tablecontroller.js"
     },
     {
@@ -2060,7 +2090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_tablecontroller_event",
-      "community": 15,
+      "community": 9,
       "norm_label": "event"
     },
     {
@@ -2070,7 +2100,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_tablecontroller_eventtable",
-      "community": 15,
+      "community": 9,
       "norm_label": "eventtable"
     },
     {
@@ -2080,47 +2110,57 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_tablecontroller_guest",
-      "community": 15,
+      "community": 9,
       "norm_label": "guest"
+    },
+    {
+      "label": "{ assertPlanFeature }",
+      "file_type": "code",
+      "source_file": "src/controllers/tableController.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "controllers_tablecontroller_assertplanfeature",
+      "community": 9,
+      "norm_label": "{ assertplanfeature }"
     },
     {
       "label": "asyncHandler",
       "file_type": "code",
       "source_file": "src/controllers/tableController.js",
-      "source_location": "L4",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_tablecontroller_asynchandler",
-      "community": 15,
+      "community": 9,
       "norm_label": "asynchandler"
     },
     {
       "label": "seatCount()",
       "file_type": "code",
       "source_file": "src/controllers/tableController.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_tablecontroller_seatcount",
-      "community": 15,
+      "community": 9,
       "norm_label": "seatcount()"
     },
     {
       "label": "assertEventOwner()",
       "file_type": "code",
       "source_file": "src/controllers/tableController.js",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "controllers_tablecontroller_asserteventowner",
-      "community": 15,
+      "community": 9,
       "norm_label": "asserteventowner()"
     },
     {
       "label": "tableSummary()",
       "file_type": "code",
       "source_file": "src/controllers/tableController.js",
-      "source_location": "L20",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "controllers_tablecontroller_tablesummary",
-      "community": 15,
+      "community": 9,
       "norm_label": "tablesummary()"
     },
     {
@@ -2130,7 +2170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_templatecontroller",
-      "community": 9,
+      "community": 23,
       "norm_label": "templatecontroller.js"
     },
     {
@@ -2140,7 +2180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_templatecontroller_template",
-      "community": 9,
+      "community": 23,
       "norm_label": "template"
     },
     {
@@ -2150,7 +2190,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_templatecontroller_asynchandler",
-      "community": 9,
+      "community": 23,
       "norm_label": "asynchandler"
     },
     {
@@ -2360,7 +2400,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_event",
-      "community": 23,
+      "community": 8,
       "norm_label": "event.js"
     },
     {
@@ -2370,7 +2410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_event_mongoose",
-      "community": 23,
+      "community": 8,
       "norm_label": "mongoose"
     },
     {
@@ -2380,7 +2420,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_event_eventschema",
-      "community": 23,
+      "community": 8,
       "norm_label": "eventschema"
     },
     {
@@ -2390,7 +2430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_eventtable",
-      "community": 15,
+      "community": 9,
       "norm_label": "eventtable.js"
     },
     {
@@ -2400,7 +2440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_eventtable_mongoose",
-      "community": 15,
+      "community": 9,
       "norm_label": "mongoose"
     },
     {
@@ -2410,7 +2450,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_eventtable_eventtableschema",
-      "community": 15,
+      "community": 9,
       "norm_label": "eventtableschema"
     },
     {
@@ -2420,7 +2460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_guest",
-      "community": 8,
+      "community": 9,
       "norm_label": "guest.js"
     },
     {
@@ -2430,7 +2470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_guest_mongoose",
-      "community": 8,
+      "community": 9,
       "norm_label": "mongoose"
     },
     {
@@ -2440,7 +2480,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "models_guest_crypto",
-      "community": 8,
+      "community": 9,
       "norm_label": "crypto"
     },
     {
@@ -2450,7 +2490,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "models_guest_guestschema",
-      "community": 8,
+      "community": 9,
       "norm_label": "guestschema"
     },
     {
@@ -2580,7 +2620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_staffaccesstoken",
-      "community": 23,
+      "community": 15,
       "norm_label": "staffaccesstoken.js"
     },
     {
@@ -2590,7 +2630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_staffaccesstoken_mongoose",
-      "community": 23,
+      "community": 15,
       "norm_label": "mongoose"
     },
     {
@@ -2600,7 +2640,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_staffaccesstoken_staffaccesstokenschema",
-      "community": 23,
+      "community": 15,
       "norm_label": "staffaccesstokenschema"
     },
     {
@@ -2610,7 +2650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_template",
-      "community": 9,
+      "community": 23,
       "norm_label": "template.js"
     },
     {
@@ -2620,7 +2660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_template_mongoose",
-      "community": 9,
+      "community": 23,
       "norm_label": "mongoose"
     },
     {
@@ -2630,7 +2670,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_template_templateschema",
-      "community": 9,
+      "community": 23,
       "norm_label": "templateschema"
     },
     {
@@ -5491,12 +5531,34 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "config_plans",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
       "target": "config_plans"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/checkInController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "controllers_checkincontroller",
+      "target": "config_plans",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5541,6 +5603,17 @@
       "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
       "target": "config_plans"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/tableController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "controllers_tablecontroller",
+      "target": "config_plans",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -5656,6 +5729,39 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "config_plans_assertplanfeature",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "config_plans_assertplanfeature",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/checkInController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "controllers_checkincontroller",
+      "target": "config_plans_assertplanfeature",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
       "source_location": "L6",
       "weight": 1.0,
@@ -5675,6 +5781,17 @@
       "target": "config_plans_assertplanfeature"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/tableController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "controllers_tablecontroller",
+      "target": "config_plans_assertplanfeature",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/albumController.js",
@@ -5683,6 +5800,16 @@
       "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
       "target": "controllers_albumcontroller_albumasset"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "controllers_albumcontroller_assertplanfeature",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5785,6 +5912,16 @@
       "target": "controllers_albumcontroller_uploadalbumfile"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "controllers_albumcontroller_user",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -5827,6 +5964,17 @@
       "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
       "target": "models_invitation"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "models_user",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -5948,9 +6096,9 @@
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
-      "target": "controllers_assetcontroller_getplanlimits"
+      "target": "controllers_assetcontroller_getplanlimits_assertplanfeature",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -6217,6 +6365,16 @@
       "source_file": "src/controllers/checkInController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "source": "controllers_checkincontroller",
+      "target": "controllers_checkincontroller_assertplanfeature",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/checkInController.js",
+      "source_location": "L6",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_checkincontroller",
       "target": "controllers_checkincontroller_asynchandler"
@@ -6466,9 +6624,9 @@
       "source_file": "src/controllers/dashboardController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_dashboardcontroller",
-      "target": "controllers_dashboardcontroller_whatsappmessagelog",
-      "confidence_score": 1.0
+      "target": "controllers_dashboardcontroller_whatsappmessagelog"
     },
     {
       "relation": "imports_from",
@@ -6521,9 +6679,9 @@
       "source_file": "src/controllers/dashboardController.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_dashboardcontroller",
-      "target": "models_whatsappmessagelog",
-      "confidence_score": 1.0
+      "target": "models_whatsappmessagelog"
     },
     {
       "relation": "imports_from",
@@ -7895,6 +8053,16 @@
       "confidence_score": 1.0,
       "source": "controllers_tablecontroller",
       "target": "controllers_tablecontroller_asserteventowner"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/tableController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "controllers_tablecontroller",
+      "target": "controllers_tablecontroller_assertplanfeature",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -10783,9 +10951,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice",
-      "target": "services_whatsappservice_fallbackprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_fallbackprovider"
     },
     {
       "relation": "contains",
@@ -10803,9 +10971,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice",
-      "target": "services_whatsappservice_isfallbackenabled",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_isfallbackenabled"
     },
     {
       "relation": "contains",
@@ -10813,9 +10981,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice",
-      "target": "services_whatsappservice_ismetaconfigured",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_ismetaconfigured"
     },
     {
       "relation": "contains",
@@ -10823,9 +10991,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice",
-      "target": "services_whatsappservice_isopenwaconfigured",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_isopenwaconfigured"
     },
     {
       "relation": "contains",
@@ -10913,9 +11081,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L243",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice",
-      "target": "services_whatsappservice_sendviaprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_sendviaprovider"
     },
     {
       "relation": "contains",
@@ -10923,9 +11091,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice",
-      "target": "services_whatsappservice_shouldfallbackfromopenwa",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_shouldfallbackfromopenwa"
     },
     {
       "relation": "contains",
@@ -10974,9 +11142,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_fallbackprovider",
-      "target": "services_whatsappservice_activeprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_activeprovider"
     },
     {
       "relation": "calls",
@@ -11007,9 +11175,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_shouldfallbackfromopenwa",
-      "target": "services_whatsappservice_activeprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_activeprovider"
     },
     {
       "relation": "calls",
@@ -11018,9 +11186,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_isfallbackenabled",
-      "target": "services_whatsappservice_fallbackprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_fallbackprovider"
     },
     {
       "relation": "calls",
@@ -11029,9 +11197,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_shouldfallbackfromopenwa",
-      "target": "services_whatsappservice_fallbackprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_fallbackprovider"
     },
     {
       "relation": "calls",
@@ -11040,9 +11208,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_isfallbackenabled",
-      "target": "services_whatsappservice_ismetaconfigured",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_ismetaconfigured"
     },
     {
       "relation": "calls",
@@ -11051,9 +11219,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_isfallbackenabled",
-      "target": "services_whatsappservice_isopenwaconfigured",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_isopenwaconfigured"
     },
     {
       "relation": "calls",
@@ -11062,9 +11230,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_shouldfallbackfromopenwa",
-      "target": "services_whatsappservice_isfallbackenabled",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_isfallbackenabled"
     },
     {
       "relation": "calls",
@@ -11161,9 +11329,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L250",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_sendviaprovider",
-      "target": "services_whatsappservice_buildmetatemplatepayload",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_buildmetatemplatepayload"
     },
     {
       "relation": "calls",
@@ -11183,9 +11351,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L253",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_sendviaprovider",
-      "target": "services_whatsappservice_sendmeta",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_sendmeta"
     },
     {
       "relation": "calls",
@@ -11205,9 +11373,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_sendviaprovider",
-      "target": "services_whatsappservice_sendopenwa",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_sendopenwa"
     },
     {
       "relation": "calls",
@@ -11238,9 +11406,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_sendviaprovider",
-      "target": "services_whatsappservice_sendopenwamedia",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_sendopenwamedia"
     },
     {
       "relation": "calls",
@@ -11249,9 +11417,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L325",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_sendmessage",
-      "target": "services_whatsappservice_shouldfallbackfromopenwa",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_shouldfallbackfromopenwa"
     },
     {
       "relation": "calls",
@@ -11260,9 +11428,9 @@
       "source_file": "src/services/whatsappService.js",
       "source_location": "L323",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_whatsappservice_sendmessage",
-      "target": "services_whatsappservice_sendviaprovider",
-      "confidence_score": 1.0
+      "target": "services_whatsappservice_sendviaprovider"
     },
     {
       "relation": "calls",
@@ -11307,5 +11475,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fe28cd8889c710f6bcc30e590e2a3589480e671e"
+  "built_at_commit": "eb892d587c39e5934cf8d94b52b85db991cce382"
 }

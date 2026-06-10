@@ -298,6 +298,7 @@ exports.whatsappStatus = asyncHandler(async (_req, res) => {
 });
 
 exports.sendWhatsApp = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'whatsappMessaging', 'El envio de WhatsApp requiere Evento Individual o Pro');
   const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
   if (!guest) {
     const error = new Error('Invitado no encontrado');
@@ -378,6 +379,7 @@ exports.sendEmail = asyncHandler(async (req, res) => {
 });
 
 exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'whatsappBulk', 'El envio masivo por WhatsApp requiere plan Pro');
   if (!req.validated.body.confirm) {
     const error = new Error('Confirma el envio masivo antes de continuar');
     error.statusCode = 400;

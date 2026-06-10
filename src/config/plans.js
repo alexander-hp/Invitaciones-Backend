@@ -10,6 +10,12 @@ const PLAN_DEFINITIONS = {
       music: false,
       premiumTemplates: false,
       exportData: false,
+      whatsappMessaging: false,
+      whatsappBulk: false,
+      whatsappMedia: false,
+      checkIn: false,
+      seating: false,
+      guestAlbum: false,
       customDomain: false,
       whiteLabel: false
     }
@@ -25,6 +31,12 @@ const PLAN_DEFINITIONS = {
       music: true,
       premiumTemplates: true,
       exportData: true,
+      whatsappMessaging: true,
+      whatsappBulk: false,
+      whatsappMedia: true,
+      checkIn: true,
+      seating: true,
+      guestAlbum: true,
       customDomain: false,
       whiteLabel: false
     }
@@ -40,6 +52,12 @@ const PLAN_DEFINITIONS = {
       music: true,
       premiumTemplates: true,
       exportData: true,
+      whatsappMessaging: true,
+      whatsappBulk: true,
+      whatsappMedia: true,
+      checkIn: true,
+      seating: true,
+      guestAlbum: true,
       customDomain: true,
       whiteLabel: true
     }

@@ -1,7 +1,7 @@
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const env = require('../config/env');
-const { getPlanLimits } = require('../config/plans');
+const { getPlanLimits, assertPlanFeature } = require('../config/plans');
 const Event = require('../models/Event');
 const WhatsAppMediaAsset = require('../models/WhatsAppMediaAsset');
 const asyncHandler = require('../utils/asyncHandler');
@@ -51,7 +51,17 @@ function assertMediaAllowed({ folder, contentType, size }) {
     throw error;
   }
   if (size && size > maxSize) {
-    const error = new Error(isMusicFolder ? 'El audio excede 10MB' : 'La imagen excede 5MB');
+    const error = new Error(
+      isMusicFolder
+        ? 'El audio excede 10MB'
+        : isWhatsAppFolder && whatsappMediaType === 'video'
+          ? 'El video excede 25MB'
+          : isWhatsAppFolder && whatsappMediaType === 'audio'
+            ? 'El audio excede 10MB'
+            : isWhatsAppFolder && whatsappMediaType === 'document'
+              ? 'El documento excede 10MB'
+              : 'La imagen excede 5MB'
+    );
     error.statusCode = 400;
     throw error;
   }
@@ -78,6 +88,9 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
     error.statusCode = 402;
     throw error;
   }
+  if (folder === 'whatsapp-media') {
+    assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+  }
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
   const key = `${folder}/${req.user._id}/${Date.now()}-${safeName}`;
@@ -101,6 +114,7 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
 });
 
 exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
   if (!event) {
     const error = new Error('Evento no encontrado');
@@ -125,6 +139,7 @@ exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
 });
 
 exports.listWhatsAppMedia = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
   if (!event) {
     const error = new Error('Evento no encontrado');
@@ -137,6 +152,7 @@ exports.listWhatsAppMedia = asyncHandler(async (req, res) => {
 });
 
 exports.deleteWhatsAppMedia = asyncHandler(async (req, res) => {
+  assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   const asset = await WhatsAppMediaAsset.findOneAndUpdate(
     { _id: req.params.assetId, event: req.params.eventId, owner: req.user._id },
     { active: false },
