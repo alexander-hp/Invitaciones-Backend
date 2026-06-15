@@ -1,7 +1,7 @@
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const env = require('../config/env');
-const { getPlanLimits, assertPlanFeature } = require('../config/plans');
+const { getPlanLimits, getEffectivePlanLimits, assertEffectivePlanFeature } = require('../config/plans');
 const Event = require('../models/Event');
 const WhatsAppMediaAsset = require('../models/WhatsAppMediaAsset');
 const asyncHandler = require('../utils/asyncHandler');
@@ -15,6 +15,19 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_AUDIO_SIZE = 10 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 25 * 1024 * 1024;
 const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+const MIME_BY_EXTENSION = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.mov': 'video/quicktime',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav',
+  '.pdf': 'application/pdf'
+};
 
 function whatsappMediaTypeForContentType(contentType) {
   if (IMAGE_TYPES.has(contentType)) return 'image';
@@ -73,6 +86,84 @@ function buildPublicUrl(key) {
   return `https://${env.s3Bucket}.s3.${env.awsRegion}.amazonaws.com/${key}`;
 }
 
+function filenameFromUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const name = decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || '');
+    return name && name.includes('.') ? name.replace(/[^a-zA-Z0-9._-]/g, '-') : '';
+  } catch (_error) {
+    return '';
+  }
+}
+
+function extensionFromFilename(filename) {
+  const match = String(filename || '').toLowerCase().match(/\.[a-z0-9]+$/);
+  return match ? match[0] : '';
+}
+
+function normalizeContentType(value) {
+  return String(value || '').split(';')[0].trim().toLowerCase();
+}
+
+function inspectPreviewKind(type) {
+  return type === 'document' ? 'document' : type;
+}
+
+async function fetchUrlMetadata(url) {
+  const headers = { 'User-Agent': 'KyndraSoft-AssetInspector/1.0' };
+  let response = await fetch(url, { method: 'HEAD', headers }).catch(() => null);
+  if (!response || !response.ok || !response.headers.get('content-type')) {
+    response = await fetch(url, { method: 'GET', headers: { ...headers, Range: 'bytes=0-1023' } }).catch(() => null);
+  }
+  return response;
+}
+
+exports.inspectUrl = asyncHandler(async (req, res) => {
+  const url = String(req.validated.body.url || '').trim();
+  const parsed = new URL(url);
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    const error = new Error('URL debe iniciar con http o https');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const warnings = [];
+  const response = await fetchUrlMetadata(url);
+  if (!response) {
+    const error = new Error('No se pudo consultar la URL');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const filename = filenameFromUrl(url) || 'whatsapp-media';
+  const extensionMime = MIME_BY_EXTENSION[extensionFromFilename(filename)];
+  const headerMime = normalizeContentType(response.headers.get('content-type'));
+  const mimetype = whatsappMediaTypeForContentType(headerMime) ? headerMime : extensionMime;
+  const type = whatsappMediaTypeForContentType(mimetype || '');
+  const size = Number(response.headers.get('content-length') || 0) || undefined;
+
+  if (!response.ok && response.status !== 206) warnings.push(`La URL respondio HTTP ${response.status}`);
+  if (!headerMime) warnings.push('El servidor no envio Content-Type; se intento inferir por extension.');
+  if (headerMime && !whatsappMediaTypeForContentType(headerMime) && extensionMime) warnings.push(`Content-Type "${headerMime}" no es soportado; se uso la extension del archivo.`);
+  if (!type) {
+    const error = new Error('La URL no parece ser media WhatsApp soportada');
+    error.statusCode = 400;
+    error.details = { contentType: headerMime, filename };
+    throw error;
+  }
+
+  res.json({
+    url,
+    type,
+    mimetype,
+    filename,
+    size,
+    previewKind: inspectPreviewKind(type),
+    previewUrl: url,
+    warnings
+  });
+});
+
 exports.createUploadUrl = asyncHandler(async (req, res) => {
   if (!env.s3Bucket) {
     const error = new Error('AWS_S3_BUCKET no configurado');
@@ -80,16 +171,25 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  const { fileName, contentType, folder = 'assets', size } = req.validated.body;
+  const { fileName, contentType, folder = 'assets', event: eventId, size } = req.validated.body;
   assertMediaAllowed({ folder, contentType, size });
-  const limits = getPlanLimits(req.user);
+  let event = null;
+  if (eventId) {
+    event = await Event.findOne({ _id: eventId, owner: req.user._id }).select('_id plan');
+    if (!event) {
+      const error = new Error('Evento no encontrado');
+      error.statusCode = 404;
+      throw error;
+    }
+  }
+  const limits = event ? getEffectivePlanLimits(req.user, event) : getPlanLimits(req.user);
   if (folder === 'music' && !limits.music) {
     const error = new Error('La musica requiere Evento Individual o Pro');
     error.statusCode = 402;
     throw error;
   }
   if (folder === 'whatsapp-media') {
-    assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+    assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   }
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
@@ -114,13 +214,13 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
 });
 
 exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
 
   const payload = req.validated.body;
   const asset = await WhatsAppMediaAsset.create({
@@ -139,20 +239,26 @@ exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
 });
 
 exports.listWhatsAppMedia = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
 
   const assets = await WhatsAppMediaAsset.find({ owner: req.user._id, event: event._id, active: true }).sort('-createdAt');
   res.json({ assets });
 });
 
 exports.deleteWhatsAppMedia = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   const asset = await WhatsAppMediaAsset.findOneAndUpdate(
     { _id: req.params.assetId, event: req.params.eventId, owner: req.user._id },
     { active: false },

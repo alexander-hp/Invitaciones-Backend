@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const rsvpActivitySchema = new mongoose.Schema({
-  invitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation', required: true, index: true },
+  invitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation', index: true },
   event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true, index: true },
   guest: { type: mongoose.Schema.Types.ObjectId, ref: 'Guest' },
   rsvp: { type: mongoose.Schema.Types.ObjectId, ref: 'Rsvp', index: true },

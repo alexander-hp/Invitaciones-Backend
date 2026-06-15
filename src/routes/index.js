@@ -10,6 +10,8 @@ const assets = require('./assetRoutes');
 const payments = require('./paymentRoutes');
 const contact = require('./contactRoutes');
 const checkIn = require('./checkInRoutes');
+const eventAccess = require('./eventAccessRoutes');
+const external = require('./externalRoutes');
 const whatsappWebhooks = require('./whatsappWebhookRoutes');
 
 const router = express.Router();
@@ -25,6 +27,8 @@ router.use('/assets', assets);
 router.use('/payments', payments);
 router.use('/contact', contact);
 router.use('/check-in', checkIn);
+router.use('/event-access', eventAccess);
+router.use('/external', external);
 router.use('/webhooks/whatsapp', whatsappWebhooks);
 
 module.exports = router;

@@ -6,12 +6,14 @@ const { validate, z } = require('../utils/validate');
 const router = express.Router();
 
 const checkoutBody = z.object({
-  package: z.enum(['event', 'pro', 'basic', 'premium', 'organizer']),
+  package: z.enum(['event', 'pro', 'basic', 'premium', 'organizer', 'event_12m', 'external_dashboard_12m', 'planner_pro_monthly', 'planner_pro_yearly']),
+  event: z.string().min(12).optional(),
+  billingCycle: z.enum(['monthly', 'yearly']).optional(),
   invitation: z.string().min(12).optional()
 }).strict();
 
 router.get('/plans', protect, controller.listPlans);
 router.get('/status', protect, controller.status);
 router.post('/checkout', protect, validate(z.object({ body: checkoutBody })), controller.createCheckout);
-router.post('/webhook', controller.webhook);
+// router.post('/webhook', controller.webhook);
 module.exports = router;

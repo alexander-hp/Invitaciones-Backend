@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const rsvpSchema = new mongoose.Schema({
-  invitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation', required: true, index: true },
+  invitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation', index: true },
   event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true, index: true },
   guest: { type: mongoose.Schema.Types.ObjectId, ref: 'Guest' },
   name: { type: String, required: true, trim: true },
@@ -34,6 +34,14 @@ rsvpSchema.index(
 rsvpSchema.index(
   { invitation: 1, emailNormalized: 1 },
   { unique: true, partialFilterExpression: { emailNormalized: { $type: 'string' } } }
+);
+rsvpSchema.index(
+  { event: 1, guest: 1 },
+  { unique: true, partialFilterExpression: { invitation: { $exists: false }, guest: { $type: 'objectId' } } }
+);
+rsvpSchema.index(
+  { event: 1, emailNormalized: 1 },
+  { unique: true, partialFilterExpression: { invitation: { $exists: false }, emailNormalized: { $type: 'string' } } }
 );
 
 module.exports = mongoose.model('Rsvp', rsvpSchema);

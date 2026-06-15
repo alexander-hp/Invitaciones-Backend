@@ -8,6 +8,10 @@ const guestSchema = new mongoose.Schema({
   email: { type: String, lowercase: true, trim: true },
   phone: { type: String, trim: true },
   group: String,
+  roles: [{ type: String, trim: true, lowercase: true }],
+  tags: [{ type: String, trim: true, lowercase: true }],
+  relationshipLabel: { type: String, trim: true },
+  visibilityGroup: { type: String, trim: true },
   tableName: { type: String, trim: true },
   seatLabel: { type: String, trim: true },
   companions: [{

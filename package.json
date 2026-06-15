@@ -16,7 +16,9 @@
         "docker:down": "docker compose down",
         "check": "node --check src/server.js && node --check src/app.js",
         "seed:templates": "node scripts/seedTemplates.js",
+        "migrate:commercial-plans": "node scripts/migrateCommercialPlans.js",
         "test:smtp": "node scripts/testSmtp.js",
+        "test:stripe": "node scripts/testStripeCheckout.js",
         "test:whatsapp": "node scripts/testWhatsAppProviders.js",
         "reminders:rsvp": "node scripts/sendRsvpReminders.js",
         "smoke:mvp": "node scripts/smokeMvpFlow.js"

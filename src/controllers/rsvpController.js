@@ -4,7 +4,7 @@ const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
 const RsvpActivity = require('../models/RsvpActivity');
 const emailService = require('../services/emailService');
-const { assertPlanFeature } = require('../config/plans');
+const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 function normalizeEmail(email) {
@@ -68,8 +68,8 @@ function snapshotRsvp(rsvp) {
 
 async function createRsvpActivity({ invitation, guest, rsvp, action, previous, next, metadata }) {
   await RsvpActivity.create({
-    invitation: invitation._id,
-    event: invitation.event,
+    invitation: invitation?._id,
+    event: invitation?.event || rsvp?.event || guest?.event,
     guest: guest?._id,
     rsvp: rsvp?._id,
     actorType: 'guest',
@@ -151,6 +151,17 @@ async function findExistingRsvp(invitation, guest, emailNormalized) {
   return null;
 }
 
+async function findExistingEventRsvp(event, guest, emailNormalized) {
+  if (guest) {
+    const byGuest = await Rsvp.findOne({ event: event._id, invitation: { $exists: false }, guest: guest._id });
+    if (byGuest) return byGuest;
+  }
+  if (emailNormalized) {
+    return Rsvp.findOne({ event: event._id, invitation: { $exists: false }, emailNormalized });
+  }
+  return null;
+}
+
 async function updateGuestStatus(guest, response) {
   if (!guest) return;
   const status = response === 'maybe' ? 'pending' : response;
@@ -197,6 +208,34 @@ async function saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings
       conflict.statusCode = 409;
       throw conflict;
     }
+    previousSnapshot = snapshotRsvp(duplicate);
+    Object.assign(duplicate, rsvpData);
+    rsvp = await duplicate.save();
+    statusCode = 200;
+    return { rsvp, statusCode, previousSnapshot };
+  }
+}
+
+async function saveEventRsvp({ event, guest, emailNormalized, rsvpData }) {
+  const existingRsvp = await findExistingEventRsvp(event, guest, emailNormalized);
+  let rsvp;
+  let statusCode = 201;
+  let previousSnapshot;
+
+  if (existingRsvp) {
+    previousSnapshot = snapshotRsvp(existingRsvp);
+    Object.assign(existingRsvp, rsvpData);
+    rsvp = await existingRsvp.save();
+    return { rsvp, statusCode: 200, previousSnapshot };
+  }
+
+  try {
+    rsvp = await Rsvp.create(rsvpData);
+    return { rsvp, statusCode, previousSnapshot };
+  } catch (error) {
+    if (error?.code !== 11000) throw error;
+    const duplicate = await findExistingEventRsvp(event, guest, emailNormalized);
+    if (!duplicate) throw error;
     previousSnapshot = snapshotRsvp(duplicate);
     Object.assign(duplicate, rsvpData);
     rsvp = await duplicate.save();
@@ -290,6 +329,81 @@ exports.submitPublic = asyncHandler(async (req, res) => {
   res.status(statusCode).json({ rsvp, updated: statusCode === 200 });
 });
 
+exports.submitPublicEvent = asyncHandler(async (req, res) => {
+  const payload = req.validated.body;
+  const event = await Event.findOne({
+    externalPortalSlug: req.params.portalSlug,
+    mode: 'external_dashboard',
+    externalPortalEnabled: { $ne: false },
+    'externalPortalSettings.rsvpEnabled': { $ne: false }
+  });
+  if (!event) {
+    const error = new Error('Portal RSVP no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const emailNormalized = normalizeEmail(payload.email);
+  let guest = null;
+  if (payload.guest) {
+    guest = await Guest.findOne({ _id: payload.guest, event: event._id });
+    if (!guest) {
+      const error = new Error('Invitado no pertenece a este evento');
+      error.statusCode = 400;
+      throw error;
+    }
+  } else if (emailNormalized) {
+    guest = await Guest.findOne({ event: event._id, email: emailNormalized });
+  }
+
+  if (!guest) {
+    const error = new Error('Invitado no autorizado para este evento');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const requestedCompanions = Number(payload.companions || (payload.companionNames || []).filter(Boolean).length || 0);
+  if (payload.response === 'confirmed' && requestedCompanions > guest.allowedCompanions) {
+    const error = new Error('El numero de acompanantes excede lo permitido');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const isFinalAttendance = payload.response === 'confirmed';
+  const companionNames = isFinalAttendance
+    ? (payload.companionNames || []).map((name) => String(name || '').trim()).filter(Boolean)
+    : [];
+  const rsvpData = {
+    event: event._id,
+    guest: guest._id,
+    name: guest.name || payload.name,
+    email: guest.email || payload.email,
+    emailNormalized: guest.email ? normalizeEmail(guest.email) : emailNormalized,
+    response: payload.response,
+    companions: isFinalAttendance ? Number(payload.companions || companionNames.length || 0) : 0,
+    companionNames,
+    attendingCount: isFinalAttendance ? 1 + Number(payload.companions || companionNames.length || 0) : 0,
+    mealPreference: isFinalAttendance ? payload.mealPreference : undefined,
+    dietaryRestrictions: isFinalAttendance ? payload.dietaryRestrictions : undefined,
+    menuSelection: isFinalAttendance ? payload.menuSelection : undefined,
+    customAnswers: Array.isArray(payload.customAnswers) ? payload.customAnswers : [],
+    message: payload.message,
+    ...normalizePhone(payload)
+  };
+
+  const { rsvp, statusCode, previousSnapshot } = await saveEventRsvp({ event, guest, emailNormalized, rsvpData });
+  await createRsvpActivity({
+    guest,
+    rsvp,
+    action: statusCode === 200 ? 'updated' : payload.response,
+    previous: previousSnapshot,
+    next: snapshotRsvp(rsvp),
+    metadata: { portalSlug: event.externalPortalSlug, updated: statusCode === 200 }
+  });
+  await updateGuestStatus(guest, payload.response);
+  res.status(statusCode).json({ rsvp, updated: statusCode === 200 });
+});
+
 exports.listByEvent = asyncHandler(async (req, res) => {
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
   if (!event) {
@@ -302,13 +416,13 @@ exports.listByEvent = asyncHandler(async (req, res) => {
 });
 
 exports.exportByEvent = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
 
   const rsvps = await Rsvp.find({ event: event._id }).sort('-createdAt').lean();
   const rows = [

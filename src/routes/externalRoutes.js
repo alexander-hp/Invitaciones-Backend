@@ -1,0 +1,51 @@
+const express = require('express');
+const multer = require('multer');
+const controller = require('../controllers/externalController');
+const { validate, z } = require('../utils/validate');
+
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
+
+const identifyBody = z.object({
+  email: z.string().email().optional(),
+  phone: z.string().min(6).optional(),
+  token: z.string().min(16).optional()
+}).strict();
+
+const rsvpBody = z.object({
+  guest: z.string().min(12),
+  name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  response: z.enum(['confirmed', 'declined', 'maybe']),
+  companions: z.number().int().min(0).optional(),
+  companionNames: z.array(z.string()).optional(),
+  dietaryRestrictions: z.string().optional(),
+  mealPreference: z.string().optional(),
+  menuSelection: z.string().optional(),
+  customAnswers: z.array(z.object({
+    key: z.string().min(1),
+    label: z.string().optional(),
+    value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional()
+  }).strict()).optional(),
+  message: z.string().optional()
+}).strict();
+
+const songBody = z.object({
+  guest: z.string().min(12).optional(),
+  requesterName: z.string().min(2).optional(),
+  requesterEmail: z.string().email().optional(),
+  title: z.string().min(1).max(180),
+  artist: z.string().max(180).optional(),
+  dedication: z.string().max(500).optional()
+}).strict();
+
+router.get('/:portalSlug/config', controller.config);
+router.get('/:portalSlug/assets', controller.assets);
+router.post('/:portalSlug/guest/identify', validate(z.object({ body: identifyBody })), controller.identifyGuest);
+router.post('/:portalSlug/rsvp', validate(z.object({ body: rsvpBody })), controller.rsvp);
+router.get('/:portalSlug/album', controller.album);
+router.post('/:portalSlug/album', upload.single('file'), controller.albumUpload);
+router.post('/:portalSlug/song-requests', validate(z.object({ body: songBody })), controller.songRequest);
+router.get('/:portalSlug/embed-manifest', controller.embedManifest);
+
+module.exports = router;

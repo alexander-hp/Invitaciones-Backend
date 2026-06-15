@@ -45,10 +45,23 @@ function normalizePhone(phone) {
   return digits.length === 10 ? `52${digits}` : digits;
 }
 
-function publicInvitationUrl(invitation, guest) {
+function publicInvitationUrl(invitation, guest, event) {
+  if (!invitation?.slug && event?.externalPortalSlug) {
+    const token = guest?.invitationToken ? `?t=${encodeURIComponent(guest.invitationToken)}` : '';
+    return `${env.publicBaseUrl}/e/${event.externalPortalSlug}${token}`;
+  }
   if (!invitation?.slug) return env.publicBaseUrl;
   const token = guest?.invitationToken ? `?t=${encodeURIComponent(guest.invitationToken)}` : '';
   return `${env.publicBaseUrl}/i/${invitation.slug}${token}`;
+}
+
+function messageLinks(event, invitation, guest) {
+  const portalLink = publicInvitationUrl(invitation, guest, event);
+  if (event?.mode !== 'external_dashboard') return [portalLink];
+  return [
+    event.externalSiteUrl ? `Pagina del evento: ${event.externalSiteUrl}` : '',
+    `RSVP, pase y album: ${portalLink}`
+  ].filter(Boolean);
 }
 
 function eventDateText(event) {
@@ -64,13 +77,13 @@ function buildText({ guest, event, invitation, type, text }) {
   const title = event?.title || invitation?.content?.headline || 'nuestro evento';
   const date = eventDateText(event);
   const location = eventLocationText(event);
-  const link = publicInvitationUrl(invitation, guest);
+  const links = messageLinks(event, invitation, guest);
 
   if (type === 'reminder') {
     return [
       `Hola ${guest.name}, te recordamos confirmar tu asistencia a ${title}.`,
       date ? `Fecha: ${date}` : '',
-      link,
+      ...links,
       'Tu confirmacion nos ayuda a organizar mejor el evento.'
     ].filter(Boolean).join('\n\n');
   }
@@ -80,7 +93,7 @@ function buildText({ guest, event, invitation, type, text }) {
       `Hola ${guest.name}, te compartimos un recordatorio para ${title}.`,
       date ? `Fecha: ${date}` : '',
       location ? `Lugar: ${location}` : '',
-      link
+      ...links
     ].filter(Boolean).join('\n\n');
   }
 
@@ -97,14 +110,14 @@ function buildText({ guest, event, invitation, type, text }) {
     `Hola ${guest.name}, te comparto tu invitacion digital para ${title}.`,
     date ? `Fecha: ${date}` : '',
     location ? `Lugar: ${location}` : '',
-    link,
+    ...links,
     'Por favor confirma tu asistencia desde el enlace.'
   ].filter(Boolean).join('\n\n');
 }
 
 function buildMetaTemplatePayload({ phone, type, guest, event, invitation }) {
   const templateName = TEMPLATE_BY_TYPE[type] || TEMPLATE_BY_TYPE.invitation;
-  const link = publicInvitationUrl(invitation, guest);
+  const link = publicInvitationUrl(invitation, guest, event);
   const components = [{
     type: 'body',
     parameters: [
@@ -179,6 +192,26 @@ async function sendOpenWa({ phone, text }) {
     throw error;
   }
   return data;
+}
+
+async function getOpenWaSessionStatus() {
+  if (!isOpenWaConfigured()) return { configured: false, ready: false, status: 'not_configured' };
+  const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
+  try {
+    const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}`, {
+      headers: { 'X-API-Key': env.openWaApiKey }
+    });
+    const data = await response.json().catch(() => ({}));
+    return {
+      configured: true,
+      ready: response.ok && data.status === 'ready',
+      status: data.status || (response.ok ? 'unknown' : 'unreachable'),
+      phone: data.phone,
+      pushName: data.pushName
+    };
+  } catch (error) {
+    return { configured: true, ready: false, status: 'unreachable', error: error.message };
+  }
 }
 
 function openWaMediaEndpoint(mediaType) {
@@ -386,6 +419,7 @@ module.exports = {
   publicInvitationUrl,
   buildText,
   buildMetaTemplatePayload,
+  getOpenWaSessionStatus,
   sendMessage,
   updateMessageStatus,
   verifyMetaSignature

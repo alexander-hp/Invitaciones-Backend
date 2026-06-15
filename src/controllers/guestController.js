@@ -5,7 +5,7 @@ const Event = require('../models/Event');
 const Invitation = require('../models/Invitation');
 const Rsvp = require('../models/Rsvp');
 const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
-const { getPlanLimits, assertPlanFeature } = require('../config/plans');
+const { getEffectivePlanLimits, assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const whatsappService = require('../services/whatsappService');
 const emailService = require('../services/emailService');
@@ -22,6 +22,7 @@ function normalizePhone(phone) {
 function normalizeGuestPayload(payload) {
   const email = normalizeEmail(payload.email);
   const phone = normalizePhone(payload.phone);
+  const normalizeList = (items) => Array.isArray(items) ? items.map((item) => String(item || '').trim().toLowerCase()).filter(Boolean) : undefined;
   const companions = Array.isArray(payload.companions)
     ? payload.companions
         .filter((companion) => companion?.name || companion?.seatLabel || companion?.tableName)
@@ -37,6 +38,10 @@ function normalizeGuestPayload(payload) {
     email: email || undefined,
     phone: phone || undefined,
     group: payload.group ? String(payload.group).trim() : undefined,
+    roles: normalizeList(payload.roles),
+    tags: normalizeList(payload.tags),
+    relationshipLabel: payload.relationshipLabel ? String(payload.relationshipLabel).trim() : undefined,
+    visibilityGroup: payload.visibilityGroup ? String(payload.visibilityGroup).trim() : undefined,
     tableName: payload.tableName ? String(payload.tableName).trim() : undefined,
     seatLabel: payload.seatLabel ? String(payload.seatLabel).trim() : undefined,
     companions,
@@ -132,6 +137,17 @@ function personalizedPublicUrl(invitation, guest) {
   return guest.invitationToken ? `${baseUrl}?t=${encodeURIComponent(guest.invitationToken)}` : baseUrl;
 }
 
+async function assertWhatsAppProviderReady(media) {
+  if (whatsappService.activeProvider() !== 'openwa') return;
+  const session = await whatsappService.getOpenWaSessionStatus();
+  if (!session.ready) {
+    const error = new Error(`WhatsApp conectado pero no listo (${session.status}). Revisa OpenWA antes de enviar${media ? ' media' : ''}.`);
+    error.statusCode = 503;
+    error.details = { provider: 'openwa', session };
+    throw error;
+  }
+}
+
 async function findDuplicateGuest({ owner, event, email, phone, excludeGuestId }) {
   const query = buildDuplicateQuery({ owner, event, email, phone, excludeGuestId });
   if (!query) return null;
@@ -173,7 +189,7 @@ exports.create = asyncHandler(async (req, res) => {
   });
   if (duplicate) throw buildDuplicateError(duplicate.guest, duplicate.field);
 
-  const limits = getPlanLimits(req.user);
+  const limits = getEffectivePlanLimits(req.user, event);
   const currentGuests = await Guest.countDocuments({ owner: req.user._id, event: event._id });
   if (currentGuests >= limits.guests) {
     const error = new Error(`Tu plan permite hasta ${limits.guests} invitados por evento`);
@@ -212,6 +228,10 @@ exports.update = asyncHandler(async (req, res) => {
   guest.email = payload.email;
   guest.phone = payload.phone;
   guest.group = payload.group;
+  guest.roles = payload.roles || [];
+  guest.tags = payload.tags || [];
+  guest.relationshipLabel = payload.relationshipLabel;
+  guest.visibilityGroup = payload.visibilityGroup;
   guest.tableName = payload.tableName;
   guest.seatLabel = payload.seatLabel;
   guest.companions = payload.companions || [];
@@ -287,18 +307,19 @@ function applyEmailGuestStatus(guest, { status, type, error }) {
 }
 
 exports.whatsappStatus = asyncHandler(async (_req, res) => {
+  const openWaSession = await whatsappService.getOpenWaSessionStatus();
   res.json({
     provider: whatsappService.activeProvider(),
     fallbackProvider: whatsappService.fallbackProvider(),
     enabled: whatsappService.isEnabled(),
     fallbackEnabled: whatsappService.isFallbackEnabled(),
     openWaConfigured: whatsappService.isOpenWaConfigured(),
-    metaConfigured: whatsappService.isMetaConfigured()
+    metaConfigured: whatsappService.isMetaConfigured(),
+    openWaSession
   });
 });
 
 exports.sendWhatsApp = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'whatsappMessaging', 'El envio de WhatsApp requiere Evento Individual o Pro');
   const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
   if (!guest) {
     const error = new Error('Invitado no encontrado');
@@ -311,14 +332,16 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'whatsappMessaging', 'El envio de WhatsApp requiere Evento Individual o Pro');
   const invitation = await primaryInvitationForEvent(event._id, req.user._id);
-  if (!invitation) {
+  if (!invitation && event.mode !== 'external_dashboard') {
     const error = new Error('Crea una invitacion antes de enviar WhatsApp');
     error.statusCode = 400;
     throw error;
   }
 
   const type = req.validated.body.messageType;
+  await assertWhatsAppProviderReady(req.validated.body.media);
   const result = await whatsappService.sendMessage({
     owner: req.user._id,
     guest,
@@ -379,7 +402,6 @@ exports.sendEmail = asyncHandler(async (req, res) => {
 });
 
 exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'whatsappBulk', 'El envio masivo por WhatsApp requiere plan Pro');
   if (!req.validated.body.confirm) {
     const error = new Error('Confirma el envio masivo antes de continuar');
     error.statusCode = 400;
@@ -391,8 +413,9 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'whatsappBulk', 'El envio masivo por WhatsApp requiere plan Pro');
   const invitation = await primaryInvitationForEvent(event._id, req.user._id);
-  if (!invitation) {
+  if (!invitation && event.mode !== 'external_dashboard') {
     const error = new Error('Crea una invitacion antes de enviar WhatsApp');
     error.statusCode = 400;
     throw error;
@@ -404,6 +427,7 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType;
   const media = req.validated.body.media;
+  await assertWhatsAppProviderReady(media);
   const results = [];
 
   for (const guest of guests) {
@@ -494,7 +518,7 @@ exports.importGuests = asyncHandler(async (req, res) => {
   const invalidRows = rows.length - payload.length;
 
   const existingGuests = await Guest.find({ owner: req.user._id, event: event._id }).select('_id name email phone');
-  const limits = getPlanLimits(req.user);
+  const limits = getEffectivePlanLimits(req.user, event);
   if (existingGuests.length >= limits.guests) {
     const error = new Error(`Tu plan permite hasta ${limits.guests} invitados por evento`);
     error.statusCode = 402;
@@ -560,13 +584,13 @@ exports.importGuests = asyncHandler(async (req, res) => {
 });
 
 exports.exportGuests = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'exportData', 'La exportacion de datos requiere Evento Individual o Pro');
   const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'exportData', 'La exportacion de datos requiere Evento Individual o Pro');
 
   const guests = await Guest.find({ owner: req.user._id, event: event._id, ...buildGuestFilters(req.query) }).sort('name').lean();
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();

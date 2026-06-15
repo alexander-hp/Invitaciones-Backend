@@ -5,7 +5,7 @@ const Guest = require('../models/Guest');
 const Invitation = require('../models/Invitation');
 const User = require('../models/User');
 const env = require('../config/env');
-const { assertPlanFeature } = require('../config/plans');
+const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 
 const s3 = new S3Client({ region: env.awsRegion });
@@ -54,7 +54,8 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
     throw error;
   }
   const owner = await User.findById(invitation.owner).select('plan');
-  assertPlanFeature(owner, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+  const event = await Event.findById(invitation.event).select('_id plan');
+  assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
 
   let guest = null;
   const email = req.body.email ? String(req.body.email).toLowerCase().trim() : '';
@@ -79,27 +80,65 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
   res.status(201).json({ asset: { id: asset._id, status: asset.status } });
 });
 
+exports.uploadPublicEvent = asyncHandler(async (req, res) => {
+  const event = await Event.findOne({
+    externalPortalSlug: req.params.portalSlug,
+    mode: 'external_dashboard',
+    externalPortalEnabled: { $ne: false },
+    'externalPortalSettings.albumEnabled': { $ne: false }
+  }).select('_id owner plan externalPortalSettings');
+  if (!event) {
+    const error = new Error('Album no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const owner = await User.findById(event.owner).select('plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
+  assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+
+  let guest = null;
+  const email = req.body.email ? String(req.body.email).toLowerCase().trim() : '';
+  if (req.body.guest) {
+    guest = await Guest.findOne({ _id: req.body.guest, event: event._id }).select('_id name email');
+  } else if (email) {
+    guest = await Guest.findOne({ email, event: event._id }).select('_id name email');
+  }
+
+  const upload = await uploadAlbumFile(req.file, event.owner, event._id);
+  const asset = await AlbumAsset.create({
+    owner: event.owner,
+    event: event._id,
+    guest: guest?._id,
+    uploaderName: req.body.name || guest?.name,
+    uploaderEmail: email || guest?.email,
+    key: upload.key,
+    url: upload.url
+  });
+
+  res.status(201).json({ asset: { id: asset._id, status: asset.status } });
+});
+
 exports.list = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const assets = await AlbumAsset.find({ owner: req.user._id, event: event._id }).sort('-createdAt');
   res.json({ assets });
 });
 
 exports.publicApproved = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id owner content');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id owner event content');
   if (!invitation || !invitation.content?.privateAlbumEnabled) {
     const error = new Error('Album no disponible');
     error.statusCode = 404;
     throw error;
   }
   const owner = await User.findById(invitation.owner).select('plan');
-  assertPlanFeature(owner, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+  const event = await Event.findById(invitation.event).select('_id plan');
+  assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const assets = await AlbumAsset.find({ invitation: invitation._id, status: 'approved' })
     .select('url uploaderName createdAt')
     .sort('-createdAt')
@@ -107,14 +146,35 @@ exports.publicApproved = asyncHandler(async (req, res) => {
   res.json({ assets });
 });
 
+exports.publicEventApproved = asyncHandler(async (req, res) => {
+  const event = await Event.findOne({
+    externalPortalSlug: req.params.portalSlug,
+    mode: 'external_dashboard',
+    externalPortalEnabled: { $ne: false },
+    'externalPortalSettings.albumEnabled': { $ne: false }
+  }).select('_id owner plan');
+  if (!event) {
+    const error = new Error('Album no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const owner = await User.findById(event.owner).select('plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
+  assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+  const assets = await AlbumAsset.find({ event: event._id, status: 'approved' })
+    .select('url uploaderName createdAt')
+    .sort('-createdAt')
+    .limit(100);
+  res.json({ assets });
+});
+
 exports.update = asyncHandler(async (req, res) => {
-  assertPlanFeature(req.user, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
+  assertEffectivePlanFeature(req.user, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const asset = await AlbumAsset.findOneAndUpdate(
     { _id: req.params.assetId, owner: req.user._id, event: event._id },
     { status: req.validated.body.status, reviewedAt: new Date() },

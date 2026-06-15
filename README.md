@@ -19,6 +19,7 @@ Health: `http://localhost:4000/health`
 - `PUBLIC_BASE_URL`
 - `AWS_S3_BUCKET`, `AWS_REGION`
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- Stripe Price IDs: `STRIPE_PRICE_EVENT_12M`, `STRIPE_PRICE_EXTERNAL_DASHBOARD_12M`, `STRIPE_PRICE_PLANNER_PRO_MONTHLY`, `STRIPE_PRICE_PLANNER_PRO_YEARLY`
 - WhatsApp:
   - `WHATSAPP_PROVIDER=openwa`
   - `WHATSAPP_FALLBACK_PROVIDER=meta`
@@ -49,6 +50,51 @@ Para Gmail usa app password, no la contraseña normal. El backend tambien soport
 - `POST /api/assets/upload-url`
 - `POST /api/payments/checkout`
 - `POST /api/contact`
+
+## Stripe test local
+
+Modelo comercial actual:
+
+- `Free Demo`: aplica por evento no pagado.
+- `Evento Individual`: pago unico por evento, dura 12 meses y cubre todas sus invitaciones.
+- `Dashboard Externo`: pago unico por evento externo, dura 12 meses y no requiere invitacion publica propia.
+- `Planner Pro`: suscripcion mensual o anual para toda la cuenta.
+
+La app recibe webhooks de Stripe en la ruta raw:
+
+```bash
+http://localhost:4000/webhook
+```
+
+En PowerShell, si `stripe` falla por ExecutionPolicy, usa `cmd.exe /c stripe ...`.
+
+Validar sesion CLI:
+
+```bash
+cmd.exe /c stripe whoami
+```
+
+Escuchar webhooks locales:
+
+```bash
+cmd.exe /c stripe listen --forward-to localhost:4000/webhook
+```
+
+El secret que imprime `stripe listen` debe coincidir con `STRIPE_WEBHOOK_SECRET`.
+
+Prueba automatizada de checkout + webhook firmado:
+
+```bash
+npm run test:stripe
+```
+
+Requisitos: Mongo local activo, backend corriendo en `http://localhost:4000`, `STRIPE_SECRET_KEY=sk_test_...` y `STRIPE_WEBHOOK_SECRET=whsec_...`.
+
+Migrar eventos/usuarios legacy:
+
+```bash
+npm run migrate:commercial-plans
+```
 
 ## Docker local
 ```bash

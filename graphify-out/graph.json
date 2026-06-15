@@ -4,6 +4,66 @@
   "graph": {},
   "nodes": [
     {
+      "label": "migrateCommercialPlans.js",
+      "file_type": "code",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scripts_migratecommercialplans",
+      "community": 2,
+      "norm_label": "migratecommercialplans.js"
+    },
+    {
+      "label": "{ connectDatabase }",
+      "file_type": "code",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "scripts_migratecommercialplans_connectdatabase",
+      "community": 2,
+      "norm_label": "{ connectdatabase }"
+    },
+    {
+      "label": "Event",
+      "file_type": "code",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "scripts_migratecommercialplans_event",
+      "community": 2,
+      "norm_label": "event"
+    },
+    {
+      "label": "User",
+      "file_type": "code",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "scripts_migratecommercialplans_user",
+      "community": 2,
+      "norm_label": "user"
+    },
+    {
+      "label": "{ planExpiresAt }",
+      "file_type": "code",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "scripts_migratecommercialplans_planexpiresat",
+      "community": 2,
+      "norm_label": "{ planexpiresat }"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "scripts_migratecommercialplans_main",
+      "community": 2,
+      "norm_label": "main()"
+    },
+    {
       "label": "seedTemplates.js",
       "file_type": "code",
       "source_file": "scripts/seedTemplates.js",
@@ -290,7 +350,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testsmtp",
-      "community": 12,
+      "community": 2,
       "norm_label": "testsmtp.js"
     },
     {
@@ -300,7 +360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testsmtp_env",
-      "community": 12,
+      "community": 2,
       "norm_label": "env"
     },
     {
@@ -310,7 +370,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "scripts_testsmtp_emailservice",
-      "community": 12,
+      "community": 2,
       "norm_label": "emailservice"
     },
     {
@@ -320,7 +380,107 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "scripts_testsmtp_main",
-      "community": 12,
+      "community": 2,
+      "norm_label": "main()"
+    },
+    {
+      "label": "testStripeCheckout.js",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout",
+      "community": 25,
+      "norm_label": "teststripecheckout.js"
+    },
+    {
+      "label": "Stripe",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_stripe",
+      "community": 25,
+      "norm_label": "stripe"
+    },
+    {
+      "label": "apiUrl",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_apiurl",
+      "community": 25,
+      "norm_label": "apiurl"
+    },
+    {
+      "label": "runId",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_runid",
+      "community": 25,
+      "norm_label": "runid"
+    },
+    {
+      "label": "assertEnv()",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_assertenv",
+      "community": 25,
+      "norm_label": "assertenv()"
+    },
+    {
+      "label": "idOf()",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_idof",
+      "community": 25,
+      "norm_label": "idof()"
+    },
+    {
+      "label": "request()",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_request",
+      "community": 25,
+      "norm_label": "request()"
+    },
+    {
+      "label": "api()",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_api",
+      "community": 25,
+      "norm_label": "api()"
+    },
+    {
+      "label": "postSignedWebhook()",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_postsignedwebhook",
+      "community": 25,
+      "norm_label": "postsignedwebhook()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L90",
+      "_origin": "ast",
+      "id": "scripts_teststripecheckout_main",
+      "community": 25,
       "norm_label": "main()"
     },
     {
@@ -330,7 +490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders",
-      "community": 24,
+      "community": 1,
       "norm_label": "testwhatsappproviders.js"
     },
     {
@@ -340,7 +500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_assert",
-      "community": 24,
+      "community": 1,
       "norm_label": "assert"
     },
     {
@@ -350,7 +510,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_whatsappservice",
-      "community": 24,
+      "community": 1,
       "norm_label": "whatsappservice"
     },
     {
@@ -360,7 +520,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_guest",
-      "community": 24,
+      "community": 1,
       "norm_label": "guest"
     },
     {
@@ -370,7 +530,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_event",
-      "community": 24,
+      "community": 1,
       "norm_label": "event"
     },
     {
@@ -380,7 +540,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_invitation",
-      "community": 24,
+      "community": 1,
       "norm_label": "invitation"
     },
     {
@@ -390,7 +550,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_text",
-      "community": 24,
+      "community": 1,
       "norm_label": "text"
     },
     {
@@ -400,7 +560,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "scripts_testwhatsappproviders_payload",
-      "community": 24,
+      "community": 1,
       "norm_label": "payload"
     },
     {
@@ -494,14 +654,34 @@
       "norm_label": "{ notfound, errorhandler }"
     },
     {
+      "label": "paymentController",
+      "file_type": "code",
+      "source_file": "src/app.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "src_app_paymentcontroller",
+      "community": 2,
+      "norm_label": "paymentcontroller"
+    },
+    {
       "label": "app",
       "file_type": "code",
       "source_file": "src/app.js",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "src_app_app",
       "community": 2,
       "norm_label": "app"
+    },
+    {
+      "label": "origin()",
+      "file_type": "code",
+      "source_file": "src/app.js",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "src_app_origin",
+      "community": 2,
+      "norm_label": "origin()"
     },
     {
       "label": "database.js",
@@ -560,7 +740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "config_plans",
-      "community": 6,
+      "community": 22,
       "norm_label": "plans.js"
     },
     {
@@ -570,58 +750,138 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "config_plans_plan_definitions",
-      "community": 6,
+      "community": 22,
       "norm_label": "plan_definitions"
     },
     {
       "label": "LEGACY_PLAN_ALIASES",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L67",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "config_plans_legacy_plan_aliases",
-      "community": 6,
+      "community": 22,
       "norm_label": "legacy_plan_aliases"
     },
     {
       "label": "normalizePlan()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L73",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "config_plans_normalizeplan",
-      "community": 6,
+      "community": 22,
       "norm_label": "normalizeplan()"
     },
     {
       "label": "getPlanDefinition()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L77",
+      "source_location": "L199",
       "_origin": "ast",
       "id": "config_plans_getplandefinition",
-      "community": 6,
+      "community": 22,
       "norm_label": "getplandefinition()"
     },
     {
       "label": "getPlanLimits()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L81",
+      "source_location": "L203",
       "_origin": "ast",
       "id": "config_plans_getplanlimits",
-      "community": 6,
+      "community": 22,
       "norm_label": "getplanlimits()"
+    },
+    {
+      "label": "isSubscriptionActive()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L207",
+      "_origin": "ast",
+      "id": "config_plans_issubscriptionactive",
+      "community": 22,
+      "norm_label": "issubscriptionactive()"
+    },
+    {
+      "label": "isLegacyPro()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L214",
+      "_origin": "ast",
+      "id": "config_plans_islegacypro",
+      "community": 22,
+      "norm_label": "islegacypro()"
+    },
+    {
+      "label": "isEventPlanActive()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L218",
+      "_origin": "ast",
+      "id": "config_plans_iseventplanactive",
+      "community": 22,
+      "norm_label": "iseventplanactive()"
+    },
+    {
+      "label": "effectivePlanKey()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L224",
+      "_origin": "ast",
+      "id": "config_plans_effectiveplankey",
+      "community": 22,
+      "norm_label": "effectiveplankey()"
+    },
+    {
+      "label": "getEffectivePlanDefinition()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L230",
+      "_origin": "ast",
+      "id": "config_plans_geteffectiveplandefinition",
+      "community": 22,
+      "norm_label": "geteffectiveplandefinition()"
+    },
+    {
+      "label": "getEffectivePlanLimits()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L234",
+      "_origin": "ast",
+      "id": "config_plans_geteffectiveplanlimits",
+      "community": 22,
+      "norm_label": "geteffectiveplanlimits()"
     },
     {
       "label": "assertPlanFeature()",
       "file_type": "code",
       "source_file": "src/config/plans.js",
-      "source_location": "L85",
+      "source_location": "L238",
       "_origin": "ast",
       "id": "config_plans_assertplanfeature",
-      "community": 6,
+      "community": 22,
       "norm_label": "assertplanfeature()"
+    },
+    {
+      "label": "assertEffectivePlanFeature()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L246",
+      "_origin": "ast",
+      "id": "config_plans_asserteffectiveplanfeature",
+      "community": 22,
+      "norm_label": "asserteffectiveplanfeature()"
+    },
+    {
+      "label": "planExpiresAt()",
+      "file_type": "code",
+      "source_file": "src/config/plans.js",
+      "source_location": "L254",
+      "_origin": "ast",
+      "id": "config_plans_planexpiresat",
+      "community": 22,
+      "norm_label": "planexpiresat()"
     },
     {
       "label": "albumController.js",
@@ -704,14 +964,14 @@
       "norm_label": "env"
     },
     {
-      "label": "{ assertPlanFeature }",
+      "label": "{ assertEffectivePlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/albumController.js",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "controllers_albumcontroller_assertplanfeature",
+      "id": "controllers_albumcontroller_asserteffectiveplanfeature",
       "community": 21,
-      "norm_label": "{ assertplanfeature }"
+      "norm_label": "{ asserteffectiveplanfeature }"
     },
     {
       "label": "asyncHandler",
@@ -770,7 +1030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_assetcontroller",
-      "community": 10,
+      "community": 6,
       "norm_label": "assetcontroller.js"
     },
     {
@@ -780,7 +1040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_assetcontroller_putobjectcommand_s3client",
-      "community": 10,
+      "community": 6,
       "norm_label": "{ putobjectcommand, s3client }"
     },
     {
@@ -790,7 +1050,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_assetcontroller_getsignedurl",
-      "community": 10,
+      "community": 6,
       "norm_label": "{ getsignedurl }"
     },
     {
@@ -800,18 +1060,18 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_assetcontroller_env",
-      "community": 10,
+      "community": 6,
       "norm_label": "env"
     },
     {
-      "label": "{ getPlanLimits, assertPlanFeature }",
+      "label": "{ getPlanLimits, getEffectivePlanLimits, assertEffectivePlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "_origin": "ast",
-      "id": "controllers_assetcontroller_getplanlimits_assertplanfeature",
-      "community": 10,
-      "norm_label": "{ getplanlimits, assertplanfeature }"
+      "id": "controllers_assetcontroller_getplanlimits_geteffectiveplanlimits_asserteffectiveplanfeature",
+      "community": 6,
+      "norm_label": "{ getplanlimits, geteffectiveplanlimits, asserteffectiveplanfeature }"
     },
     {
       "label": "Event",
@@ -820,7 +1080,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_assetcontroller_event",
-      "community": 10,
+      "community": 6,
       "norm_label": "event"
     },
     {
@@ -830,7 +1090,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_assetcontroller_whatsappmediaasset",
-      "community": 10,
+      "community": 6,
       "norm_label": "whatsappmediaasset"
     },
     {
@@ -840,7 +1100,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_assetcontroller_asynchandler",
-      "community": 10,
+      "community": 6,
       "norm_label": "asynchandler"
     },
     {
@@ -850,7 +1110,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_assetcontroller_s3",
-      "community": 10,
+      "community": 6,
       "norm_label": "s3"
     },
     {
@@ -860,7 +1120,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "controllers_assetcontroller_image_types",
-      "community": 10,
+      "community": 6,
       "norm_label": "image_types"
     },
     {
@@ -870,7 +1130,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "controllers_assetcontroller_audio_types",
-      "community": 10,
+      "community": 6,
       "norm_label": "audio_types"
     },
     {
@@ -880,7 +1140,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "controllers_assetcontroller_video_types",
-      "community": 10,
+      "community": 6,
       "norm_label": "video_types"
     },
     {
@@ -890,38 +1150,98 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "controllers_assetcontroller_document_types",
-      "community": 10,
+      "community": 6,
       "norm_label": "document_types"
+    },
+    {
+      "label": "MIME_BY_EXTENSION",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_mime_by_extension",
+      "community": 6,
+      "norm_label": "mime_by_extension"
     },
     {
       "label": "whatsappMediaTypeForContentType()",
       "file_type": "code",
       "source_file": "src/controllers/assetController.js",
-      "source_location": "L19",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "controllers_assetcontroller_whatsappmediatypeforcontenttype",
-      "community": 10,
+      "community": 6,
       "norm_label": "whatsappmediatypeforcontenttype()"
     },
     {
       "label": "assertMediaAllowed()",
       "file_type": "code",
       "source_file": "src/controllers/assetController.js",
-      "source_location": "L27",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "controllers_assetcontroller_assertmediaallowed",
-      "community": 10,
+      "community": 6,
       "norm_label": "assertmediaallowed()"
     },
     {
       "label": "buildPublicUrl()",
       "file_type": "code",
       "source_file": "src/controllers/assetController.js",
-      "source_location": "L70",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "controllers_assetcontroller_buildpublicurl",
-      "community": 10,
+      "community": 6,
       "norm_label": "buildpublicurl()"
+    },
+    {
+      "label": "filenameFromUrl()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_filenamefromurl",
+      "community": 6,
+      "norm_label": "filenamefromurl()"
+    },
+    {
+      "label": "extensionFromFilename()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_extensionfromfilename",
+      "community": 6,
+      "norm_label": "extensionfromfilename()"
+    },
+    {
+      "label": "normalizeContentType()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_normalizecontenttype",
+      "community": 6,
+      "norm_label": "normalizecontenttype()"
+    },
+    {
+      "label": "inspectPreviewKind()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_inspectpreviewkind",
+      "community": 6,
+      "norm_label": "inspectpreviewkind()"
+    },
+    {
+      "label": "fetchUrlMetadata()",
+      "file_type": "code",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L112",
+      "_origin": "ast",
+      "id": "controllers_assetcontroller_fetchurlmetadata",
+      "community": 6,
+      "norm_label": "fetchurlmetadata()"
     },
     {
       "label": "authController.js",
@@ -930,7 +1250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_authcontroller",
-      "community": 5,
+      "community": 21,
       "norm_label": "authcontroller.js"
     },
     {
@@ -940,7 +1260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_authcontroller_crypto",
-      "community": 5,
+      "community": 21,
       "norm_label": "crypto"
     },
     {
@@ -950,7 +1270,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_authcontroller_jwt",
-      "community": 5,
+      "community": 21,
       "norm_label": "jwt"
     },
     {
@@ -960,7 +1280,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_authcontroller_user",
-      "community": 5,
+      "community": 21,
       "norm_label": "user"
     },
     {
@@ -970,7 +1290,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_authcontroller_env",
-      "community": 5,
+      "community": 21,
       "norm_label": "env"
     },
     {
@@ -980,7 +1300,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_authcontroller_emailservice",
-      "community": 5,
+      "community": 21,
       "norm_label": "emailservice"
     },
     {
@@ -990,7 +1310,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_authcontroller_asynchandler",
-      "community": 5,
+      "community": 21,
       "norm_label": "asynchandler"
     },
     {
@@ -1000,7 +1320,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "controllers_authcontroller_signtoken",
-      "community": 5,
+      "community": 21,
       "norm_label": "signtoken()"
     },
     {
@@ -1010,7 +1330,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "controllers_authcontroller_hashresettoken",
-      "community": 5,
+      "community": 21,
       "norm_label": "hashresettoken()"
     },
     {
@@ -1020,7 +1340,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "controllers_authcontroller_logpasswordresetemailerror",
-      "community": 5,
+      "community": 21,
       "norm_label": "logpasswordresetemailerror()"
     },
     {
@@ -1030,7 +1350,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_checkincontroller",
-      "community": 15,
+      "community": 9,
       "norm_label": "checkincontroller.js"
     },
     {
@@ -1040,7 +1360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_checkincontroller_crypto",
-      "community": 15,
+      "community": 9,
       "norm_label": "crypto"
     },
     {
@@ -1050,7 +1370,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_checkincontroller_event",
-      "community": 15,
+      "community": 9,
       "norm_label": "event"
     },
     {
@@ -1060,7 +1380,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_checkincontroller_guest",
-      "community": 15,
+      "community": 9,
       "norm_label": "guest"
     },
     {
@@ -1070,7 +1390,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_checkincontroller_staffaccesstoken",
-      "community": 15,
+      "community": 9,
       "norm_label": "staffaccesstoken"
     },
     {
@@ -1080,18 +1400,18 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_checkincontroller_env",
-      "community": 15,
+      "community": 9,
       "norm_label": "env"
     },
     {
-      "label": "{ assertPlanFeature }",
+      "label": "{ assertEffectivePlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/checkInController.js",
       "source_location": "L6",
       "_origin": "ast",
-      "id": "controllers_checkincontroller_assertplanfeature",
-      "community": 15,
-      "norm_label": "{ assertplanfeature }"
+      "id": "controllers_checkincontroller_asserteffectiveplanfeature",
+      "community": 9,
+      "norm_label": "{ asserteffectiveplanfeature }"
     },
     {
       "label": "asyncHandler",
@@ -1100,7 +1420,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_checkincontroller_asynchandler",
-      "community": 15,
+      "community": 9,
       "norm_label": "asynchandler"
     },
     {
@@ -1110,7 +1430,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_checkincontroller_staffguest",
-      "community": 15,
+      "community": 9,
       "norm_label": "staffguest()"
     },
     {
@@ -1120,7 +1440,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "controllers_checkincontroller_getactivetoken",
-      "community": 15,
+      "community": 9,
       "norm_label": "getactivetoken()"
     },
     {
@@ -1130,7 +1450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_contactcontroller",
-      "community": 9,
+      "community": 21,
       "norm_label": "contactcontroller.js"
     },
     {
@@ -1140,7 +1460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_contactcontroller_asynchandler",
-      "community": 9,
+      "community": 21,
       "norm_label": "asynchandler"
     },
     {
@@ -1150,7 +1470,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_contactcontroller_emailservice",
-      "community": 9,
+      "community": 21,
       "norm_label": "emailservice"
     },
     {
@@ -1224,104 +1544,454 @@
       "norm_label": "asynchandler"
     },
     {
+      "label": "eventAccessController.js",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller",
+      "community": 10,
+      "norm_label": "eventaccesscontroller.js"
+    },
+    {
+      "label": "AlbumAsset",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_albumasset",
+      "community": 10,
+      "norm_label": "albumasset"
+    },
+    {
+      "label": "Event",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_event",
+      "community": 10,
+      "norm_label": "event"
+    },
+    {
+      "label": "EventAccessToken",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_eventaccesstoken",
+      "community": 10,
+      "norm_label": "eventaccesstoken"
+    },
+    {
+      "label": "EventTable",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_eventtable",
+      "community": 10,
+      "norm_label": "eventtable"
+    },
+    {
+      "label": "Guest",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_guest",
+      "community": 10,
+      "norm_label": "guest"
+    },
+    {
+      "label": "Rsvp",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_rsvp",
+      "community": 10,
+      "norm_label": "rsvp"
+    },
+    {
+      "label": "asyncHandler",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_asynchandler",
+      "community": 10,
+      "norm_label": "asynchandler"
+    },
+    {
+      "label": "ROLE_PERMISSIONS",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_role_permissions",
+      "community": 10,
+      "norm_label": "role_permissions"
+    },
+    {
+      "label": "hasPermission()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_haspermission",
+      "community": 10,
+      "norm_label": "haspermission()"
+    },
+    {
+      "label": "getActiveAccess()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_getactiveaccess",
+      "community": 10,
+      "norm_label": "getactiveaccess()"
+    },
+    {
+      "label": "publicGuest()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "controllers_eventaccesscontroller_publicguest",
+      "community": 10,
+      "norm_label": "publicguest()"
+    },
+    {
       "label": "eventController.js",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_eventcontroller",
-      "community": 8,
+      "community": 5,
       "norm_label": "eventcontroller.js"
+    },
+    {
+      "label": "crypto",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_crypto",
+      "community": 5,
+      "norm_label": "crypto"
+    },
+    {
+      "label": "slugify",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_slugify",
+      "community": 5,
+      "norm_label": "slugify"
     },
     {
       "label": "Event",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L1",
+      "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_eventcontroller_event",
-      "community": 8,
+      "community": 5,
       "norm_label": "event"
     },
     {
       "label": "Guest",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L2",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_eventcontroller_guest",
-      "community": 8,
+      "community": 5,
       "norm_label": "guest"
     },
     {
       "label": "Invitation",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L3",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_eventcontroller_invitation",
-      "community": 8,
+      "community": 5,
       "norm_label": "invitation"
+    },
+    {
+      "label": "EventAccessToken",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_eventaccesstoken",
+      "community": 5,
+      "norm_label": "eventaccesstoken"
     },
     {
       "label": "asyncHandler",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L4",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_eventcontroller_asynchandler",
-      "community": 8,
+      "community": 5,
       "norm_label": "asynchandler"
     },
     {
       "label": "emailService",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L5",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "controllers_eventcontroller_emailservice",
-      "community": 8,
+      "community": 5,
       "norm_label": "emailservice"
     },
     {
       "label": "env",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L6",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_eventcontroller_env",
-      "community": 8,
+      "community": 5,
       "norm_label": "env"
+    },
+    {
+      "label": "buildUniquePortalSlug()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_builduniqueportalslug",
+      "community": 5,
+      "norm_label": "builduniqueportalslug()"
+    },
+    {
+      "label": "normalizeExternalPortalSettings()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_normalizeexternalportalsettings",
+      "community": 5,
+      "norm_label": "normalizeexternalportalsettings()"
+    },
+    {
+      "label": "ensureExternalPortalPayload()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_ensureexternalportalpayload",
+      "community": 5,
+      "norm_label": "ensureexternalportalpayload()"
+    },
+    {
+      "label": "publicGuest()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_publicguest",
+      "community": 5,
+      "norm_label": "publicguest()"
+    },
+    {
+      "label": "publicExternalEvent()",
+      "file_type": "code",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "controllers_eventcontroller_publicexternalevent",
+      "community": 5,
+      "norm_label": "publicexternalevent()"
     },
     {
       "label": "primaryInvitationForEvent()",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L38",
+      "source_location": "L243",
       "_origin": "ast",
       "id": "controllers_eventcontroller_primaryinvitationforevent",
-      "community": 8,
+      "community": 5,
       "norm_label": "primaryinvitationforevent()"
     },
     {
       "label": "personalizedPublicUrl()",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L44",
+      "source_location": "L249",
       "_origin": "ast",
       "id": "controllers_eventcontroller_personalizedpublicurl",
-      "community": 8,
+      "community": 5,
       "norm_label": "personalizedpublicurl()"
     },
     {
       "label": "markEmailResult()",
       "file_type": "code",
       "source_file": "src/controllers/eventController.js",
-      "source_location": "L49",
+      "source_location": "L254",
       "_origin": "ast",
       "id": "controllers_eventcontroller_markemailresult",
-      "community": 8,
+      "community": 5,
       "norm_label": "markemailresult()"
+    },
+    {
+      "label": "externalController.js",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller",
+      "community": 24,
+      "norm_label": "externalcontroller.js"
+    },
+    {
+      "label": "Event",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_event",
+      "community": 24,
+      "norm_label": "event"
+    },
+    {
+      "label": "Guest",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_guest",
+      "community": 24,
+      "norm_label": "guest"
+    },
+    {
+      "label": "Rsvp",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_rsvp",
+      "community": 24,
+      "norm_label": "rsvp"
+    },
+    {
+      "label": "SongRequest",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_songrequest",
+      "community": 24,
+      "norm_label": "songrequest"
+    },
+    {
+      "label": "asyncHandler",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_asynchandler",
+      "community": 24,
+      "norm_label": "asynchandler"
+    },
+    {
+      "label": "albumController",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_albumcontroller",
+      "community": 24,
+      "norm_label": "albumcontroller"
+    },
+    {
+      "label": "env",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_env",
+      "community": 24,
+      "norm_label": "env"
+    },
+    {
+      "label": "normalizeEmail()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_normalizeemail",
+      "community": 24,
+      "norm_label": "normalizeemail()"
+    },
+    {
+      "label": "normalizePhone()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_normalizephone",
+      "community": 24,
+      "norm_label": "normalizephone()"
+    },
+    {
+      "label": "publicGuest()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_publicguest",
+      "community": 24,
+      "norm_label": "publicguest()"
+    },
+    {
+      "label": "safeContent()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_safecontent",
+      "community": 24,
+      "norm_label": "safecontent()"
+    },
+    {
+      "label": "publicEvent()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L59",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_publicevent",
+      "community": 24,
+      "norm_label": "publicevent()"
+    },
+    {
+      "label": "getPublicEvent()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_getpublicevent",
+      "community": 24,
+      "norm_label": "getpublicevent()"
+    },
+    {
+      "label": "assetPayload()",
+      "file_type": "code",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "controllers_externalcontroller_assetpayload",
+      "community": 24,
+      "norm_label": "assetpayload()"
     },
     {
       "label": "guestController.js",
@@ -1404,14 +2074,14 @@
       "norm_label": "whatsappmessagelog"
     },
     {
-      "label": "{ getPlanLimits, assertPlanFeature }",
+      "label": "{ getEffectivePlanLimits, assertEffectivePlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "controllers_guestcontroller_getplanlimits_assertplanfeature",
+      "id": "controllers_guestcontroller_geteffectiveplanlimits_asserteffectiveplanfeature",
       "community": 7,
-      "norm_label": "{ getplanlimits, assertplanfeature }"
+      "norm_label": "{ geteffectiveplanlimits, asserteffectiveplanfeature }"
     },
     {
       "label": "asyncHandler",
@@ -1487,7 +2157,7 @@
       "label": "companionRows()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L47",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "controllers_guestcontroller_companionrows",
       "community": 7,
@@ -1497,7 +2167,7 @@
       "label": "normalizeGuestRow()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L55",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "controllers_guestcontroller_normalizeguestrow",
       "community": 7,
@@ -1507,7 +2177,7 @@
       "label": "buildDuplicateError()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L72",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicateerror",
       "community": 7,
@@ -1517,7 +2187,7 @@
       "label": "buildDuplicateKeyError()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L83",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicatekeyerror",
       "community": 7,
@@ -1527,7 +2197,7 @@
       "label": "buildDuplicateQuery()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L90",
+      "source_location": "L95",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildduplicatequery",
       "community": 7,
@@ -1537,7 +2207,7 @@
       "label": "escapeCsv()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L101",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "controllers_guestcontroller_escapecsv",
       "community": 7,
@@ -1547,7 +2217,7 @@
       "label": "csvResponse()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L106",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "controllers_guestcontroller_csvresponse",
       "community": 7,
@@ -1557,7 +2227,7 @@
       "label": "buildGuestFilters()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L112",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "controllers_guestcontroller_buildguestfilters",
       "community": 7,
@@ -1567,17 +2237,27 @@
       "label": "personalizedPublicUrl()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L130",
+      "source_location": "L135",
       "_origin": "ast",
       "id": "controllers_guestcontroller_personalizedpublicurl",
       "community": 7,
       "norm_label": "personalizedpublicurl()"
     },
     {
+      "label": "assertWhatsAppProviderReady()",
+      "file_type": "code",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L140",
+      "_origin": "ast",
+      "id": "controllers_guestcontroller_assertwhatsappproviderready",
+      "community": 7,
+      "norm_label": "assertwhatsappproviderready()"
+    },
+    {
       "label": "findDuplicateGuest()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L135",
+      "source_location": "L151",
       "_origin": "ast",
       "id": "controllers_guestcontroller_findduplicateguest",
       "community": 7,
@@ -1587,7 +2267,7 @@
       "label": "primaryInvitationForEvent()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L259",
+      "source_location": "L279",
       "_origin": "ast",
       "id": "controllers_guestcontroller_primaryinvitationforevent",
       "community": 7,
@@ -1597,7 +2277,7 @@
       "label": "applyWhatsAppGuestStatus()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L265",
+      "source_location": "L285",
       "_origin": "ast",
       "id": "controllers_guestcontroller_applywhatsappgueststatus",
       "community": 7,
@@ -1607,7 +2287,7 @@
       "label": "applyEmailGuestStatus()",
       "file_type": "code",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L276",
+      "source_location": "L296",
       "_origin": "ast",
       "id": "controllers_guestcontroller_applyemailgueststatus",
       "community": 7,
@@ -1620,7 +2300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_invitationcontroller",
-      "community": 6,
+      "community": 23,
       "norm_label": "invitationcontroller.js"
     },
     {
@@ -1630,7 +2310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_slugify",
-      "community": 6,
+      "community": 23,
       "norm_label": "slugify"
     },
     {
@@ -1640,7 +2320,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_invitation",
-      "community": 6,
+      "community": 23,
       "norm_label": "invitation"
     },
     {
@@ -1650,7 +2330,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_event",
-      "community": 6,
+      "community": 23,
       "norm_label": "event"
     },
     {
@@ -1660,7 +2340,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_guest",
-      "community": 6,
+      "community": 23,
       "norm_label": "guest"
     },
     {
@@ -1670,18 +2350,18 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_template",
-      "community": 6,
+      "community": 23,
       "norm_label": "template"
     },
     {
-      "label": "{ getPlanLimits }",
+      "label": "{ getEffectivePlanLimits }",
       "file_type": "code",
       "source_file": "src/controllers/invitationController.js",
       "source_location": "L6",
       "_origin": "ast",
-      "id": "controllers_invitationcontroller_getplanlimits",
-      "community": 6,
-      "norm_label": "{ getplanlimits }"
+      "id": "controllers_invitationcontroller_geteffectiveplanlimits",
+      "community": 23,
+      "norm_label": "{ geteffectiveplanlimits }"
     },
     {
       "label": "asyncHandler",
@@ -1690,7 +2370,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_asynchandler",
-      "community": 6,
+      "community": 23,
       "norm_label": "asynchandler"
     },
     {
@@ -1700,7 +2380,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_env",
-      "community": 6,
+      "community": 23,
       "norm_label": "env"
     },
     {
@@ -1710,7 +2390,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_emailservice",
-      "community": 6,
+      "community": 23,
       "norm_label": "emailservice"
     },
     {
@@ -1720,7 +2400,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_builduniqueslug",
-      "community": 6,
+      "community": 23,
       "norm_label": "builduniqueslug()"
     },
     {
@@ -1730,7 +2410,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_publicevent",
-      "community": 6,
+      "community": 23,
       "norm_label": "publicevent()"
     },
     {
@@ -1740,7 +2420,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_publictemplate",
-      "community": 6,
+      "community": 23,
       "norm_label": "publictemplate()"
     },
     {
@@ -1750,7 +2430,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_publicinvitation",
-      "community": 6,
+      "community": 23,
       "norm_label": "publicinvitation()"
     },
     {
@@ -1760,7 +2440,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_publicguest",
-      "community": 6,
+      "community": 23,
       "norm_label": "publicguest()"
     },
     {
@@ -1770,7 +2450,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "controllers_invitationcontroller_assertinvitationplanlimits",
-      "community": 6,
+      "community": 22,
       "norm_label": "assertinvitationplanlimits()"
     },
     {
@@ -1780,7 +2460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_paymentcontroller",
-      "community": 6,
+      "community": 22,
       "norm_label": "paymentcontroller.js"
     },
     {
@@ -1790,68 +2470,178 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_paymentcontroller_stripe",
-      "community": 6,
+      "community": 22,
       "norm_label": "stripe"
+    },
+    {
+      "label": "Event",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_event",
+      "community": 22,
+      "norm_label": "event"
     },
     {
       "label": "Invitation",
       "file_type": "code",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L2",
+      "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_paymentcontroller_invitation",
-      "community": 6,
+      "community": 22,
       "norm_label": "invitation"
     },
     {
       "label": "Payment",
       "file_type": "code",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L3",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "controllers_paymentcontroller_payment",
-      "community": 6,
+      "community": 22,
       "norm_label": "payment"
     },
     {
       "label": "User",
       "file_type": "code",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L4",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_paymentcontroller_user",
-      "community": 6,
+      "community": 22,
       "norm_label": "user"
     },
     {
       "label": "env",
       "file_type": "code",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L5",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "controllers_paymentcontroller_env",
-      "community": 6,
+      "community": 22,
       "norm_label": "env"
     },
     {
-      "label": "{ PLAN_DEFINITIONS, normalizePlan, getPlanDefinition }",
+      "label": "{\n  PLAN_DEFINITIONS,\n  normalizePlan,\n  getPlanDefinition,\n  getEffectivePlanDefinition,\n  isSubscriptionActive,\n  isEventPlanActive,\n  planExpiresAt\n}",
       "file_type": "code",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
-      "id": "controllers_paymentcontroller_plan_definitions_normalizeplan_getplandefinition",
-      "community": 6,
-      "norm_label": "{ plan_definitions, normalizeplan, getplandefinition }"
+      "id": "controllers_paymentcontroller_plan_definitions_normalizeplan_getplandefinition_geteffectiveplandefinition_issubscriptionactive_iseventplanactive_planexpiresat",
+      "community": 22,
+      "norm_label": "{\n  plan_definitions,\n  normalizeplan,\n  getplandefinition,\n  geteffectiveplandefinition,\n  issubscriptionactive,\n  iseventplanactive,\n  planexpiresat\n}"
     },
     {
       "label": "asyncHandler",
       "file_type": "code",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L7",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "controllers_paymentcontroller_asynchandler",
-      "community": 6,
+      "community": 22,
       "norm_label": "asynchandler"
+    },
+    {
+      "label": "CANONICAL_PLAN_KEYS",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_canonical_plan_keys",
+      "community": 22,
+      "norm_label": "canonical_plan_keys"
+    },
+    {
+      "label": "canonicalPlans()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_canonicalplans",
+      "community": 22,
+      "norm_label": "canonicalplans()"
+    },
+    {
+      "label": "groupedPlans()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_groupedplans",
+      "community": 22,
+      "norm_label": "groupedplans()"
+    },
+    {
+      "label": "priceIdForPlan()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_priceidforplan",
+      "community": 22,
+      "norm_label": "priceidforplan()"
+    },
+    {
+      "label": "lineItemForPlan()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_lineitemforplan",
+      "community": 22,
+      "norm_label": "lineitemforplan()"
+    },
+    {
+      "label": "resolveRequestedPlan()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L62",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_resolverequestedplan",
+      "community": 22,
+      "norm_label": "resolverequestedplan()"
+    },
+    {
+      "label": "eventForCheckout()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L73",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_eventforcheckout",
+      "community": 22,
+      "norm_label": "eventforcheckout()"
+    },
+    {
+      "label": "activateOneTimePayment()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L95",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_activateonetimepayment",
+      "community": 22,
+      "norm_label": "activateonetimepayment()"
+    },
+    {
+      "label": "applySubscriptionToUser()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L118",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_applysubscriptiontouser",
+      "community": 22,
+      "norm_label": "applysubscriptiontouser()"
+    },
+    {
+      "label": "applySubscriptionObject()",
+      "file_type": "code",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L128",
+      "_origin": "ast",
+      "id": "controllers_paymentcontroller_applysubscriptionobject",
+      "community": 22,
+      "norm_label": "applysubscriptionobject()"
     },
     {
       "label": "rsvpController.js",
@@ -1924,14 +2714,14 @@
       "norm_label": "emailservice"
     },
     {
-      "label": "{ assertPlanFeature }",
+      "label": "{ assertEffectivePlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "controllers_rsvpcontroller_assertplanfeature",
+      "id": "controllers_rsvpcontroller_asserteffectiveplanfeature",
       "community": 4,
-      "norm_label": "{ assertplanfeature }"
+      "norm_label": "{ asserteffectiveplanfeature }"
     },
     {
       "label": "asyncHandler",
@@ -2054,10 +2844,20 @@
       "norm_label": "findexistingrsvp()"
     },
     {
-      "label": "updateGuestStatus()",
+      "label": "findExistingEventRsvp()",
       "file_type": "code",
       "source_file": "src/controllers/rsvpController.js",
       "source_location": "L154",
+      "_origin": "ast",
+      "id": "controllers_rsvpcontroller_findexistingeventrsvp",
+      "community": 4,
+      "norm_label": "findexistingeventrsvp()"
+    },
+    {
+      "label": "updateGuestStatus()",
+      "file_type": "code",
+      "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L165",
       "_origin": "ast",
       "id": "controllers_rsvpcontroller_updategueststatus",
       "community": 4,
@@ -2067,11 +2867,71 @@
       "label": "saveRsvp()",
       "file_type": "code",
       "source_file": "src/controllers/rsvpController.js",
-      "source_location": "L162",
+      "source_location": "L173",
       "_origin": "ast",
       "id": "controllers_rsvpcontroller_saversvp",
       "community": 4,
       "norm_label": "saversvp()"
+    },
+    {
+      "label": "saveEventRsvp()",
+      "file_type": "code",
+      "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L219",
+      "_origin": "ast",
+      "id": "controllers_rsvpcontroller_saveeventrsvp",
+      "community": 4,
+      "norm_label": "saveeventrsvp()"
+    },
+    {
+      "label": "songRequestController.js",
+      "file_type": "code",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_songrequestcontroller",
+      "community": 24,
+      "norm_label": "songrequestcontroller.js"
+    },
+    {
+      "label": "Event",
+      "file_type": "code",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "controllers_songrequestcontroller_event",
+      "community": 24,
+      "norm_label": "event"
+    },
+    {
+      "label": "SongRequest",
+      "file_type": "code",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "controllers_songrequestcontroller_songrequest",
+      "community": 24,
+      "norm_label": "songrequest"
+    },
+    {
+      "label": "asyncHandler",
+      "file_type": "code",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "controllers_songrequestcontroller_asynchandler",
+      "community": 24,
+      "norm_label": "asynchandler"
+    },
+    {
+      "label": "findOwnedEvent()",
+      "file_type": "code",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "controllers_songrequestcontroller_findownedevent",
+      "community": 24,
+      "norm_label": "findownedevent()"
     },
     {
       "label": "tableController.js",
@@ -2080,7 +2940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_tablecontroller",
-      "community": 9,
+      "community": 22,
       "norm_label": "tablecontroller.js"
     },
     {
@@ -2090,7 +2950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "controllers_tablecontroller_event",
-      "community": 9,
+      "community": 22,
       "norm_label": "event"
     },
     {
@@ -2100,7 +2960,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "controllers_tablecontroller_eventtable",
-      "community": 9,
+      "community": 22,
       "norm_label": "eventtable"
     },
     {
@@ -2110,18 +2970,18 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "controllers_tablecontroller_guest",
-      "community": 9,
+      "community": 22,
       "norm_label": "guest"
     },
     {
-      "label": "{ assertPlanFeature }",
+      "label": "{ assertEffectivePlanFeature }",
       "file_type": "code",
       "source_file": "src/controllers/tableController.js",
       "source_location": "L4",
       "_origin": "ast",
-      "id": "controllers_tablecontroller_assertplanfeature",
-      "community": 9,
-      "norm_label": "{ assertplanfeature }"
+      "id": "controllers_tablecontroller_asserteffectiveplanfeature",
+      "community": 22,
+      "norm_label": "{ asserteffectiveplanfeature }"
     },
     {
       "label": "asyncHandler",
@@ -2130,7 +2990,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "controllers_tablecontroller_asynchandler",
-      "community": 9,
+      "community": 22,
       "norm_label": "asynchandler"
     },
     {
@@ -2140,7 +3000,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "controllers_tablecontroller_seatcount",
-      "community": 9,
+      "community": 22,
       "norm_label": "seatcount()"
     },
     {
@@ -2150,7 +3010,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "controllers_tablecontroller_asserteventowner",
-      "community": 9,
+      "community": 22,
       "norm_label": "asserteventowner()"
     },
     {
@@ -2160,7 +3020,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "controllers_tablecontroller_tablesummary",
-      "community": 9,
+      "community": 22,
       "norm_label": "tablesummary()"
     },
     {
@@ -2370,7 +3230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_albumasset",
-      "community": 21,
+      "community": 10,
       "norm_label": "albumasset.js"
     },
     {
@@ -2380,7 +3240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_albumasset_mongoose",
-      "community": 21,
+      "community": 10,
       "norm_label": "mongoose"
     },
     {
@@ -2390,7 +3250,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_albumasset_albumassetschema",
-      "community": 21,
+      "community": 10,
       "norm_label": "albumassetschema"
     },
     {
@@ -2400,7 +3260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_event",
-      "community": 8,
+      "community": 24,
       "norm_label": "event.js"
     },
     {
@@ -2410,7 +3270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_event_mongoose",
-      "community": 8,
+      "community": 24,
       "norm_label": "mongoose"
     },
     {
@@ -2420,8 +3280,38 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_event_eventschema",
-      "community": 8,
+      "community": 24,
       "norm_label": "eventschema"
+    },
+    {
+      "label": "EventAccessToken.js",
+      "file_type": "code",
+      "source_file": "src/models/EventAccessToken.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "models_eventaccesstoken",
+      "community": 10,
+      "norm_label": "eventaccesstoken.js"
+    },
+    {
+      "label": "mongoose",
+      "file_type": "code",
+      "source_file": "src/models/EventAccessToken.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "models_eventaccesstoken_mongoose",
+      "community": 10,
+      "norm_label": "mongoose"
+    },
+    {
+      "label": "eventAccessTokenSchema",
+      "file_type": "code",
+      "source_file": "src/models/EventAccessToken.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "models_eventaccesstoken_eventaccesstokenschema",
+      "community": 10,
+      "norm_label": "eventaccesstokenschema"
     },
     {
       "label": "EventTable.js",
@@ -2430,7 +3320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_eventtable",
-      "community": 9,
+      "community": 10,
       "norm_label": "eventtable.js"
     },
     {
@@ -2440,7 +3330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_eventtable_mongoose",
-      "community": 9,
+      "community": 10,
       "norm_label": "mongoose"
     },
     {
@@ -2450,7 +3340,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_eventtable_eventtableschema",
-      "community": 9,
+      "community": 10,
       "norm_label": "eventtableschema"
     },
     {
@@ -2530,7 +3420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_payment",
-      "community": 6,
+      "community": 22,
       "norm_label": "payment.js"
     },
     {
@@ -2540,7 +3430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_payment_mongoose",
-      "community": 6,
+      "community": 22,
       "norm_label": "mongoose"
     },
     {
@@ -2550,7 +3440,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_payment_paymentschema",
-      "community": 6,
+      "community": 22,
       "norm_label": "paymentschema"
     },
     {
@@ -2614,13 +3504,43 @@
       "norm_label": "rsvpactivityschema"
     },
     {
+      "label": "SongRequest.js",
+      "file_type": "code",
+      "source_file": "src/models/SongRequest.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "models_songrequest",
+      "community": 24,
+      "norm_label": "songrequest.js"
+    },
+    {
+      "label": "mongoose",
+      "file_type": "code",
+      "source_file": "src/models/SongRequest.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "models_songrequest_mongoose",
+      "community": 24,
+      "norm_label": "mongoose"
+    },
+    {
+      "label": "songRequestSchema",
+      "file_type": "code",
+      "source_file": "src/models/SongRequest.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "models_songrequest_songrequestschema",
+      "community": 24,
+      "norm_label": "songrequestschema"
+    },
+    {
       "label": "StaffAccessToken.js",
       "file_type": "code",
       "source_file": "src/models/StaffAccessToken.js",
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_staffaccesstoken",
-      "community": 15,
+      "community": 9,
       "norm_label": "staffaccesstoken.js"
     },
     {
@@ -2630,7 +3550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_staffaccesstoken_mongoose",
-      "community": 15,
+      "community": 9,
       "norm_label": "mongoose"
     },
     {
@@ -2640,7 +3560,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_staffaccesstoken_staffaccesstokenschema",
-      "community": 15,
+      "community": 9,
       "norm_label": "staffaccesstokenschema"
     },
     {
@@ -2680,7 +3600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_user",
-      "community": 5,
+      "community": 21,
       "norm_label": "user.js"
     },
     {
@@ -2690,7 +3610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_user_mongoose",
-      "community": 5,
+      "community": 21,
       "norm_label": "mongoose"
     },
     {
@@ -2700,7 +3620,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "models_user_bcrypt",
-      "community": 5,
+      "community": 21,
       "norm_label": "bcrypt"
     },
     {
@@ -2710,7 +3630,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "models_user_userschema",
-      "community": 5,
+      "community": 21,
       "norm_label": "userschema"
     },
     {
@@ -2720,7 +3640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_whatsappmediaasset",
-      "community": 10,
+      "community": 6,
       "norm_label": "whatsappmediaasset.js"
     },
     {
@@ -2730,7 +3650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "models_whatsappmediaasset_mongoose",
-      "community": 10,
+      "community": 6,
       "norm_label": "mongoose"
     },
     {
@@ -2740,7 +3660,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "models_whatsappmediaasset_whatsappmediaassetschema",
-      "community": 10,
+      "community": 6,
       "norm_label": "whatsappmediaassetschema"
     },
     {
@@ -2854,10 +3774,20 @@
       "norm_label": "uploadurlbody"
     },
     {
+      "label": "inspectUrlBody",
+      "file_type": "code",
+      "source_file": "src/routes/assetRoutes.js",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "routes_assetroutes_inspecturlbody",
+      "community": 16,
+      "norm_label": "inspecturlbody"
+    },
+    {
       "label": "whatsappMediaBody",
       "file_type": "code",
       "source_file": "src/routes/assetRoutes.js",
-      "source_location": "L16",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "routes_assetroutes_whatsappmediabody",
       "community": 16,
@@ -2870,7 +3800,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_authroutes",
-      "community": 22,
+      "community": 17,
       "norm_label": "authroutes.js"
     },
     {
@@ -2880,7 +3810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_authroutes_express",
-      "community": 22,
+      "community": 17,
       "norm_label": "express"
     },
     {
@@ -2890,7 +3820,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "routes_authroutes_controller",
-      "community": 22,
+      "community": 17,
       "norm_label": "controller"
     },
     {
@@ -2900,7 +3830,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "routes_authroutes_protect",
-      "community": 22,
+      "community": 17,
       "norm_label": "{ protect }"
     },
     {
@@ -2910,7 +3840,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "routes_authroutes_validate_z",
-      "community": 22,
+      "community": 17,
       "norm_label": "{ validate, z }"
     },
     {
@@ -2920,7 +3850,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "routes_authroutes_router",
-      "community": 22,
+      "community": 17,
       "norm_label": "router"
     },
     {
@@ -2980,7 +3910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_contactroutes",
-      "community": 17,
+      "community": 27,
       "norm_label": "contactroutes.js"
     },
     {
@@ -2990,7 +3920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "routes_contactroutes_express",
-      "community": 17,
+      "community": 27,
       "norm_label": "express"
     },
     {
@@ -3000,7 +3930,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "routes_contactroutes_controller",
-      "community": 17,
+      "community": 27,
       "norm_label": "controller"
     },
     {
@@ -3010,7 +3940,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "routes_contactroutes_validate_z",
-      "community": 17,
+      "community": 27,
       "norm_label": "{ validate, z }"
     },
     {
@@ -3020,7 +3950,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "routes_contactroutes_router",
-      "community": 17,
+      "community": 27,
       "norm_label": "router"
     },
     {
@@ -3030,7 +3960,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "routes_contactroutes_contactbody",
-      "community": 17,
+      "community": 27,
       "norm_label": "contactbody"
     },
     {
@@ -3084,6 +4014,56 @@
       "norm_label": "router"
     },
     {
+      "label": "eventAccessRoutes.js",
+      "file_type": "code",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "routes_eventaccessroutes",
+      "community": 17,
+      "norm_label": "eventaccessroutes.js"
+    },
+    {
+      "label": "express",
+      "file_type": "code",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "routes_eventaccessroutes_express",
+      "community": 17,
+      "norm_label": "express"
+    },
+    {
+      "label": "controller",
+      "file_type": "code",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "routes_eventaccessroutes_controller",
+      "community": 17,
+      "norm_label": "controller"
+    },
+    {
+      "label": "{ validate, z }",
+      "file_type": "code",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "routes_eventaccessroutes_validate_z",
+      "community": 17,
+      "norm_label": "{ validate, z }"
+    },
+    {
+      "label": "router",
+      "file_type": "code",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "routes_eventaccessroutes_router",
+      "community": 17,
+      "norm_label": "router"
+    },
+    {
       "label": "eventRoutes.js",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
@@ -3104,10 +4084,20 @@
       "norm_label": "express"
     },
     {
-      "label": "controller",
+      "label": "multer",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
       "source_location": "L2",
+      "_origin": "ast",
+      "id": "routes_eventroutes_multer",
+      "community": 15,
+      "norm_label": "multer"
+    },
+    {
+      "label": "controller",
+      "file_type": "code",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L3",
       "_origin": "ast",
       "id": "routes_eventroutes_controller",
       "community": 15,
@@ -3117,7 +4107,7 @@
       "label": "albumController",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L3",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "routes_eventroutes_albumcontroller",
       "community": 15,
@@ -3127,7 +4117,7 @@
       "label": "checkInController",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L4",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "routes_eventroutes_checkincontroller",
       "community": 15,
@@ -3137,17 +4127,27 @@
       "label": "tableController",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L5",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "routes_eventroutes_tablecontroller",
       "community": 15,
       "norm_label": "tablecontroller"
     },
     {
+      "label": "songRequestController",
+      "file_type": "code",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "routes_eventroutes_songrequestcontroller",
+      "community": 15,
+      "norm_label": "songrequestcontroller"
+    },
+    {
       "label": "{ protect }",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L6",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "routes_eventroutes_protect",
       "community": 15,
@@ -3157,7 +4157,7 @@
       "label": "{ validate, z }",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L7",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "routes_eventroutes_validate_z",
       "community": 15,
@@ -3167,17 +4167,27 @@
       "label": "router",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L9",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "routes_eventroutes_router",
       "community": 15,
       "norm_label": "router"
     },
     {
+      "label": "upload",
+      "file_type": "code",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "routes_eventroutes_upload",
+      "community": 15,
+      "norm_label": "upload"
+    },
+    {
       "label": "messageTypeBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L10",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "routes_eventroutes_messagetypebody",
       "community": 15,
@@ -3187,7 +4197,7 @@
       "label": "eventBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L15",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "routes_eventroutes_eventbody",
       "community": 15,
@@ -3197,7 +4207,7 @@
       "label": "eventUpdateBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L24",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "routes_eventroutes_eventupdatebody",
       "community": 15,
@@ -3207,7 +4217,7 @@
       "label": "checkInLinkBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L25",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "routes_eventroutes_checkinlinkbody",
       "community": 15,
@@ -3217,7 +4227,7 @@
       "label": "tableBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L29",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "routes_eventroutes_tablebody",
       "community": 15,
@@ -3227,7 +4237,7 @@
       "label": "tableUpdateBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L35",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "routes_eventroutes_tableupdatebody",
       "community": 15,
@@ -3237,11 +4247,141 @@
       "label": "albumStatusBody",
       "file_type": "code",
       "source_file": "src/routes/eventRoutes.js",
-      "source_location": "L36",
+      "source_location": "L104",
       "_origin": "ast",
       "id": "routes_eventroutes_albumstatusbody",
       "community": 15,
       "norm_label": "albumstatusbody"
+    },
+    {
+      "label": "songRequestStatusBody",
+      "file_type": "code",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L105",
+      "_origin": "ast",
+      "id": "routes_eventroutes_songrequeststatusbody",
+      "community": 15,
+      "norm_label": "songrequeststatusbody"
+    },
+    {
+      "label": "publicEmailBody",
+      "file_type": "code",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L106",
+      "_origin": "ast",
+      "id": "routes_eventroutes_publicemailbody",
+      "community": 15,
+      "norm_label": "publicemailbody"
+    },
+    {
+      "label": "accessLinkBody",
+      "file_type": "code",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L107",
+      "_origin": "ast",
+      "id": "routes_eventroutes_accesslinkbody",
+      "community": 15,
+      "norm_label": "accesslinkbody"
+    },
+    {
+      "label": "externalRoutes.js",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "routes_externalroutes",
+      "community": 26,
+      "norm_label": "externalroutes.js"
+    },
+    {
+      "label": "express",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "routes_externalroutes_express",
+      "community": 26,
+      "norm_label": "express"
+    },
+    {
+      "label": "multer",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "routes_externalroutes_multer",
+      "community": 26,
+      "norm_label": "multer"
+    },
+    {
+      "label": "controller",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "routes_externalroutes_controller",
+      "community": 26,
+      "norm_label": "controller"
+    },
+    {
+      "label": "{ validate, z }",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "routes_externalroutes_validate_z",
+      "community": 26,
+      "norm_label": "{ validate, z }"
+    },
+    {
+      "label": "router",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "routes_externalroutes_router",
+      "community": 26,
+      "norm_label": "router"
+    },
+    {
+      "label": "upload",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "routes_externalroutes_upload",
+      "community": 26,
+      "norm_label": "upload"
+    },
+    {
+      "label": "identifyBody",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "routes_externalroutes_identifybody",
+      "community": 26,
+      "norm_label": "identifybody"
+    },
+    {
+      "label": "rsvpBody",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "routes_externalroutes_rsvpbody",
+      "community": 26,
+      "norm_label": "rsvpbody"
+    },
+    {
+      "label": "songBody",
+      "file_type": "code",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "routes_externalroutes_songbody",
+      "community": 26,
+      "norm_label": "songbody"
     },
     {
       "label": "guestRoutes.js",
@@ -3337,7 +4477,7 @@
       "label": "guestUpdateBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L26",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "routes_guestroutes_guestupdatebody",
       "community": 13,
@@ -3347,7 +4487,7 @@
       "label": "importBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L28",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "routes_guestroutes_importbody",
       "community": 13,
@@ -3357,7 +4497,7 @@
       "label": "communicationBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L32",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "routes_guestroutes_communicationbody",
       "community": 13,
@@ -3367,7 +4507,7 @@
       "label": "emailSendBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L38",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "routes_guestroutes_emailsendbody",
       "community": 13,
@@ -3377,7 +4517,7 @@
       "label": "whatsappMediaBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L42",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "routes_guestroutes_whatsappmediabody",
       "community": 13,
@@ -3387,7 +4527,7 @@
       "label": "whatsappSendBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L51",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "routes_guestroutes_whatsappsendbody",
       "community": 13,
@@ -3397,7 +4537,7 @@
       "label": "whatsappBulkBody",
       "file_type": "code",
       "source_file": "src/routes/guestRoutes.js",
-      "source_location": "L57",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "routes_guestroutes_whatsappbulkbody",
       "community": 13,
@@ -3534,10 +4674,30 @@
       "norm_label": "checkin"
     },
     {
-      "label": "whatsappWebhooks",
+      "label": "eventAccess",
       "file_type": "code",
       "source_file": "src/routes/index.js",
       "source_location": "L13",
+      "_origin": "ast",
+      "id": "routes_index_eventaccess",
+      "community": 11,
+      "norm_label": "eventaccess"
+    },
+    {
+      "label": "external",
+      "file_type": "code",
+      "source_file": "src/routes/index.js",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "routes_index_external",
+      "community": 11,
+      "norm_label": "external"
+    },
+    {
+      "label": "whatsappWebhooks",
+      "file_type": "code",
+      "source_file": "src/routes/index.js",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "routes_index_whatsappwebhooks",
       "community": 11,
@@ -3547,7 +4707,7 @@
       "label": "router",
       "file_type": "code",
       "source_file": "src/routes/index.js",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "routes_index_router",
       "community": 11,
@@ -4354,10 +5514,20 @@
       "norm_label": "publicinvitationurl()"
     },
     {
+      "label": "messageLinks()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "services_whatsappservice_messagelinks",
+      "community": 1,
+      "norm_label": "messagelinks()"
+    },
+    {
       "label": "eventDateText()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L54",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "services_whatsappservice_eventdatetext",
       "community": 1,
@@ -4367,7 +5537,7 @@
       "label": "eventLocationText()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L58",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "services_whatsappservice_eventlocationtext",
       "community": 1,
@@ -4377,7 +5547,7 @@
       "label": "buildText()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L62",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "services_whatsappservice_buildtext",
       "community": 1,
@@ -4387,7 +5557,7 @@
       "label": "buildMetaTemplatePayload()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L105",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "services_whatsappservice_buildmetatemplatepayload",
       "community": 1,
@@ -4397,7 +5567,7 @@
       "label": "sendMeta()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L130",
+      "source_location": "L143",
       "_origin": "ast",
       "id": "services_whatsappservice_sendmeta",
       "community": 1,
@@ -4407,17 +5577,27 @@
       "label": "sendOpenWa()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L155",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "services_whatsappservice_sendopenwa",
       "community": 1,
       "norm_label": "sendopenwa()"
     },
     {
+      "label": "getOpenWaSessionStatus()",
+      "file_type": "code",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L197",
+      "_origin": "ast",
+      "id": "services_whatsappservice_getopenwasessionstatus",
+      "community": 1,
+      "norm_label": "getopenwasessionstatus()"
+    },
+    {
       "label": "openWaMediaEndpoint()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L184",
+      "source_location": "L217",
       "_origin": "ast",
       "id": "services_whatsappservice_openwamediaendpoint",
       "community": 1,
@@ -4427,7 +5607,7 @@
       "label": "sendOpenWaMedia()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L193",
+      "source_location": "L226",
       "_origin": "ast",
       "id": "services_whatsappservice_sendopenwamedia",
       "community": 1,
@@ -4437,7 +5617,7 @@
       "label": "shouldFallbackFromOpenWa()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L235",
+      "source_location": "L268",
       "_origin": "ast",
       "id": "services_whatsappservice_shouldfallbackfromopenwa",
       "community": 1,
@@ -4447,7 +5627,7 @@
       "label": "sendViaProvider()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L243",
+      "source_location": "L276",
       "_origin": "ast",
       "id": "services_whatsappservice_sendviaprovider",
       "community": 1,
@@ -4457,7 +5637,7 @@
       "label": "normalizeMedia()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L264",
+      "source_location": "L297",
       "_origin": "ast",
       "id": "services_whatsappservice_normalizemedia",
       "community": 1,
@@ -4467,7 +5647,7 @@
       "label": "sendMessage()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L287",
+      "source_location": "L320",
       "_origin": "ast",
       "id": "services_whatsappservice_sendmessage",
       "community": 1,
@@ -4477,7 +5657,7 @@
       "label": "updateMessageStatus()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L356",
+      "source_location": "L389",
       "_origin": "ast",
       "id": "services_whatsappservice_updatemessagestatus",
       "community": 1,
@@ -4487,7 +5667,7 @@
       "label": "verifyMetaSignature()",
       "file_type": "code",
       "source_file": "src/services/whatsappService.js",
-      "source_location": "L369",
+      "source_location": "L402",
       "_origin": "ast",
       "id": "services_whatsappservice_verifymetasignature",
       "community": 1,
@@ -4500,7 +5680,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_asynchandler",
-      "community": 9,
+      "community": 21,
       "norm_label": "asynchandler.js"
     },
     {
@@ -4545,6 +5725,144 @@
     }
   ],
   "links": [
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "config_database"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "config_database_connectdatabase"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "config_plans"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "config_plans_planexpiresat"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "models_event"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "models_user"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "scripts_migratecommercialplans_connectdatabase"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "scripts_migratecommercialplans_event"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "scripts_migratecommercialplans_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "scripts_migratecommercialplans_planexpiresat"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_migratecommercialplans",
+      "target": "scripts_migratecommercialplans_user"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "scripts_migratecommercialplans_main",
+      "target": "config_database_connectdatabase"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/migrateCommercialPlans.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "scripts_migratecommercialplans_main",
+      "target": "config_plans_planexpiresat"
+    },
     {
       "relation": "imports_from",
       "context": "import",
@@ -5016,6 +6334,151 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_api"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_apiurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_assertenv"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_idof"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L86",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_postsignedwebhook"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_request"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_runid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout",
+      "target": "scripts_teststripecheckout_stripe"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L87",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout_main",
+      "target": "scripts_teststripecheckout_assertenv"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L117",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout_main",
+      "target": "scripts_teststripecheckout_idof"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L52",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout_api",
+      "target": "scripts_teststripecheckout_request"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L92",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout_main",
+      "target": "scripts_teststripecheckout_api"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/testStripeCheckout.js",
+      "source_location": "L114",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "scripts_teststripecheckout_main",
+      "target": "scripts_teststripecheckout_postsignedwebhook"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scripts/testWhatsAppProviders.js",
       "source_location": "L1",
       "weight": 1.0,
@@ -5104,6 +6567,17 @@
       "confidence_score": 1.0,
       "source": "src_app",
       "target": "config_env"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "controllers_paymentcontroller"
     },
     {
       "relation": "imports_from",
@@ -5218,6 +6692,26 @@
       "confidence_score": 1.0,
       "source": "src_app",
       "target": "src_app_notfound_errorhandler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "src_app_origin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_app",
+      "target": "src_app_paymentcontroller"
     },
     {
       "relation": "contains",
@@ -5383,6 +6877,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "config_env"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
       "source_location": "L12",
       "weight": 1.0,
@@ -5471,11 +6976,51 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/config/plans.js",
+      "source_location": "L107",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
       "source_location": "L67",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "config_plans",
       "target": "config_plans_assertplanfeature"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L85",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_effectiveplankey"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L91",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_geteffectiveplandefinition"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_geteffectiveplanlimits"
     },
     {
       "relation": "contains",
@@ -5496,6 +7041,36 @@
       "confidence_score": 1.0,
       "source": "config_plans",
       "target": "config_plans_getplanlimits"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L218",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_iseventplanactive"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L214",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_islegacypro"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L207",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_issubscriptionactive"
     },
     {
       "relation": "contains",
@@ -5528,15 +7103,25 @@
       "target": "config_plans_plan_definitions"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L254",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans",
+      "target": "config_plans_planexpiresat"
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/albumController.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports_from",
@@ -5556,9 +7141,9 @@
       "source_file": "src/controllers/checkInController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_checkincontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports_from",
@@ -5611,9 +7196,9 @@
       "source_file": "src/controllers/tableController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_tablecontroller",
-      "target": "config_plans",
-      "confidence_score": 1.0
+      "target": "config_plans"
     },
     {
       "relation": "imports",
@@ -5631,10 +7216,32 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/config/plans.js",
+      "source_location": "L86",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_effectiveplankey",
+      "target": "config_plans_normalizeplan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
       "source_location": "L60",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "config_plans_getplandefinition",
+      "target": "config_plans_normalizeplan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L219",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_iseventplanactive",
       "target": "config_plans_normalizeplan"
     },
     {
@@ -5652,11 +7259,55 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "controllers_paymentcontroller_applysubscriptionobject",
+      "target": "config_plans_normalizeplan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "controllers_paymentcontroller_resolverequestedplan",
+      "target": "config_plans_normalizeplan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L92",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_geteffectiveplandefinition",
+      "target": "config_plans_getplandefinition"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "source_file": "src/config/plans.js",
       "source_location": "L64",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "config_plans_getplanlimits",
+      "target": "config_plans_getplandefinition"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L255",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_planexpiresat",
       "target": "config_plans_getplandefinition"
     },
     {
@@ -5668,6 +7319,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
+      "target": "config_plans_getplandefinition"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "controllers_paymentcontroller_activateonetimepayment",
       "target": "config_plans_getplandefinition"
     },
     {
@@ -5726,15 +7388,103 @@
       "target": "config_plans_getplanlimits"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L225",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_effectiveplankey",
+      "target": "config_plans_issubscriptionactive"
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "src/controllers/albumController.js",
-      "source_location": "L8",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L7",
       "weight": 1.0,
-      "source": "controllers_albumcontroller",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "config_plans_issubscriptionactive"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L225",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_effectiveplankey",
+      "target": "config_plans_islegacypro"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L226",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_effectiveplankey",
+      "target": "config_plans_iseventplanactive"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "config_plans_iseventplanactive"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L92",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_geteffectiveplandefinition",
+      "target": "config_plans_effectiveplankey"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L96",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_geteffectiveplanlimits",
+      "target": "config_plans_geteffectiveplandefinition"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "config_plans_geteffectiveplandefinition"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/config/plans.js",
+      "source_location": "L108",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "config_plans_asserteffectiveplanfeature",
+      "target": "config_plans_geteffectiveplanlimits"
     },
     {
       "relation": "imports",
@@ -5743,9 +7493,64 @@
       "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "config_plans_geteffectiveplanlimits"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "config_plans_geteffectiveplanlimits"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/invitationController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_invitationcontroller",
+      "target": "config_plans_geteffectiveplanlimits"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/invitationController.js",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "controllers_invitationcontroller_assertinvitationplanlimits",
+      "target": "config_plans_geteffectiveplanlimits"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "config_plans_assertplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "config_plans_assertplanfeature"
     },
     {
       "relation": "imports",
@@ -5754,9 +7559,9 @@
       "source_file": "src/controllers/checkInController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_checkincontroller",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "config_plans_assertplanfeature"
     },
     {
       "relation": "imports",
@@ -5787,9 +7592,97 @@
       "source_file": "src/controllers/tableController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_tablecontroller",
-      "target": "config_plans_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "config_plans_assertplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/albumController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_albumcontroller",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/checkInController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_checkincontroller",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_rsvpcontroller",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/tableController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_tablecontroller",
+      "target": "config_plans_asserteffectiveplanfeature"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "config_plans_planexpiresat"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "controllers_paymentcontroller_activateonetimepayment",
+      "target": "config_plans_planexpiresat"
     },
     {
       "relation": "contains",
@@ -5807,9 +7700,9 @@
       "source_file": "src/controllers/albumController.js",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
-      "target": "controllers_albumcontroller_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "controllers_albumcontroller_asserteffectiveplanfeature"
     },
     {
       "relation": "contains",
@@ -5917,9 +7810,9 @@
       "source_file": "src/controllers/albumController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
-      "target": "controllers_albumcontroller_user",
-      "confidence_score": 1.0
+      "target": "controllers_albumcontroller_user"
     },
     {
       "relation": "imports_from",
@@ -5972,9 +7865,9 @@
       "source_file": "src/controllers/albumController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
-      "target": "models_user",
-      "confidence_score": 1.0
+      "target": "models_user"
     },
     {
       "relation": "imports_from",
@@ -5986,6 +7879,17 @@
       "confidence_score": 1.0,
       "source": "controllers_albumcontroller",
       "target": "utils_asynchandler"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_albumcontroller"
     },
     {
       "relation": "imports_from",
@@ -6094,11 +7998,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/assetController.js",
+      "source_location": "L99",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_extensionfromfilename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L112",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_fetchurlmetadata"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L89",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_filenamefromurl"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
-      "target": "controllers_assetcontroller_getplanlimits_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "controllers_assetcontroller_getplanlimits_geteffectiveplanlimits_asserteffectiveplanfeature"
     },
     {
       "relation": "contains",
@@ -6119,6 +8053,36 @@
       "confidence_score": 1.0,
       "source": "controllers_assetcontroller",
       "target": "controllers_assetcontroller_image_types"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L108",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_inspectpreviewkind"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_mime_by_extension"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/assetController.js",
+      "source_location": "L104",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_assetcontroller",
+      "target": "controllers_assetcontroller_normalizecontenttype"
     },
     {
       "relation": "contains",
@@ -6365,9 +8329,9 @@
       "source_file": "src/controllers/checkInController.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controllers_checkincontroller",
-      "target": "controllers_checkincontroller_assertplanfeature",
-      "confidence_score": 1.0
+      "target": "controllers_checkincontroller_asserteffectiveplanfeature"
     },
     {
       "relation": "contains",
@@ -6708,6 +8672,204 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_albumasset"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_asynchandler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_event"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_eventaccesstoken"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_eventtable"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_getactiveaccess"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_guest"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_haspermission"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_publicguest"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_role_permissions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "controllers_eventaccesscontroller_rsvp"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "models_albumasset"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "models_event"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "models_eventaccesstoken"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "models_eventtable"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "models_guest"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "models_rsvp"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventAccessController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventaccesscontroller",
+      "target": "utils_asynchandler"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "controllers_eventaccesscontroller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/controllers/eventController.js",
       "source_location": "L2",
       "weight": 1.0,
@@ -6719,11 +8881,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/eventController.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_builduniqueportalslug"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_crypto"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
       "target": "controllers_eventcontroller_emailservice"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_ensureexternalportalpayload"
     },
     {
       "relation": "contains",
@@ -6744,6 +8936,16 @@
       "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
       "target": "controllers_eventcontroller_event"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_eventaccesstoken"
     },
     {
       "relation": "contains",
@@ -6779,6 +8981,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/eventController.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_normalizeexternalportalsettings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
       "source_location": "L44",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -6796,6 +9008,36 @@
       "target": "controllers_eventcontroller_primaryinvitationforevent"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_publicexternalevent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L47",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_publicguest"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "controllers_eventcontroller_slugify"
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -6805,6 +9047,17 @@
       "confidence_score": 1.0,
       "source": "controllers_eventcontroller",
       "target": "models_event"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller",
+      "target": "models_eventaccesstoken"
     },
     {
       "relation": "imports_from",
@@ -6862,6 +9115,278 @@
       "target": "controllers_eventcontroller"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller_builduniqueportalslug",
+      "target": "controllers_eventcontroller_slugify"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller_ensureexternalportalpayload",
+      "target": "controllers_eventcontroller_builduniqueportalslug"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller_ensureexternalportalpayload",
+      "target": "controllers_eventcontroller_normalizeexternalportalsettings"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/eventController.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_eventcontroller_publicexternalevent",
+      "target": "controllers_eventcontroller_normalizeexternalportalsettings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_albumcontroller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L100",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_assetpayload"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_asynchandler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_env"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_event"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L86",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_getpublicevent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_guest"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_normalizeemail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_normalizephone"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_publicevent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_publicguest"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_rsvp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_safecontent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "controllers_externalcontroller_songrequest"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "models_event"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "models_guest"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "models_rsvp"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "models_songrequest"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller",
+      "target": "utils_asynchandler"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "controllers_externalcontroller"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L101",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller_assetpayload",
+      "target": "controllers_externalcontroller_safecontent"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/externalController.js",
+      "source_location": "L60",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_externalcontroller_publicevent",
+      "target": "controllers_externalcontroller_safecontent"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
@@ -6880,6 +9405,16 @@
       "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
       "target": "controllers_guestcontroller_applywhatsappgueststatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/guestController.js",
+      "source_location": "L135",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_guestcontroller",
+      "target": "controllers_guestcontroller_assertwhatsappproviderready"
     },
     {
       "relation": "contains",
@@ -7005,11 +9540,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/guestController.js",
-      "source_location": "L6",
+      "source_location": "L8",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_guestcontroller",
-      "target": "controllers_guestcontroller_getplanlimits_assertplanfeature"
+      "target": "controllers_guestcontroller_geteffectiveplanlimits_asserteffectiveplanfeature"
     },
     {
       "relation": "contains",
@@ -7374,7 +9909,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_invitationcontroller",
-      "target": "controllers_invitationcontroller_getplanlimits"
+      "target": "controllers_invitationcontroller_geteffectiveplanlimits"
     },
     {
       "relation": "contains",
@@ -7570,11 +10105,61 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/paymentController.js",
+      "source_location": "L95",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_activateonetimepayment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L128",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_applysubscriptionobject"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L118",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_applysubscriptiontouser"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
       "target": "controllers_paymentcontroller_asynchandler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_canonical_plan_keys"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_canonicalplans"
     },
     {
       "relation": "contains",
@@ -7594,7 +10179,47 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_event"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L73",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_eventforcheckout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_groupedplans"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
       "target": "controllers_paymentcontroller_invitation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_lineitemforplan"
     },
     {
       "relation": "contains",
@@ -7610,11 +10235,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/paymentController.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
-      "target": "controllers_paymentcontroller_plan_definitions_normalizeplan_getplandefinition"
+      "target": "controllers_paymentcontroller_plan_definitions_normalizeplan_getplandefinition_geteffectiveplandefinition_issubscriptionactive_iseventplanactive_planexpiresat"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_priceidforplan"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L62",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "controllers_paymentcontroller_resolverequestedplan"
     },
     {
       "relation": "contains",
@@ -7635,6 +10280,17 @@
       "confidence_score": 1.0,
       "source": "controllers_paymentcontroller",
       "target": "controllers_paymentcontroller_user"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller",
+      "target": "models_event"
     },
     {
       "relation": "imports_from",
@@ -7692,6 +10348,39 @@
       "target": "controllers_paymentcontroller"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller_groupedplans",
+      "target": "controllers_paymentcontroller_canonicalplans"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller_lineitemforplan",
+      "target": "controllers_paymentcontroller_priceidforplan"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/paymentController.js",
+      "source_location": "L133",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_paymentcontroller_applysubscriptionobject",
+      "target": "controllers_paymentcontroller_applysubscriptiontouser"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/rsvpController.js",
@@ -7709,7 +10398,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
-      "target": "controllers_rsvpcontroller_assertplanfeature"
+      "target": "controllers_rsvpcontroller_asserteffectiveplanfeature"
     },
     {
       "relation": "contains",
@@ -7795,6 +10484,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L154",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_rsvpcontroller",
+      "target": "controllers_rsvpcontroller_findexistingeventrsvp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/rsvpController.js",
       "source_location": "L95",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -7870,6 +10569,16 @@
       "confidence_score": 1.0,
       "source": "controllers_rsvpcontroller",
       "target": "controllers_rsvpcontroller_rsvpactivity"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L219",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_rsvpcontroller",
+      "target": "controllers_rsvpcontroller_saveeventrsvp"
     },
     {
       "relation": "contains",
@@ -8016,6 +10725,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L226",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_rsvpcontroller_saveeventrsvp",
+      "target": "controllers_rsvpcontroller_snapshotrsvp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/rsvpController.js",
       "source_location": "L125",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -8045,6 +10765,111 @@
       "target": "controllers_rsvpcontroller_findexistingrsvp"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/rsvpController.js",
+      "source_location": "L220",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_rsvpcontroller_saveeventrsvp",
+      "target": "controllers_rsvpcontroller_findexistingeventrsvp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "controllers_songrequestcontroller_asynchandler"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "controllers_songrequestcontroller_event"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "controllers_songrequestcontroller_findownedevent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "controllers_songrequestcontroller_songrequest"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "models_event"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "models_songrequest"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/songRequestController.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_songrequestcontroller",
+      "target": "utils_asynchandler"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "controllers_songrequestcontroller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/controllers/tableController.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_tablecontroller",
+      "target": "controllers_tablecontroller_asserteffectiveplanfeature"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/controllers/tableController.js",
@@ -8053,16 +10878,6 @@
       "confidence_score": 1.0,
       "source": "controllers_tablecontroller",
       "target": "controllers_tablecontroller_asserteventowner"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/controllers/tableController.js",
-      "source_location": "L4",
-      "weight": 1.0,
-      "source": "controllers_tablecontroller",
-      "target": "controllers_tablecontroller_assertplanfeature",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8690,6 +11505,26 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/models/EventAccessToken.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_eventaccesstoken",
+      "target": "models_eventaccesstoken_eventaccesstokenschema"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/EventAccessToken.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_eventaccesstoken",
+      "target": "models_eventaccesstoken_mongoose"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/models/EventTable.js",
       "source_location": "L3",
       "weight": 1.0,
@@ -8826,6 +11661,26 @@
       "confidence_score": 1.0,
       "source": "models_rsvpactivity",
       "target": "models_rsvpactivity_rsvpactivityschema"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/SongRequest.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_songrequest",
+      "target": "models_songrequest_mongoose"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/models/SongRequest.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_songrequest",
+      "target": "models_songrequest_songrequestschema"
     },
     {
       "relation": "contains",
@@ -8967,6 +11822,16 @@
       "confidence_score": 1.0,
       "source": "routes_assetroutes",
       "target": "routes_assetroutes_express"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/assetRoutes.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_assetroutes",
+      "target": "routes_assetroutes_inspecturlbody"
     },
     {
       "relation": "contains",
@@ -9398,6 +12263,100 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "routes_eventaccessroutes_controller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "routes_eventaccessroutes_express"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "routes_eventaccessroutes_router"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "routes_eventaccessroutes_validate_z"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "utils_validate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "utils_validate_validate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventAccessRoutes.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventaccessroutes",
+      "target": "utils_validate_z"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/index.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_index",
+      "target": "routes_eventaccessroutes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L54",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "routes_eventroutes_accesslinkbody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/routes/eventRoutes.js",
       "source_location": "L3",
       "weight": 1.0,
@@ -9489,6 +12448,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "routes_eventroutes_multer"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -9499,11 +12468,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L53",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "routes_eventroutes_publicemailbody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "routes_eventroutes",
       "target": "routes_eventroutes_router"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "routes_eventroutes_songrequestcontroller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L105",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "routes_eventroutes_songrequeststatusbody"
     },
     {
       "relation": "contains",
@@ -9534,6 +12533,16 @@
       "confidence_score": 1.0,
       "source": "routes_eventroutes",
       "target": "routes_eventroutes_tableupdatebody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/eventRoutes.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_eventroutes",
+      "target": "routes_eventroutes_upload"
     },
     {
       "relation": "contains",
@@ -9588,6 +12597,140 @@
       "confidence_score": 1.0,
       "source": "routes_index",
       "target": "routes_eventroutes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_controller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_express"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_identifybody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_multer"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_router"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_rsvpbody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_songbody"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_upload"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "routes_externalroutes_validate_z"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "utils_validate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "utils_validate_validate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/externalRoutes.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_externalroutes",
+      "target": "utils_validate_z"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/index.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_index",
+      "target": "routes_externalroutes"
     },
     {
       "relation": "contains",
@@ -9837,6 +12980,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/index.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_index",
+      "target": "routes_index_eventaccess"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/index.js",
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -9852,6 +13005,16 @@
       "confidence_score": 1.0,
       "source": "routes_index",
       "target": "routes_index_express"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/index.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "routes_index",
+      "target": "routes_index_external"
     },
     {
       "relation": "contains",
@@ -10959,6 +14122,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/services/whatsappService.js",
+      "source_location": "L197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_getopenwasessionstatus"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
       "source_location": "L17",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10994,6 +14167,16 @@
       "confidence_score": 1.0,
       "source": "services_whatsappservice",
       "target": "services_whatsappservice_isopenwaconfigured"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "services_whatsappservice",
+      "target": "services_whatsappservice_messagelinks"
     },
     {
       "relation": "contains",
@@ -11217,6 +14400,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/services/whatsappService.js",
+      "source_location": "L198",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "services_whatsappservice_getopenwasessionstatus",
+      "target": "services_whatsappservice_isopenwaconfigured"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
       "source_location": "L38",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -11266,6 +14460,28 @@
       "confidence_score": 1.0,
       "source": "services_whatsappservice_buildtext",
       "target": "services_whatsappservice_publicinvitationurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "services_whatsappservice_messagelinks",
+      "target": "services_whatsappservice_publicinvitationurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/services/whatsappService.js",
+      "source_location": "L80",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "services_whatsappservice_buildtext",
+      "target": "services_whatsappservice_messagelinks"
     },
     {
       "relation": "calls",
@@ -11475,5 +14691,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "eb892d587c39e5934cf8d94b52b85db991cce382"
+  "built_at_commit": "9d93df6ed7d29b464120d5f069ca7cb73bc60b04"
 }

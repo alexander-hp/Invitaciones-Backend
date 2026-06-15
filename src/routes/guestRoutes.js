@@ -13,6 +13,10 @@ const guestBody = z.object({
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
   group: z.string().optional(),
+  roles: z.array(z.string()).max(20).optional(),
+  tags: z.array(z.string()).max(30).optional(),
+  relationshipLabel: z.string().optional(),
+  visibilityGroup: z.string().optional(),
   tableName: z.string().optional(),
   seatLabel: z.string().optional(),
   companions: z.array(z.object({

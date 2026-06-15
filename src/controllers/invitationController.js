@@ -3,7 +3,7 @@ const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Template = require('../models/Template');
-const { getPlanLimits } = require('../config/plans');
+const { getEffectivePlanLimits } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
 const emailService = require('../services/emailService');
@@ -75,8 +75,8 @@ function publicGuest(guest) {
   };
 }
 
-async function assertInvitationPlanLimits(user, payload) {
-  const limits = getPlanLimits(user);
+async function assertInvitationPlanLimits(user, event, payload) {
+  const limits = getEffectivePlanLimits(user, event);
   const galleryCount = payload.content?.gallery?.length || 0;
   if (galleryCount > limits.galleryImages) {
     const error = new Error(`Tu plan permite hasta ${limits.galleryImages} imagenes de galeria`);
@@ -116,14 +116,21 @@ exports.create = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  await assertInvitationPlanLimits(req.user, payload);
+  await assertInvitationPlanLimits(req.user, event, payload);
   const slug = await buildUniqueSlug(payload.slug || event.title);
   const invitation = await Invitation.create({ ...payload, owner: req.user._id, slug });
   res.status(201).json({ invitation, publicUrl: `${env.publicBaseUrl}/i/${invitation.slug}` });
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  await assertInvitationPlanLimits(req.user, req.validated.body);
+  const currentInvitation = await Invitation.findOne({ _id: req.params.id, owner: req.user._id }).select('_id event');
+  if (!currentInvitation) {
+    const error = new Error('Invitacion no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+  const event = await Event.findOne({ _id: currentInvitation.event, owner: req.user._id }).select('_id plan');
+  await assertInvitationPlanLimits(req.user, event, req.validated.body);
   const invitation = await Invitation.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, req.validated.body, { new: true });
   if (!invitation) {
     const error = new Error('Invitacion no encontrada');

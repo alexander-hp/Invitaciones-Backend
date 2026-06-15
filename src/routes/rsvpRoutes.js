@@ -28,6 +28,7 @@ const publicRsvpBody = z.object({
 }).strict();
 
 router.post('/public/:slug', publicRsvpLimiter, validate(z.object({ body: publicRsvpBody })), controller.submitPublic);
+router.post('/public-event/:portalSlug', publicRsvpLimiter, validate(z.object({ body: publicRsvpBody })), controller.submitPublicEvent);
 router.get('/event/:eventId', protect, controller.listByEvent);
 router.get('/event/:eventId/export', protect, controller.exportByEvent);
 

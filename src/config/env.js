@@ -12,6 +12,10 @@ module.exports = {
   nodeEnv,
   clientUrl: process.env.CLIENT_URL || 'http://localhost:4200',
   frontendUrl: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:4200',
+  externalAllowedOrigins: String(process.env.EXTERNAL_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/invitaciones',
   jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -21,6 +25,10 @@ module.exports = {
   mediaPublicBaseUrl: process.env.MEDIA_PUBLIC_BASE_URL || '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  stripePriceEvent12m: process.env.STRIPE_PRICE_EVENT_12M || '',
+  stripePriceExternalDashboard12m: process.env.STRIPE_PRICE_EXTERNAL_DASHBOARD_12M || '',
+  stripePricePlannerProMonthly: process.env.STRIPE_PRICE_PLANNER_PRO_MONTHLY || '',
+  stripePricePlannerProYearly: process.env.STRIPE_PRICE_PLANNER_PRO_YEARLY || '',
   resendApiKey: process.env.RESEND_API_KEY || '',
   emailFrom: process.env.EMAIL_FROM || 'Invitaciones <hola@tudominio.com>',
   emailTo: process.env.EMAIL_TO || process.env.emailAddress || '',
