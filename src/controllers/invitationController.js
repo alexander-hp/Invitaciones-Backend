@@ -47,6 +47,9 @@ function publicTemplate(template) {
 function publicInvitation(invitation) {
   const content = invitation.content?.toObject ? invitation.content.toObject() : { ...(invitation.content || {}) };
   delete content.privateAlbum;
+  content.giftRegistry = (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
+  content.giftSettings = content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true };
+  content.dedicationSettings = content.dedicationSettings || { enabled: true, requireApproval: true };
   return {
     id: invitation._id,
     slug: invitation.slug,

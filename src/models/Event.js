@@ -39,7 +39,7 @@ const eventSchema = new mongoose.Schema({
     }],
     sections: [{
       key: { type: String, trim: true },
-      type: { type: String, enum: ['text', 'image', 'video', 'cta', 'iframe', 'timeline'], default: 'text' },
+      type: { type: String, enum: ['text', 'image', 'video', 'cta', 'iframe', 'timeline', 'story', 'dress_code', 'gift_registry', 'dedications', 'lodging', 'faq', 'people'], default: 'text' },
       title: { type: String, trim: true },
       body: { type: String, trim: true },
       url: { type: String, trim: true },
@@ -65,6 +65,34 @@ const eventSchema = new mongoose.Schema({
       enabled: { type: Boolean, default: true },
       maxRequestsPerGuest: { type: Number, default: 3, min: 1, max: 20 },
       allowDedications: { type: Boolean, default: true }
+    },
+    giftRegistry: [{
+      store: { type: String, trim: true },
+      title: { type: String, trim: true },
+      label: { type: String, trim: true },
+      url: { type: String, trim: true },
+      imageUrl: { type: String, trim: true },
+      note: { type: String, trim: true },
+      priority: { type: Number, default: 0 }
+    }],
+    digitalEnvelope: {
+      bank: String,
+      account: String,
+      clabe: String,
+      holder: String,
+      note: String,
+      qrImageUrl: String
+    },
+    giftSettings: {
+      enabled: { type: Boolean, default: true },
+      introText: { type: String, trim: true },
+      showRegistry: { type: Boolean, default: true },
+      showEnvelope: { type: Boolean, default: true }
+    },
+    dedicationSettings: {
+      enabled: { type: Boolean, default: true },
+      requireApproval: { type: Boolean, default: true },
+      introText: { type: String, trim: true }
     }
   },
   type: { type: String, enum: ['boda', 'xv', 'graduacion', 'cumpleanos', 'bautizo', 'otro'], required: true },

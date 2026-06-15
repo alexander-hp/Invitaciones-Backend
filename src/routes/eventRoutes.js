@@ -5,6 +5,7 @@ const albumController = require('../controllers/albumController');
 const checkInController = require('../controllers/checkInController');
 const tableController = require('../controllers/tableController');
 const songRequestController = require('../controllers/songRequestController');
+const dedicationController = require('../controllers/dedicationController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
@@ -53,7 +54,7 @@ const eventBody = z.object({
     }).strict()).max(20).optional(),
     sections: z.array(z.object({
       key: z.string().optional(),
-      type: z.enum(['text', 'image', 'video', 'cta', 'iframe', 'timeline']).optional(),
+      type: z.enum(['text', 'image', 'video', 'cta', 'iframe', 'timeline', 'story', 'dress_code', 'gift_registry', 'dedications', 'lodging', 'faq', 'people']).optional(),
       title: z.string().optional(),
       body: z.string().optional(),
       url: z.string().url().optional().or(z.literal('')),
@@ -79,6 +80,34 @@ const eventBody = z.object({
       enabled: z.boolean().optional(),
       maxRequestsPerGuest: z.number().int().min(1).max(20).optional(),
       allowDedications: z.boolean().optional()
+    }).strict().optional(),
+    giftRegistry: z.array(z.object({
+      store: z.string().optional(),
+      title: z.string().optional(),
+      label: z.string().optional(),
+      url: z.string().url().optional().or(z.literal('')),
+      imageUrl: z.string().url().optional().or(z.literal('')),
+      note: z.string().optional(),
+      priority: z.number().int().optional()
+    }).strict()).max(20).optional(),
+    digitalEnvelope: z.object({
+      bank: z.string().optional(),
+      account: z.string().optional(),
+      clabe: z.string().optional(),
+      holder: z.string().optional(),
+      note: z.string().optional(),
+      qrImageUrl: z.string().url().optional().or(z.literal(''))
+    }).strict().optional(),
+    giftSettings: z.object({
+      enabled: z.boolean().optional(),
+      introText: z.string().max(600).optional(),
+      showRegistry: z.boolean().optional(),
+      showEnvelope: z.boolean().optional()
+    }).strict().optional(),
+    dedicationSettings: z.object({
+      enabled: z.boolean().optional(),
+      requireApproval: z.boolean().optional(),
+      introText: z.string().max(600).optional()
     }).strict().optional()
   }).strict().optional(),
   type: z.enum(['boda', 'xv', 'graduacion', 'cumpleanos', 'bautizo', 'otro']),
@@ -103,6 +132,7 @@ const tableBody = z.object({
 const tableUpdateBody = tableBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
 const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']) }).strict();
+const dedicationStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'hidden']) }).strict();
 const publicEmailBody = z.object({ email: z.string().email() }).strict();
 const accessLinkBody = z.object({
   role: z.enum(['check_in', 'album_review', 'client_view', 'guest_ops']),
@@ -130,6 +160,8 @@ router.get('/:eventId/album', albumController.list);
 router.patch('/:eventId/album/:assetId', validate(z.object({ body: albumStatusBody })), albumController.update);
 router.get('/:eventId/song-requests', songRequestController.list);
 router.patch('/:eventId/song-requests/:songRequestId', validate(z.object({ body: songRequestStatusBody })), songRequestController.update);
+router.get('/:eventId/dedications', dedicationController.listAdmin);
+router.patch('/:eventId/dedications/:dedicationId', validate(z.object({ body: dedicationStatusBody })), dedicationController.updateAdmin);
 router.get('/:eventId/access-links', controller.listAccessLinks);
 router.post('/:eventId/access-links', validate(z.object({ body: accessLinkBody })), controller.createAccessLink);
 router.delete('/:eventId/access-links/:linkId', controller.revokeAccessLink);

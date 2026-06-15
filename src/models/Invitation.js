@@ -44,15 +44,32 @@ const invitationSchema = new mongoose.Schema({
     }],
     dressCode: String,
     giftRegistry: [{
+      store: String,
+      title: String,
       label: String,
-      url: String
+      url: String,
+      imageUrl: String,
+      note: String,
+      priority: { type: Number, default: 0 }
     }],
     digitalEnvelope: {
       bank: String,
       account: String,
       clabe: String,
       holder: String,
-      note: String
+      note: String,
+      qrImageUrl: String
+    },
+    giftSettings: {
+      enabled: { type: Boolean, default: true },
+      introText: String,
+      showRegistry: { type: Boolean, default: true },
+      showEnvelope: { type: Boolean, default: true }
+    },
+    dedicationSettings: {
+      enabled: { type: Boolean, default: true },
+      requireApproval: { type: Boolean, default: true },
+      introText: String
     },
     brandLogoUrl: String,
     hideBranding: { type: Boolean, default: false },

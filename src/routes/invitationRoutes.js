@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const albumController = require('../controllers/albumController');
 const controller = require('../controllers/invitationController');
+const dedicationController = require('../controllers/dedicationController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
@@ -39,15 +40,32 @@ const invitationContentBody = z.object({
   }).strict()).max(12).optional(),
   dressCode: z.string().optional(),
   giftRegistry: z.array(z.object({
+    store: z.string().optional(),
+    title: z.string().optional(),
     label: z.string().optional(),
-    url: z.string().url().or(z.literal('')).optional()
+    url: z.string().url().or(z.literal('')).optional(),
+    imageUrl: z.string().url().or(z.literal('')).optional(),
+    note: z.string().optional(),
+    priority: z.number().int().optional()
   }).strict()).optional(),
   digitalEnvelope: z.object({
     bank: z.string().optional(),
     account: z.string().optional(),
     clabe: z.string().optional(),
     holder: z.string().optional(),
-    note: z.string().optional()
+    note: z.string().optional(),
+    qrImageUrl: z.string().url().or(z.literal('')).optional()
+  }).strict().optional(),
+  giftSettings: z.object({
+    enabled: z.boolean().optional(),
+    introText: z.string().max(600).optional(),
+    showRegistry: z.boolean().optional(),
+    showEnvelope: z.boolean().optional()
+  }).strict().optional(),
+  dedicationSettings: z.object({
+    enabled: z.boolean().optional(),
+    requireApproval: z.boolean().optional(),
+    introText: z.string().max(600).optional()
   }).strict().optional(),
   brandLogoUrl: z.string().url().or(z.literal('')).optional(),
   hideBranding: z.boolean().optional(),
@@ -88,12 +106,22 @@ const invitationUpdateBody = z.object({
   rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
+const dedicationBody = z.object({
+  guest: z.string().min(12).optional(),
+  publicName: z.string().min(2).max(120).optional(),
+  email: z.string().email().optional(),
+  message: z.string().min(2).max(1000),
+  type: z.enum(['dedication', 'wish', 'memory', 'toast']).optional(),
+  visibility: z.enum(['public', 'hosts_only']).optional()
+}).strict();
 
 router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
 router.get('/public/:slug/album', publicInvitationLimiter, albumController.publicApproved);
+router.get('/public/:slug/dedications', publicInvitationLimiter, dedicationController.listInvitationPublic);
 router.get('/public/:slug/guest-token/:token', guestAccessLimiter, controller.guestByToken);
 router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
+router.post('/public/:slug/dedications', publicInvitationLimiter, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
 router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);

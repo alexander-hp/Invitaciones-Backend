@@ -48,14 +48,25 @@ const songLookupBody = z.object({
   title: z.string().max(180).optional(),
   artist: z.string().max(180).optional()
 }).strict().refine((body) => body.query || body.url || body.title, 'Se requiere busqueda o link');
+const dedicationBody = z.object({
+  guest: z.string().min(12).optional(),
+  publicName: z.string().min(2).max(120).optional(),
+  email: z.string().email().optional(),
+  message: z.string().min(2).max(1000),
+  type: z.enum(['dedication', 'wish', 'memory', 'toast']).optional(),
+  visibility: z.enum(['public', 'hosts_only']).optional()
+}).strict();
 
 router.get('/:portalSlug/config', controller.config);
 router.get('/:portalSlug/assets', controller.assets);
+router.get('/:portalSlug/gifts', controller.gifts);
 router.post('/:portalSlug/guest/identify', validate(z.object({ body: identifyBody })), controller.identifyGuest);
 router.get('/:portalSlug/my-status', controller.myStatus);
 router.post('/:portalSlug/rsvp', validate(z.object({ body: rsvpBody })), controller.rsvp);
 router.get('/:portalSlug/album', controller.album);
 router.post('/:portalSlug/album', upload.single('file'), controller.albumUpload);
+router.get('/:portalSlug/dedications', controller.dedications);
+router.post('/:portalSlug/dedications', validate(z.object({ body: dedicationBody })), controller.createDedication);
 router.post('/:portalSlug/song-lookup', validate(z.object({ body: songLookupBody })), controller.songLookup);
 router.post('/:portalSlug/song-requests', validate(z.object({ body: songBody })), controller.songRequest);
 router.get('/:portalSlug/embed-manifest', controller.embedManifest);

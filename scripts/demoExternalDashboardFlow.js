@@ -271,11 +271,36 @@ async function main() {
       }
     ],
     sections: [
-      { key: 'dress-code', type: 'text', title: 'Dress code', body: 'Formal elegante. Esta seccion viene desde la API publica.', roles: ['vip', 'familia'], order: 1 },
+      { key: 'dress-code', type: 'dress_code', title: 'Dress code', body: 'Formal elegante. Esta seccion viene desde la API publica.', roles: ['vip', 'familia'], order: 1 },
       { key: 'timeline', type: 'timeline', title: 'Momentos clave', body: 'Ceremonia, cena, brindis y DJ.', order: 2 },
+      { key: 'gifts', type: 'gift_registry', title: 'Mesa de regalos', body: 'Links y sobre digital servidos por KyndraSoft.', order: 3 },
+      { key: 'dedications', type: 'dedications', title: 'Dedicatorias', body: 'Mensajes moderados para los anfitriones.', order: 4 },
       { key: 'cta-rsvp', type: 'cta', title: 'Confirma asistencia', body: 'La pagina externa puede usar iframe o POST directo.', url: `${clientUrl}/assets/external-demo-api.html`, order: 3 }
     ],
-    songRequestSettings: { enabled: true, maxRequestsPerGuest: 3, allowDedications: true }
+    songRequestSettings: { enabled: true, maxRequestsPerGuest: 3, allowDedications: true },
+    giftRegistry: [
+      { store: 'Liverpool', title: 'Mesa Liverpool Demo', url: 'https://www.liverpool.com.mx/', imageUrl: urls[2], note: 'Referencia demo para probar link externo.', priority: 1 },
+      { store: 'Amazon', title: 'Wishlist Demo', url: 'https://www.amazon.com.mx/', imageUrl: urls[3], note: 'Referencia demo para probar otra mesa.', priority: 2 }
+    ],
+    digitalEnvelope: {
+      bank: 'Banco Demo',
+      holder: 'KyndraSoft Demo',
+      account: '0000000000',
+      clabe: '000000000000000000',
+      note: 'Datos ficticios para pruebas.',
+      qrImageUrl: urls[4]
+    },
+    giftSettings: {
+      enabled: true,
+      introText: 'Tu presencia es el mejor regalo. Estos datos son demo.',
+      showRegistry: true,
+      showEnvelope: true
+    },
+    dedicationSettings: {
+      enabled: true,
+      requireApproval: true,
+      introText: 'Deja un mensaje para los anfitriones; se publicara tras revision.'
+    }
   };
 
   const updated = await request(`/events/${eventId}`, {

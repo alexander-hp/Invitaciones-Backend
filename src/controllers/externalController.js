@@ -3,8 +3,10 @@ const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
 const SongRequest = require('../models/SongRequest');
 const AlbumAsset = require('../models/AlbumAsset');
+const Dedication = require('../models/Dedication');
 const asyncHandler = require('../utils/asyncHandler');
 const albumController = require('./albumController');
+const dedicationController = require('./dedicationController');
 const env = require('../config/env');
 const { signGuestSession, verifyGuestSession } = require('../utils/guestSession');
 
@@ -167,7 +169,11 @@ function safeContent(event) {
     }].filter((item) => item.name || item.address || item.mapUrl),
     sections: (content.sections || []).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)),
     rsvpSettings: content.rsvpSettings || {},
-    songRequestSettings: content.songRequestSettings || { enabled: true, maxRequestsPerGuest: 3, allowDedications: true }
+    songRequestSettings: content.songRequestSettings || { enabled: true, maxRequestsPerGuest: 3, allowDedications: true },
+    giftRegistry: (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0)),
+    digitalEnvelope: content.digitalEnvelope || {},
+    giftSettings: content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true },
+    dedicationSettings: content.dedicationSettings || { enabled: true, requireApproval: true }
   };
 }
 
@@ -193,7 +199,9 @@ function publicEvent(event) {
       album: event.externalPortalSettings?.albumEnabled !== false,
       pass: event.externalPortalSettings?.passEnabled !== false,
       calendar: event.externalPortalSettings?.calendarEnabled !== false,
-      songRequests: event.externalContent?.songRequestSettings?.enabled !== false
+      songRequests: event.externalContent?.songRequestSettings?.enabled !== false,
+      gifts: event.externalContent?.giftSettings?.enabled !== false,
+      dedications: event.externalContent?.dedicationSettings?.enabled !== false
     }
   };
 }
@@ -219,18 +227,23 @@ function assetPayload(event, type) {
   if (type === 'gallery') return { gallery: content.gallery, spectacularImages: content.spectacularImages };
   if (type === 'audio') return { musicUrl: content.musicUrl, audioSections: content.audioSections };
   if (type === 'map') return { locations: content.locations };
+  if (type === 'gifts') return { giftRegistry: content.giftRegistry, digitalEnvelope: content.digitalEnvelope, giftSettings: content.giftSettings };
   return content;
 }
 
 exports.config = asyncHandler(async (req, res) => {
   const event = await getPublicEvent(req.params.portalSlug);
-  res.json({ event: publicEvent(event) });
+  const dedications = await Dedication.find({ event: event._id, status: 'approved', visibility: 'public' })
+    .select('publicName message type status visibility createdAt reviewedAt')
+    .sort('-createdAt')
+    .limit(50);
+  res.json({ event: { ...publicEvent(event), dedications: dedications.map(dedicationController.publicDedication) } });
 });
 
 exports.assets = asyncHandler(async (req, res) => {
   const event = await getPublicEvent(req.params.portalSlug);
   const type = String(req.query.type || 'all');
-  if (!['cover', 'carousel', 'gallery', 'audio', 'map', 'all'].includes(type)) {
+  if (!['cover', 'carousel', 'gallery', 'audio', 'map', 'gifts', 'all'].includes(type)) {
     const error = new Error('Tipo de asset no soportado');
     error.statusCode = 400;
     throw error;
@@ -269,16 +282,18 @@ exports.identifyGuest = asyncHandler(async (req, res) => {
 
 exports.myStatus = asyncHandler(async (req, res) => {
   const { event, guest } = await verifyGuestSession(req, req.params.portalSlug);
-  const [rsvp, albumUploads, songRequests] = await Promise.all([
+  const [rsvp, albumUploads, songRequests, dedications] = await Promise.all([
     Rsvp.findOne({ event: event._id, invitation: { $exists: false }, guest: guest._id }),
     AlbumAsset.find({ event: event._id, guest: guest._id }).sort('-createdAt').limit(100),
-    SongRequest.find({ event: event._id, guest: guest._id }).sort('-createdAt').limit(100)
+    SongRequest.find({ event: event._id, guest: guest._id }).sort('-createdAt').limit(100),
+    Dedication.find({ event: event._id, guest: guest._id }).sort('-createdAt').limit(100)
   ]);
   res.json({
     guest: publicGuest(guest),
     rsvp: publicRsvp(rsvp),
     albumUploads: albumUploads.map(publicAlbumAsset),
-    songRequests: songRequests.map(publicSongRequest)
+    songRequests: songRequests.map(publicSongRequest),
+    dedications: dedications.map(dedicationController.publicDedication)
   });
 });
 
@@ -373,6 +388,18 @@ exports.songLookup = asyncHandler(async (req, res) => {
   res.json({ song });
 });
 
+exports.gifts = asyncHandler(async (req, res) => {
+  const event = await getPublicEvent(req.params.portalSlug);
+  const content = safeContent(event);
+  res.json({
+    gifts: {
+      giftRegistry: content.giftRegistry,
+      digitalEnvelope: content.digitalEnvelope,
+      giftSettings: content.giftSettings
+    }
+  });
+});
+
 exports.embedManifest = asyncHandler(async (req, res) => {
   const event = await getPublicEvent(req.params.portalSlug);
   const base = env.clientUrl.replace(/\/$/, '');
@@ -387,6 +414,9 @@ exports.embedManifest = asyncHandler(async (req, res) => {
       gallery: widget('gallery'),
       map: widget('map'),
       songRequests: widget('song-requests'),
+      gifts: widget('gifts'),
+      dedications: widget('dedications'),
+      fullDetails: widget('full-details'),
       fullPortal: widget('full-portal')
     },
     snippets: {
@@ -394,6 +424,9 @@ exports.embedManifest = asyncHandler(async (req, res) => {
       album: `<iframe src="${widget('album')}" width="100%" height="720" style="border:0"></iframe>`,
       map: `<iframe src="${widget('map')}" width="100%" height="480" style="border:0"></iframe>`,
       songRequests: `<iframe src="${widget('song-requests')}" width="100%" height="520" style="border:0"></iframe>`,
+      gifts: `<iframe src="${widget('gifts')}" width="100%" height="520" style="border:0"></iframe>`,
+      dedications: `<iframe src="${widget('dedications')}" width="100%" height="640" style="border:0"></iframe>`,
+      fullDetails: `<iframe src="${widget('full-details')}" width="100%" height="760" style="border:0"></iframe>`,
       script: `<div data-kyndra-widget="rsvp" data-portal="${slug}"></div><script src="${base}/assets/kyndra-embed.js"></script>`
     }
   });
@@ -401,3 +434,5 @@ exports.embedManifest = asyncHandler(async (req, res) => {
 
 exports.album = albumController.publicEventApproved;
 exports.albumUpload = albumController.uploadPublicEvent;
+exports.dedications = dedicationController.listExternalPublic;
+exports.createDedication = dedicationController.createExternalPublic;
