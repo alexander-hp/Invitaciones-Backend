@@ -22,9 +22,11 @@ exports.list = asyncHandler(async (req, res) => {
 
 exports.update = asyncHandler(async (req, res) => {
   await findOwnedEvent(req.params.eventId, req.user.id);
+  const update = { status: req.validated.body.status, reviewedAt: new Date() };
+  if (req.validated.body.status === 'played') update.playedAt = new Date();
   const songRequest = await SongRequest.findOneAndUpdate(
     { _id: req.params.songRequestId, event: req.params.eventId },
-    { status: req.validated.body.status },
+    update,
     { new: true }
   ).populate('guest', 'name group roles relationshipLabel visibilityGroup tableName');
   if (!songRequest) {

@@ -34,17 +34,29 @@ const songBody = z.object({
   guest: z.string().min(12).optional(),
   requesterName: z.string().min(2).optional(),
   requesterEmail: z.string().email().optional(),
-  title: z.string().min(1).max(180),
+  title: z.string().min(1).max(180).optional(),
   artist: z.string().max(180).optional(),
-  dedication: z.string().max(500).optional()
-}).strict();
+  dedication: z.string().max(500).optional(),
+  query: z.string().max(300).optional(),
+  url: z.string().url().optional(),
+  sourceUrl: z.string().url().optional()
+}).strict().refine((body) => body.title || body.query || body.url || body.sourceUrl, 'Se requiere cancion, busqueda o link');
+
+const songLookupBody = z.object({
+  query: z.string().max(300).optional(),
+  url: z.string().url().optional(),
+  title: z.string().max(180).optional(),
+  artist: z.string().max(180).optional()
+}).strict().refine((body) => body.query || body.url || body.title, 'Se requiere busqueda o link');
 
 router.get('/:portalSlug/config', controller.config);
 router.get('/:portalSlug/assets', controller.assets);
 router.post('/:portalSlug/guest/identify', validate(z.object({ body: identifyBody })), controller.identifyGuest);
+router.get('/:portalSlug/my-status', controller.myStatus);
 router.post('/:portalSlug/rsvp', validate(z.object({ body: rsvpBody })), controller.rsvp);
 router.get('/:portalSlug/album', controller.album);
 router.post('/:portalSlug/album', upload.single('file'), controller.albumUpload);
+router.post('/:portalSlug/song-lookup', validate(z.object({ body: songLookupBody })), controller.songLookup);
 router.post('/:portalSlug/song-requests', validate(z.object({ body: songBody })), controller.songRequest);
 router.get('/:portalSlug/embed-manifest', controller.embedManifest);
 

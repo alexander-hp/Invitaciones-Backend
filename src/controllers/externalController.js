@@ -2,9 +2,11 @@ const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
 const SongRequest = require('../models/SongRequest');
+const AlbumAsset = require('../models/AlbumAsset');
 const asyncHandler = require('../utils/asyncHandler');
 const albumController = require('./albumController');
 const env = require('../config/env');
+const { signGuestSession, verifyGuestSession } = require('../utils/guestSession');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -31,6 +33,119 @@ function publicGuest(guest) {
     tableName: guest.tableName,
     seatLabel: guest.seatLabel,
     companions: guest.companions || []
+  };
+}
+
+function publicRsvp(rsvp) {
+  if (!rsvp) return null;
+  return {
+    id: rsvp._id,
+    response: rsvp.response,
+    companions: rsvp.companions,
+    companionNames: rsvp.companionNames || [],
+    attendingCount: rsvp.attendingCount,
+    mealPreference: rsvp.mealPreference,
+    dietaryRestrictions: rsvp.dietaryRestrictions,
+    menuSelection: rsvp.menuSelection,
+    customAnswers: rsvp.customAnswers || [],
+    message: rsvp.message,
+    createdAt: rsvp.createdAt,
+    updatedAt: rsvp.updatedAt
+  };
+}
+
+function publicAlbumAsset(asset) {
+  return {
+    id: asset._id,
+    url: asset.url,
+    uploaderName: asset.uploaderName,
+    status: asset.status,
+    reviewedAt: asset.reviewedAt,
+    createdAt: asset.createdAt,
+    updatedAt: asset.updatedAt
+  };
+}
+
+function publicSongRequest(songRequest) {
+  return {
+    id: songRequest._id,
+    title: songRequest.title,
+    artist: songRequest.artist,
+    dedication: songRequest.dedication,
+    status: songRequest.status,
+    sourceProvider: songRequest.sourceProvider,
+    sourceUrl: songRequest.sourceUrl,
+    externalId: songRequest.externalId,
+    thumbnailUrl: songRequest.thumbnailUrl,
+    previewUrl: songRequest.previewUrl,
+    durationMs: songRequest.durationMs,
+    reviewedAt: songRequest.reviewedAt,
+    playedAt: songRequest.playedAt,
+    createdAt: songRequest.createdAt,
+    updatedAt: songRequest.updatedAt
+  };
+}
+
+function getYouTubeId(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes('youtu.be')) return parsed.pathname.split('/').filter(Boolean)[0] || '';
+    if (parsed.hostname.includes('youtube.com')) return parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop() || '';
+  } catch (_error) {
+    return '';
+  }
+  return '';
+}
+
+function getSpotifyTrackId(url) {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes('spotify.com')) return '';
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    const trackIndex = parts.indexOf('track');
+    return trackIndex >= 0 ? parts[trackIndex + 1] || '' : '';
+  } catch (_error) {
+    return '';
+  }
+}
+
+function normalizeSongLookup({ query, url, title, artist }) {
+  const raw = String(url || query || '').trim();
+  const cleanTitle = String(title || '').trim();
+  const cleanArtist = String(artist || '').trim();
+  if (!raw && (cleanTitle || cleanArtist)) {
+    return { title: cleanTitle || 'Cancion solicitada', artist: cleanArtist };
+  }
+
+  const youtubeId = /^https?:\/\//i.test(raw) ? getYouTubeId(raw) : '';
+  if (youtubeId) {
+    return {
+      title: cleanTitle || 'Cancion de YouTube',
+      artist: cleanArtist,
+      sourceProvider: 'youtube',
+      sourceUrl: raw,
+      externalId: youtubeId,
+      thumbnailUrl: `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+    };
+  }
+
+  const spotifyId = /^https?:\/\//i.test(raw) ? getSpotifyTrackId(raw) : '';
+  if (spotifyId) {
+    return {
+      title: cleanTitle || 'Cancion de Spotify',
+      artist: cleanArtist,
+      sourceProvider: 'spotify',
+      sourceUrl: raw,
+      externalId: spotifyId
+    };
+  }
+
+  const parts = raw.split(/\s+-\s+|\s+by\s+/i).map((part) => part.trim()).filter(Boolean);
+  return {
+    title: cleanTitle || parts[0] || raw || 'Cancion solicitada',
+    artist: cleanArtist || parts[1] || '',
+    sourceProvider: /^https?:\/\//i.test(raw) ? 'url' : 'manual',
+    sourceUrl: /^https?:\/\//i.test(raw) ? raw : undefined
   };
 }
 
@@ -146,7 +261,25 @@ exports.identifyGuest = asyncHandler(async (req, res) => {
   guest.invitationOpenedAt = guest.invitationOpenedAt || new Date();
   if (guest.communicationStatus === 'sent') guest.communicationStatus = 'opened';
   await guest.save();
-  res.json({ guest: publicGuest(guest) });
+  res.json({
+    guest: publicGuest(guest),
+    guestSessionToken: signGuestSession(event, guest, event.externalPortalSlug)
+  });
+});
+
+exports.myStatus = asyncHandler(async (req, res) => {
+  const { event, guest } = await verifyGuestSession(req, req.params.portalSlug);
+  const [rsvp, albumUploads, songRequests] = await Promise.all([
+    Rsvp.findOne({ event: event._id, invitation: { $exists: false }, guest: guest._id }),
+    AlbumAsset.find({ event: event._id, guest: guest._id }).sort('-createdAt').limit(100),
+    SongRequest.find({ event: event._id, guest: guest._id }).sort('-createdAt').limit(100)
+  ]);
+  res.json({
+    guest: publicGuest(guest),
+    rsvp: publicRsvp(rsvp),
+    albumUploads: albumUploads.map(publicAlbumAsset),
+    songRequests: songRequests.map(publicSongRequest)
+  });
 });
 
 exports.rsvp = asyncHandler(async (req, res) => {
@@ -209,17 +342,35 @@ exports.songRequest = asyncHandler(async (req, res) => {
       throw error;
     }
   }
+  const lookup = normalizeSongLookup({
+    query: req.validated.body.query,
+    url: req.validated.body.sourceUrl || req.validated.body.url,
+    title: req.validated.body.title,
+    artist: req.validated.body.artist
+  });
   const songRequest = await SongRequest.create({
     owner: event.owner,
     event: event._id,
     guest: guest?._id,
     requesterName: guest?.name || req.validated.body.requesterName,
     requesterEmail: guest?.email || normalizeEmail(req.validated.body.requesterEmail),
-    title: req.validated.body.title,
-    artist: req.validated.body.artist,
-    dedication: req.validated.body.dedication
+    title: lookup.title,
+    artist: lookup.artist,
+    dedication: req.validated.body.dedication,
+    sourceProvider: lookup.sourceProvider,
+    sourceUrl: lookup.sourceUrl,
+    externalId: lookup.externalId,
+    thumbnailUrl: lookup.thumbnailUrl,
+    previewUrl: lookup.previewUrl,
+    durationMs: lookup.durationMs
   });
-  res.status(201).json({ songRequest: { id: songRequest._id, status: songRequest.status } });
+  res.status(201).json({ songRequest: publicSongRequest(songRequest) });
+});
+
+exports.songLookup = asyncHandler(async (req, res) => {
+  await getPublicEvent(req.params.portalSlug);
+  const song = normalizeSongLookup(req.validated.body);
+  res.json({ song });
 });
 
 exports.embedManifest = asyncHandler(async (req, res) => {

@@ -9,7 +9,15 @@ const songRequestSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   artist: { type: String, trim: true },
   dedication: { type: String, trim: true },
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true }
+  sourceProvider: { type: String, enum: ['manual', 'spotify', 'youtube', 'url'], default: 'manual', index: true },
+  sourceUrl: { type: String, trim: true },
+  externalId: { type: String, trim: true },
+  thumbnailUrl: { type: String, trim: true },
+  previewUrl: { type: String, trim: true },
+  durationMs: Number,
+  status: { type: String, enum: ['pending', 'approved', 'rejected', 'played'], default: 'pending', index: true },
+  reviewedAt: Date,
+  playedAt: Date
 }, { timestamps: true });
 
 module.exports = mongoose.model('SongRequest', songRequestSchema);

@@ -7,6 +7,7 @@ const User = require('../models/User');
 const env = require('../config/env');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { verifyGuestSession } = require('../utils/guestSession');
 
 const s3 = new S3Client({ region: env.awsRegion });
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -97,7 +98,10 @@ exports.uploadPublicEvent = asyncHandler(async (req, res) => {
 
   let guest = null;
   const email = req.body.email ? String(req.body.email).toLowerCase().trim() : '';
-  if (req.body.guest) {
+  if (req.get('authorization')) {
+    const session = await verifyGuestSession(req, req.params.portalSlug);
+    guest = session.guest;
+  } else if (req.body.guest) {
     guest = await Guest.findOne({ _id: req.body.guest, event: event._id }).select('_id name email');
   } else if (email) {
     guest = await Guest.findOne({ email, event: event._id }).select('_id name email');
@@ -114,7 +118,15 @@ exports.uploadPublicEvent = asyncHandler(async (req, res) => {
     url: upload.url
   });
 
-  res.status(201).json({ asset: { id: asset._id, status: asset.status } });
+  res.status(201).json({
+    asset: {
+      id: asset._id,
+      url: asset.url,
+      uploaderName: asset.uploaderName,
+      status: asset.status,
+      createdAt: asset.createdAt
+    }
+  });
 });
 
 exports.list = asyncHandler(async (req, res) => {

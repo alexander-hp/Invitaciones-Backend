@@ -87,7 +87,7 @@ const PLAN_DEFINITIONS = {
     limits: {
       guests: 300,
       galleryImages: 50,
-      music: false,
+      music: true,
       premiumTemplates: false,
       exportData: true,
       whatsappMessaging: true,
