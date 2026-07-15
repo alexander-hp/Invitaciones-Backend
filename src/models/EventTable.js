@@ -6,7 +6,12 @@ const eventTableSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   capacity: { type: Number, required: true, min: 1, max: 100 },
   notes: { type: String, trim: true },
-  order: { type: Number, default: 0 }
+  order: { type: Number, default: 0 },
+  x: { type: Number, default: 0 },
+  y: { type: Number, default: 0 },
+  shape: { type: String, enum: ['round', 'rect', 'oval', 'square'], default: 'round' },
+  width: { type: Number, default: 120 },
+  height: { type: Number, default: 120 }
 }, { timestamps: true });
 
 eventTableSchema.index({ owner: 1, event: 1, name: 1 }, { unique: true });

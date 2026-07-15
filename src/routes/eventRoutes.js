@@ -127,7 +127,12 @@ const tableBody = z.object({
   name: z.string().min(1),
   capacity: z.number().int().min(1).max(100),
   notes: z.string().optional(),
-  order: z.number().int().optional()
+  order: z.number().int().optional(),
+  x: z.number().optional(),
+  y: z.number().optional(),
+  shape: z.enum(['round', 'rect', 'oval', 'square']).optional(),
+  width: z.number().int().min(40).max(600).optional(),
+  height: z.number().int().min(40).max(600).optional()
 }).strict();
 const tableUpdateBody = tableBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
