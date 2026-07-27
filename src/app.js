@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -10,7 +10,9 @@ const paymentController = require('./controllers/paymentController')
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 app.use((req, res, next) => {
   const isExternalApi = req.path.startsWith('/api/external');
   const allowedOrigins = new Set([
@@ -47,6 +49,12 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
+
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static('public/uploads'));
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'invitaciones-api' }));
 app.use('/api', routes);

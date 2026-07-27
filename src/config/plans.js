@@ -224,6 +224,7 @@ function isEventPlanActive(event) {
 function effectivePlanKey(user, event) {
   if (isLegacyPro(user) || isSubscriptionActive(user)) return normalizePlan(user?.subscriptionPlan || user?.plan || 'planner_pro_monthly');
   if (isEventPlanActive(event)) return normalizePlan(event.plan);
+  if (process.env.NODE_ENV === 'development') return 'event_12m';
   return 'free';
 }
 

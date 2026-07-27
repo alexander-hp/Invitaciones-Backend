@@ -4,13 +4,15 @@ const EventAccessToken = require('../models/EventAccessToken');
 const EventTable = require('../models/EventTable');
 const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
+const SongRequest = require('../models/SongRequest');
 const asyncHandler = require('../utils/asyncHandler');
 
 const ROLE_PERMISSIONS = {
   check_in: ['check_in'],
   album_review: ['album_review'],
   client_view: ['client_view'],
-  guest_ops: ['check_in', 'album_review', 'client_view', 'guest_ops']
+  guest_ops: ['check_in', 'album_review', 'client_view', 'guest_ops', 'dj', 'song_requests'],
+  dj: ['dj', 'song_requests']
 };
 
 function hasPermission(access, permission) {
@@ -46,12 +48,13 @@ function publicGuest(guest) {
 
 exports.session = asyncHandler(async (req, res) => {
   const access = await getActiveAccess(req.params.token);
-  const [event, guests, rsvps, tables, albumAssets] = await Promise.all([
+  const [event, guests, rsvps, tables, albumAssets, songRequests] = await Promise.all([
     Event.findById(access.event).select('title type date venue mode externalSiteUrl externalSiteLabel externalPortalSlug'),
     hasPermission(access, 'check_in') || hasPermission(access, 'client_view') ? Guest.find({ event: access.event }).sort('name') : [],
     hasPermission(access, 'client_view') ? Rsvp.find({ event: access.event }).sort('-createdAt').limit(200) : [],
     hasPermission(access, 'client_view') ? EventTable.find({ event: access.event }).sort('order name') : [],
-    hasPermission(access, 'album_review') ? AlbumAsset.find({ event: access.event }).sort('-createdAt').limit(100) : []
+    hasPermission(access, 'album_review') ? AlbumAsset.find({ event: access.event }).sort('-createdAt').limit(100) : [],
+    hasPermission(access, 'dj') || hasPermission(access, 'song_requests') ? SongRequest.find({ event: access.event }).populate('guest', 'name').sort('-createdAt').limit(200) : []
   ]);
   access.lastUsedAt = new Date();
   await access.save();
@@ -63,6 +66,7 @@ exports.session = asyncHandler(async (req, res) => {
     rsvps,
     tables,
     albumAssets,
+    songRequests: songRequests || [],
     expiresAt: access.expiresAt
   });
 });
@@ -109,4 +113,27 @@ exports.updateAlbum = asyncHandler(async (req, res) => {
   access.lastUsedAt = new Date();
   await access.save();
   res.json({ asset });
+});
+
+exports.updateSongRequest = asyncHandler(async (req, res) => {
+  const access = await getActiveAccess(req.params.token);
+  if (!hasPermission(access, 'dj') && !hasPermission(access, 'song_requests')) {
+    const error = new Error('Este link no permite administrar canciones');
+    error.statusCode = 403;
+    throw error;
+  }
+  const songRequest = await SongRequest.findOneAndUpdate(
+    { _id: req.params.requestId, event: access.event },
+    { status: req.validated.body.status, reviewedAt: new Date(), playedAt: req.validated.body.status === 'played' ? new Date() : undefined },
+    { new: true }
+  ).populate('guest', 'name');
+
+  if (!songRequest) {
+    const error = new Error('Solicitud de canción no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+  access.lastUsedAt = new Date();
+  await access.save();
+  res.json({ songRequest });
 });

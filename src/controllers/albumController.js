@@ -20,11 +20,6 @@ function buildPublicUrl(key) {
 }
 
 async function uploadAlbumFile(file, ownerId, eventId) {
-  if (!env.s3Bucket) {
-    const error = new Error('AWS_S3_BUCKET no configurado');
-    error.statusCode = 501;
-    throw error;
-  }
   if (!file) {
     const error = new Error('Archivo requerido');
     error.statusCode = 400;
@@ -43,6 +38,25 @@ async function uploadAlbumFile(file, ownerId, eventId) {
 
   const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '-');
   const key = `album/${ownerId}/${eventId}/${Date.now()}-${safeName}`;
+
+  if (!env.s3Bucket) {
+    if (env.nodeEnv === 'development') {
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(__dirname, '../../public/uploads', key);
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      fs.writeFileSync(filePath, file.buffer);
+
+      const port = process.env.PORT || 4000;
+      const url = `http://localhost:${port}/uploads/${key}`;
+      return { key, url };
+    }
+
+    const error = new Error('AWS_S3_BUCKET no configurado');
+    error.statusCode = 501;
+    throw error;
+  }
+
   await s3.send(new PutObjectCommand({ Bucket: env.s3Bucket, Key: key, ContentType: file.mimetype, Body: file.buffer }));
   return { key, url: buildPublicUrl(key) };
 }
@@ -54,8 +68,8 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const owner = await User.findById(invitation.owner).select('plan');
-  const event = await Event.findById(invitation.event).select('_id plan');
+  const owner = await User.findById(invitation.owner).select('plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
+  const event = await Event.findById(invitation.event).select('_id plan planExpiresAt');
   assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
 
   let guest = null;
@@ -87,7 +101,7 @@ exports.uploadPublicEvent = asyncHandler(async (req, res) => {
     mode: 'external_dashboard',
     externalPortalEnabled: { $ne: false },
     'externalPortalSettings.albumEnabled': { $ne: false }
-  }).select('_id owner plan externalPortalSettings');
+  }).select('_id owner plan planExpiresAt externalPortalSettings');
   if (!event) {
     const error = new Error('Album no disponible');
     error.statusCode = 404;

@@ -111,15 +111,74 @@ function getSpotifyTrackId(url) {
   }
 }
 
-function normalizeSongLookup({ query, url, title, artist }) {
+async function normalizeSongLookup({ query, url, title, artist }) {
   const raw = String(url || query || '').trim();
   const cleanTitle = String(title || '').trim();
   const cleanArtist = String(artist || '').trim();
+
+  const isUrl = /^https?:\/\//i.test(raw);
+
+  if (raw && !isUrl) {
+    try {
+      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(raw)}`;
+      const response = await fetch(searchUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36',
+          'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8'
+        }
+      });
+      if (response.ok) {
+        const html = await response.text();
+        const match = html.match(/ytInitialData\s*=\s*({.+?});/) || html.match(/ytInitialData\s*=\s*({.+?})\s*</);
+        if (match) {
+          const data = JSON.parse(match[1]);
+          const contents = data?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
+          const videoItem = contents.find(item => item.videoRenderer);
+          if (videoItem) {
+            const video = videoItem.videoRenderer;
+            const videoId = video.videoId;
+            const rawTitle = video.title?.runs?.[0]?.text || '';
+            const channel = video.ownerText?.runs?.[0]?.text || '';
+            const thumbnailUrl = video.thumbnail?.thumbnails?.[0]?.url || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+            let parsedTitle = rawTitle;
+            let parsedArtist = channel;
+
+            if (rawTitle.includes(' - ')) {
+              const parts = rawTitle.split(' - ');
+              parsedArtist = parts[0].trim();
+              parsedTitle = parts[1].trim();
+            }
+
+            // Limpieza del título
+            parsedTitle = parsedTitle
+              .replace(/\s*[\(\[][^\]\)]*video[^\]\)]*[\)\]]/i, '')
+              .replace(/\s*[\(\[][^\]\)]*audio[^\]\)]*[\)\]]/i, '')
+              .replace(/\s*[\(\[][^\]\)]*lyrics[^\]\)]*[\)\]]/i, '')
+              .replace(/\s*[\(\[][^\]\)]*official[^\]\)]*[\)\]]/i, '')
+              .trim();
+
+            return {
+              title: parsedTitle,
+              artist: parsedArtist,
+              sourceProvider: 'youtube',
+              sourceUrl: `https://www.youtube.com/watch?v=${videoId}`,
+              externalId: videoId,
+              thumbnailUrl
+            };
+          }
+        }
+      }
+    } catch (err) {
+      console.error('YouTube search failed:', err.message);
+    }
+  }
+
   if (!raw && (cleanTitle || cleanArtist)) {
     return { title: cleanTitle || 'Cancion solicitada', artist: cleanArtist };
   }
 
-  const youtubeId = /^https?:\/\//i.test(raw) ? getYouTubeId(raw) : '';
+  const youtubeId = isUrl ? getYouTubeId(raw) : '';
   if (youtubeId) {
     return {
       title: cleanTitle || 'Cancion de YouTube',
@@ -131,7 +190,7 @@ function normalizeSongLookup({ query, url, title, artist }) {
     };
   }
 
-  const spotifyId = /^https?:\/\//i.test(raw) ? getSpotifyTrackId(raw) : '';
+  const spotifyId = isUrl ? getSpotifyTrackId(raw) : '';
   if (spotifyId) {
     return {
       title: cleanTitle || 'Cancion de Spotify',
@@ -146,8 +205,8 @@ function normalizeSongLookup({ query, url, title, artist }) {
   return {
     title: cleanTitle || parts[0] || raw || 'Cancion solicitada',
     artist: cleanArtist || parts[1] || '',
-    sourceProvider: /^https?:\/\//i.test(raw) ? 'url' : 'manual',
-    sourceUrl: /^https?:\/\//i.test(raw) ? raw : undefined
+    sourceProvider: isUrl ? 'url' : 'manual',
+    sourceUrl: isUrl ? raw : undefined
   };
 }
 
@@ -357,7 +416,7 @@ exports.songRequest = asyncHandler(async (req, res) => {
       throw error;
     }
   }
-  const lookup = normalizeSongLookup({
+  const lookup = await normalizeSongLookup({
     query: req.validated.body.query,
     url: req.validated.body.sourceUrl || req.validated.body.url,
     title: req.validated.body.title,
@@ -384,7 +443,7 @@ exports.songRequest = asyncHandler(async (req, res) => {
 
 exports.songLookup = asyncHandler(async (req, res) => {
   await getPublicEvent(req.params.portalSlug);
-  const song = normalizeSongLookup(req.validated.body);
+  const song = await normalizeSongLookup(req.validated.body);
   res.json({ song });
 });
 

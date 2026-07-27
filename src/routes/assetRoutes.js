@@ -30,6 +30,7 @@ const whatsappMediaBody = z.object({
 
 router.post('/inspect-url', protect, validate(z.object({ body: inspectUrlBody })), controller.inspectUrl);
 router.post('/upload-url', protect, validate(z.object({ body: uploadUrlBody })), controller.createUploadUrl);
+router.put('/local-upload', controller.localUpload);
 router.get('/events/:eventId/whatsapp-media', protect, validate(z.object({ params: z.object({ eventId: z.string().min(12) }) })), controller.listWhatsAppMedia);
 router.post('/events/:eventId/whatsapp-media', protect, validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: whatsappMediaBody })), controller.createWhatsAppMedia);
 router.delete('/events/:eventId/whatsapp-media/:assetId', protect, validate(z.object({ params: z.object({ eventId: z.string().min(12), assetId: z.string().min(12) }) })), controller.deleteWhatsAppMedia);

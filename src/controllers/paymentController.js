@@ -204,6 +204,28 @@ exports.createCheckout = asyncHandler(async (req, res) => {
   });
 
   if (!stripe) {
+    if (env.nodeEnv === 'development') {
+      payment.status = 'paid';
+      payment.paidAt = new Date();
+      if (selected.billingType === 'subscription') {
+        await payment.save();
+        await applySubscriptionToUser({
+          userId: payment.owner,
+          planKey: selected.key,
+          status: 'active'
+        });
+      } else {
+        await activateOneTimePayment(payment, 'evt_local_mock');
+      }
+      return res.json({
+        checkoutUrl: null,
+        sessionId: null,
+        manualPayment: false,
+        payment,
+        message: `Plan ${selected.name} activado automáticamente en modo de desarrollo.`
+      });
+    }
+
     return res.json({
       checkoutUrl: null,
       sessionId: null,

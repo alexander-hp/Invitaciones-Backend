@@ -329,3 +329,10 @@ Notas QA:
 - `POST /api/guests` responde `409` con `details.field`, `details.guestId` y `details.guestName` si el contacto ya existe.
 - Se agrego `PATCH /api/guests/:id` para editar nombre, email, telefono, grupo y acompanantes sin permitir duplicados contra otros invitados del evento.
 - Importacion CSV/XLSX ahora importa filas validas y omite duplicadas; responde `duplicateRows` y `duplicates` con fila, campo, valor y nombre del invitado existente.
+
+## Actualizacion 2026-07-23 - Almacenamiento local de assets y fix CORP/CORS
+
+- `STORAGE_PROVIDER`: Se agrego `STORAGE_PROVIDER` en `env.js` con fallback a `'local'` cuando `AWS_S3_BUCKET` no esta configurado.
+- `createUploadUrl`: Si `storageProvider === 'local'` o `!s3Bucket`, genera URLs locales (`uploadUrl: http://localhost:4000/api/assets/local-upload?key=...` y `publicUrl: http://localhost:4000/uploads/...`).
+- Security Headers / CORP: Se ajusto Helmet en `app.js` (`crossOriginResourcePolicy: { policy: 'cross-origin' }`) y la ruta estatica `/uploads` (`Access-Control-Allow-Origin: *`, `Cross-Origin-Resource-Policy: cross-origin`).
+- Esto resuelve el problema de carga de imagenes locales donde el upload daba success pero la imagen se bloqueaba en el navegador por CORP al renderizarse en el frontend (`http://localhost:4200`).

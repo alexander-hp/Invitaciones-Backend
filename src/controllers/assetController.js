@@ -165,12 +165,6 @@ exports.inspectUrl = asyncHandler(async (req, res) => {
 });
 
 exports.createUploadUrl = asyncHandler(async (req, res) => {
-  if (!env.s3Bucket) {
-    const error = new Error('AWS_S3_BUCKET no configurado');
-    error.statusCode = 501;
-    throw error;
-  }
-
   const { fileName, contentType, folder = 'assets', event: eventId, size } = req.validated.body;
   assertMediaAllowed({ folder, contentType, size });
   let event = null;
@@ -194,6 +188,14 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
   const key = `${folder}/${req.user._id}/${Date.now()}-${safeName}`;
+
+  if (env.storageProvider === 'local' || !env.s3Bucket) {
+    const baseUrl = env.mediaPublicBaseUrl || `${req.protocol}://${req.get('host')}`;
+    const uploadUrl = `${baseUrl}/api/assets/local-upload?key=${encodeURIComponent(key)}`;
+    const publicUrl = `${baseUrl}/uploads/${key}`;
+    return res.json({ key, uploadUrl, publicUrl });
+  }
+
   const command = new PutObjectCommand({ Bucket: env.s3Bucket, Key: key, ContentType: contentType });
   let uploadUrl;
   try {
@@ -271,3 +273,28 @@ exports.deleteWhatsAppMedia = asyncHandler(async (req, res) => {
   }
   res.json({ asset });
 });
+
+exports.localUpload = (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const fileKey = req.query.key;
+  if (!fileKey) return res.status(400).json({ message: 'Missing key parameter' });
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const safeKey = fileKey.replace(/\.\./g, '');
+  const filePath = path.join(__dirname, '../../public/uploads', safeKey);
+
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+
+  const writeStream = fs.createWriteStream(filePath);
+  req.pipe(writeStream);
+
+  writeStream.on('finish', () => {
+    res.json({ ok: true, message: 'File uploaded locally successfully' });
+  });
+
+  writeStream.on('error', (err) => {
+    console.error('Local upload write error:', err);
+    res.status(500).json({ message: 'Error writing file locally' });
+  });
+};
