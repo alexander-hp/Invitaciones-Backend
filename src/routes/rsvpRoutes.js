@@ -23,6 +23,7 @@ const publicRsvpBody = z.object({
   }).strict()).optional(),
   message: z.string().optional(),
   declineConfirmed: z.boolean().optional(),
+  phone: z.string().min(6).max(30).optional(),
   phoneCountryCode: z.string().regex(/^\+\d{1,4}$/, 'Codigo de pais invalido').optional(),
   phoneNationalNumber: z.string().regex(/^\d+$/, 'Numero de telefono invalido').min(6).max(15).optional()
 }).strict();

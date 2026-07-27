@@ -69,6 +69,19 @@ const invitationContentBody = z.object({
   }).strict().optional(),
   brandLogoUrl: z.string().url().or(z.literal('')).optional(),
   hideBranding: z.boolean().optional(),
+  sectionSettings: z.object({
+    story: z.boolean().optional(),
+    locations: z.boolean().optional(),
+    itinerary: z.boolean().optional(),
+    dressCode: z.boolean().optional(),
+    rsvp: z.boolean().optional(),
+    giftRegistry: z.boolean().optional(),
+    digitalEnvelope: z.boolean().optional(),
+    lodging: z.boolean().optional(),
+    gallery: z.boolean().optional(),
+    guestAlbum: z.boolean().optional(),
+    dedications: z.boolean().optional()
+  }).strict().optional(),
   lodging: z.array(z.object({
     name: z.string().optional(),
     description: z.string().optional(),
@@ -83,6 +96,15 @@ const rsvpSettingsBody = z.object({
   allowChangesUntilDeadline: z.boolean().optional(),
   declineRequiresConfirmation: z.boolean().optional(),
   reminderDaysBeforeDeadline: z.number().int().min(0).max(60).optional(),
+  identityMethods: z.array(z.enum(['email', 'phone'])).max(2).optional(),
+  allowCompanionsDefault: z.boolean().optional(),
+  defaultAllowedCompanions: z.number().int().min(0).max(20).optional(),
+  maxAttendees: z.number().int().min(1).max(10000).optional(),
+  allowedGuestIds: z.array(z.string().min(12)).max(1000).optional(),
+  allowedRoles: z.array(z.string().min(1)).max(50).optional(),
+  allowedGroups: z.array(z.string().min(1)).max(100).optional(),
+  allowedEmails: z.array(z.string().email()).max(1000).optional(),
+  allowedPhones: z.array(z.string().min(6).max(30)).max(1000).optional(),
   customQuestions: z.array(z.object({
     key: z.string().min(1).optional(),
     label: z.string().min(1),
@@ -95,14 +117,14 @@ const invitationCreateBody = z.object({
   event: z.string().min(12),
   template: z.string().min(12).optional(),
   slug: z.string().min(1).optional(),
-  accessMode: z.enum(['open', 'guest_list']).optional(),
+  accessMode: z.enum(['open', 'public', 'guest_list', 'specific_users']).optional(),
   rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict();
 const invitationUpdateBody = z.object({
   template: z.string().min(12).optional(),
   slug: z.string().min(1).optional(),
-  accessMode: z.enum(['open', 'guest_list']).optional(),
+  accessMode: z.enum(['open', 'public', 'guest_list', 'specific_users']).optional(),
   rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
@@ -119,7 +141,10 @@ router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
 router.get('/public/:slug/album', publicInvitationLimiter, albumController.publicApproved);
 router.get('/public/:slug/dedications', publicInvitationLimiter, dedicationController.listInvitationPublic);
 router.get('/public/:slug/guest-token/:token', guestAccessLimiter, controller.guestByToken);
-router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({ email: z.string().email() }).strict() })), controller.guestAccess);
+router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({
+  email: z.string().email().optional(),
+  phone: z.string().min(6).max(30).optional()
+}).strict().refine((body) => body.email || body.phone, 'Email o telefono requerido') })), controller.guestAccess);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
 router.post('/public/:slug/dedications', publicInvitationLimiter, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
 router.use(protect);
