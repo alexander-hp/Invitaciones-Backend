@@ -67,6 +67,15 @@ const invitationContentBody = z.object({
     requireApproval: z.boolean().optional(),
     introText: z.string().max(600).optional()
   }).strict().optional(),
+  moderationSettings: z.object({
+    notifyOnReview: z.boolean().optional(),
+    autoApproveRoles: z.array(z.string()).max(50).optional(),
+    autoApproveGroups: z.array(z.string()).max(100).optional(),
+    autoApproveEmails: z.array(z.string().email()).max(1000).optional(),
+    autoApprovePhones: z.array(z.string().min(6).max(30)).max(1000).optional(),
+    autoApproveAlbum: z.boolean().optional(),
+    autoApproveDedications: z.boolean().optional()
+  }).strict().optional(),
   brandLogoUrl: z.string().url().or(z.literal('')).optional(),
   hideBranding: z.boolean().optional(),
   sectionSettings: z.object({

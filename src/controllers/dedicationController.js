@@ -4,6 +4,7 @@ const Guest = require('../models/Guest');
 const Invitation = require('../models/Invitation');
 const asyncHandler = require('../utils/asyncHandler');
 const { verifyGuestSession } = require('../utils/guestSession');
+const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -55,9 +56,9 @@ async function getPublicExternalEvent(portalSlug) {
 }
 
 async function findGuest(eventId, body) {
-  if (body.guest) return Guest.findOne({ _id: body.guest, event: eventId }).select('_id name email');
+  if (body.guest) return Guest.findOne({ _id: body.guest, event: eventId }).select('_id name email phone group roles visibilityGroup');
   const email = normalizeEmail(body.email);
-  if (email) return Guest.findOne({ email, event: eventId }).select('_id name email');
+  if (email) return Guest.findOne({ email, event: eventId }).select('_id name email phone group roles visibilityGroup');
   return null;
 }
 
@@ -79,6 +80,12 @@ exports.createExternalPublic = asyncHandler(async (req, res) => {
   } else {
     guest = await findGuest(event._id, req.validated.body);
   }
+  const status = initialModerationStatus({
+    guest,
+    settings: event.externalContent?.moderationSettings || {},
+    kind: 'dedication',
+    requireApproval: event.externalContent?.dedicationSettings?.requireApproval !== false
+  });
   const dedication = await Dedication.create({
     owner: event.owner,
     event: event._id,
@@ -87,6 +94,8 @@ exports.createExternalPublic = asyncHandler(async (req, res) => {
     email: normalizeEmail(req.validated.body.email) || guest?.email,
     message: req.validated.body.message,
     type: req.validated.body.type || 'dedication',
+    status,
+    reviewedAt: status === 'approved' ? new Date() : undefined,
     visibility: req.validated.body.visibility || 'public'
   });
   res.status(201).json({ dedication: publicDedication(dedication) });
@@ -107,13 +116,19 @@ exports.listInvitationPublic = asyncHandler(async (req, res) => {
 });
 
 exports.createInvitationPublic = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event owner');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event owner content');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
     throw error;
   }
   const guest = await findGuest(invitation.event, req.validated.body);
+  const status = initialModerationStatus({
+    guest,
+    settings: invitation.content?.moderationSettings || {},
+    kind: 'dedication',
+    requireApproval: invitation.content?.dedicationSettings?.requireApproval !== false
+  });
   const dedication = await Dedication.create({
     owner: invitation.owner,
     event: invitation.event,
@@ -123,13 +138,15 @@ exports.createInvitationPublic = asyncHandler(async (req, res) => {
     email: normalizeEmail(req.validated.body.email) || guest?.email,
     message: req.validated.body.message,
     type: req.validated.body.type || 'dedication',
+    status,
+    reviewedAt: status === 'approved' ? new Date() : undefined,
     visibility: req.validated.body.visibility || 'public'
   });
   res.status(201).json({ dedication: publicDedication(dedication) });
 });
 
 exports.listAdmin = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title externalContent');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
@@ -159,6 +176,16 @@ exports.updateAdmin = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+  await notifyReviewStatus({
+    guest: dedication.guest,
+    email: dedication.email,
+    name: dedication.publicName,
+    event,
+    itemType: 'dedication',
+    status: dedication.status,
+    itemTitle: dedication.message,
+    settings: event.externalContent?.moderationSettings || {}
+  });
   res.json({ dedication: adminDedication(dedication) });
 });
 

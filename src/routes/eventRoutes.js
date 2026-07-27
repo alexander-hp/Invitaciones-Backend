@@ -79,7 +79,18 @@ const eventBody = z.object({
     songRequestSettings: z.object({
       enabled: z.boolean().optional(),
       maxRequestsPerGuest: z.number().int().min(1).max(20).optional(),
-      allowDedications: z.boolean().optional()
+      allowDedications: z.boolean().optional(),
+      requireApproval: z.boolean().optional()
+    }).strict().optional(),
+    moderationSettings: z.object({
+      notifyOnReview: z.boolean().optional(),
+      autoApproveRoles: z.array(z.string()).max(50).optional(),
+      autoApproveGroups: z.array(z.string()).max(100).optional(),
+      autoApproveEmails: z.array(z.string().email()).max(1000).optional(),
+      autoApprovePhones: z.array(z.string().min(6).max(30)).max(1000).optional(),
+      autoApproveAlbum: z.boolean().optional(),
+      autoApproveSongs: z.boolean().optional(),
+      autoApproveDedications: z.boolean().optional()
     }).strict().optional(),
     giftRegistry: z.array(z.object({
       store: z.string().optional(),
@@ -136,11 +147,11 @@ const tableBody = z.object({
 }).strict();
 const tableUpdateBody = tableBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
-const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']) }).strict();
+const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
 const dedicationStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'hidden']) }).strict();
 const publicEmailBody = z.object({ email: z.string().email() }).strict();
 const accessLinkBody = z.object({
-  role: z.enum(['check_in', 'album_review', 'client_view', 'guest_ops']),
+  role: z.enum(['check_in', 'album_review', 'client_view', 'guest_ops', 'dj']),
   label: z.string().max(120).optional(),
   days: z.number().int().min(1).max(90).optional()
 }).strict();

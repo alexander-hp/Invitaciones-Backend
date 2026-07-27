@@ -9,6 +9,7 @@ const albumController = require('./albumController');
 const dedicationController = require('./dedicationController');
 const env = require('../config/env');
 const { signGuestSession, verifyGuestSession } = require('../utils/guestSession');
+const { initialModerationStatus } = require('../utils/moderation');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -170,6 +171,7 @@ function safeContent(event) {
     sections: (content.sections || []).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)),
     rsvpSettings: content.rsvpSettings || {},
     songRequestSettings: content.songRequestSettings || { enabled: true, maxRequestsPerGuest: 3, allowDedications: true },
+    moderationSettings: content.moderationSettings || { notifyOnReview: true },
     giftRegistry: (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0)),
     digitalEnvelope: content.digitalEnvelope || {},
     giftSettings: content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true },
@@ -363,6 +365,12 @@ exports.songRequest = asyncHandler(async (req, res) => {
     title: req.validated.body.title,
     artist: req.validated.body.artist
   });
+  const status = initialModerationStatus({
+    guest,
+    settings: event.externalContent?.moderationSettings || {},
+    kind: 'song',
+    requireApproval: event.externalContent?.songRequestSettings?.requireApproval !== false
+  });
   const songRequest = await SongRequest.create({
     owner: event.owner,
     event: event._id,
@@ -377,7 +385,9 @@ exports.songRequest = asyncHandler(async (req, res) => {
     externalId: lookup.externalId,
     thumbnailUrl: lookup.thumbnailUrl,
     previewUrl: lookup.previewUrl,
-    durationMs: lookup.durationMs
+    durationMs: lookup.durationMs,
+    status,
+    reviewedAt: status === 'approved' ? new Date() : undefined
   });
   res.status(201).json({ songRequest: publicSongRequest(songRequest) });
 });

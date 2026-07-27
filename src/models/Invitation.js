@@ -80,6 +80,15 @@ const invitationSchema = new mongoose.Schema({
       requireApproval: { type: Boolean, default: true },
       introText: String
     },
+    moderationSettings: {
+      notifyOnReview: { type: Boolean, default: true },
+      autoApproveRoles: [{ type: String, trim: true, lowercase: true }],
+      autoApproveGroups: [{ type: String, trim: true }],
+      autoApproveEmails: [{ type: String, lowercase: true, trim: true }],
+      autoApprovePhones: [{ type: String, trim: true }],
+      autoApproveAlbum: { type: Boolean, default: false },
+      autoApproveDedications: { type: Boolean, default: false }
+    },
     brandLogoUrl: String,
     hideBranding: { type: Boolean, default: false },
     sectionSettings: {

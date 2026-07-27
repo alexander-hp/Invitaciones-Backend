@@ -224,6 +224,37 @@ async function sendGuestInvitationEmail({ to, guest, event, invitation, publicUr
   return sendMail({ to, subject, text, html });
 }
 
+async function sendGuestReviewStatusEmail({ to, name, event, itemType, status, itemTitle }) {
+  const safeName = name || 'Invitado';
+  const title = event?.title || 'tu evento';
+  const labels = {
+    album: 'foto',
+    song: 'cancion',
+    dedication: 'dedicatoria'
+  };
+  const statusLabels = {
+    approved: 'aprobada',
+    rejected: 'rechazada',
+    played: 'marcada como tocada',
+    hidden: 'oculta'
+  };
+  const itemLabel = labels[itemType] || 'envio';
+  const statusLabel = statusLabels[status] || status;
+  const subject = `Tu ${itemLabel} fue ${statusLabel} - ${title}`;
+  const detail = itemTitle ? `Detalle: ${itemTitle}` : '';
+  const text = [
+    `Hola ${safeName},`,
+    `Tu ${itemLabel} para ${title} fue ${statusLabel}.`,
+    detail
+  ].filter(Boolean).join('\n\n');
+  const html = [
+    `<p>Hola ${escapeHtml(safeName)},</p>`,
+    `<p>Tu ${escapeHtml(itemLabel)} para <strong>${escapeHtml(title)}</strong> fue ${escapeHtml(statusLabel)}.</p>`,
+    detail ? `<p>${escapeHtml(detail)}</p>` : ''
+  ].join('');
+  return sendMail({ to, subject, text, html });
+}
+
 module.exports = {
   isEmailConfigured,
   sendMail,
@@ -232,5 +263,6 @@ module.exports = {
   sendRsvpNotification,
   sendInvitationPublishedEmail,
   sendRsvpReminderEmail,
-  sendGuestInvitationEmail
+  sendGuestInvitationEmail,
+  sendGuestReviewStatusEmail
 };

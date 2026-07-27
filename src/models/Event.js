@@ -64,7 +64,18 @@ const eventSchema = new mongoose.Schema({
     songRequestSettings: {
       enabled: { type: Boolean, default: true },
       maxRequestsPerGuest: { type: Number, default: 3, min: 1, max: 20 },
-      allowDedications: { type: Boolean, default: true }
+      allowDedications: { type: Boolean, default: true },
+      requireApproval: { type: Boolean, default: true }
+    },
+    moderationSettings: {
+      notifyOnReview: { type: Boolean, default: true },
+      autoApproveRoles: [{ type: String, trim: true, lowercase: true }],
+      autoApproveGroups: [{ type: String, trim: true }],
+      autoApproveEmails: [{ type: String, lowercase: true, trim: true }],
+      autoApprovePhones: [{ type: String, trim: true }],
+      autoApproveAlbum: { type: Boolean, default: false },
+      autoApproveSongs: { type: Boolean, default: false },
+      autoApproveDedications: { type: Boolean, default: false }
     },
     giftRegistry: [{
       store: { type: String, trim: true },
