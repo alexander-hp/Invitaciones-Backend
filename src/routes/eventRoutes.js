@@ -146,6 +146,11 @@ const tableBody = z.object({
   height: z.number().int().min(40).max(600).optional()
 }).strict();
 const tableUpdateBody = tableBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
+const tableAutoAssignBody = z.object({
+  strategy: z.enum(['fill_order', 'by_group']).optional(),
+  includeStatuses: z.array(z.enum(['pending', 'confirmed', 'declined'])).min(1).max(3).optional(),
+  overwrite: z.boolean().optional()
+}).strict();
 const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
 const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
 const dedicationStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'hidden']) }).strict();
@@ -170,6 +175,7 @@ router.post('/:eventId/send-email', validate(z.object({ params: z.object({ event
 router.post('/:eventId/check-in-link', validate(z.object({ body: checkInLinkBody })), checkInController.createLink);
 router.get('/:eventId/tables', tableController.list);
 router.post('/:eventId/tables', validate(z.object({ body: tableBody })), tableController.create);
+router.post('/:eventId/tables/auto-assign', validate(z.object({ body: tableAutoAssignBody })), tableController.autoAssign);
 router.patch('/:eventId/tables/:tableId', validate(z.object({ body: tableUpdateBody })), tableController.update);
 router.delete('/:eventId/tables/:tableId', tableController.remove);
 router.get('/:eventId/album', albumController.list);
