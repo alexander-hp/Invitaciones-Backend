@@ -4,9 +4,53 @@ const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Invitation = require('../models/Invitation');
 const EventAccessToken = require('../models/EventAccessToken');
+const EventMember = require('../models/EventMember');
+const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const emailService = require('../services/emailService');
 const env = require('../config/env');
+
+function normalizeEmail(email) {
+  return String(email || '').toLowerCase().trim();
+}
+
+function serializeMember(member) {
+  return {
+    id: member._id,
+    user: member.user,
+    email: member.email,
+    name: member.name,
+    role: member.role,
+    permissions: member.permissions || [],
+    status: member.status,
+    invitedAt: member.invitedAt,
+    acceptedAt: member.acceptedAt,
+    lastUsedAt: member.lastUsedAt,
+    createdAt: member.createdAt,
+    updatedAt: member.updatedAt
+  };
+}
+
+function defaultPermissionsForRole(role) {
+  return EventMember.ROLE_PERMISSIONS[role] || EventMember.ROLE_PERMISSIONS.client;
+}
+
+async function findOwnedOrMemberEvent(eventId, user, permission = 'view_event') {
+  const owned = await Event.findOne({ _id: eventId, owner: user._id });
+  if (owned) return { event: owned, access: { owner: true, permissions: EventMember.PERMISSIONS } };
+
+  const member = await EventMember.findOne({
+    event: eventId,
+    user: user._id,
+    status: 'active',
+    permissions: permission
+  });
+  if (!member) return null;
+  member.lastUsedAt = new Date();
+  await member.save();
+  const event = await Event.findById(eventId);
+  return event ? { event, access: { owner: false, role: member.role, permissions: member.permissions } } : null;
+}
 
 async function buildUniquePortalSlug(source, excludeId) {
   const base = slugify(source || 'evento', { lower: true, strict: true }) || 'evento';
@@ -79,7 +123,16 @@ function publicExternalEvent(event) {
 }
 
 exports.list = asyncHandler(async (req, res) => {
-  const events = await Event.find({ owner: req.user._id }).sort('-createdAt');
+  const memberships = await EventMember.find({ user: req.user._id, status: 'active', permissions: 'view_event' }).select('event role permissions').lean();
+  const memberEventIds = memberships.map((member) => member.event);
+  const membershipByEvent = new Map(memberships.map((member) => [String(member.event), member]));
+  const events = await Event.find({ $or: [{ owner: req.user._id }, { _id: { $in: memberEventIds } }] }).sort('-createdAt').lean();
+  events.forEach((event) => {
+    const member = membershipByEvent.get(String(event._id));
+    event.access = String(event.owner) === String(req.user._id)
+      ? { owner: true, permissions: EventMember.PERMISSIONS }
+      : { owner: false, role: member?.role, permissions: member?.permissions || [] };
+  });
   res.json({ events });
 });
 
@@ -90,13 +143,13 @@ exports.create = asyncHandler(async (req, res) => {
 });
 
 exports.get = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!event) {
+  const result = await findOwnedOrMemberEvent(req.params.id, req.user);
+  if (!result) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
     throw error;
   }
-  res.json({ event });
+  res.json({ event: result.event, access: result.access });
 });
 
 exports.update = asyncHandler(async (req, res) => {
@@ -238,6 +291,83 @@ exports.revokeAccessLink = asyncHandler(async (req, res) => {
     throw error;
   }
   res.json({ message: 'Link revocado' });
+});
+
+exports.listMembers = asyncHandler(async (req, res) => {
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const members = await EventMember.find({ owner: req.user._id, event: event._id }).sort('-createdAt').populate('user', 'name email role accountType avatarUrl');
+  res.json({ members: members.map(serializeMember), permissions: EventMember.PERMISSIONS, rolePermissions: EventMember.ROLE_PERMISSIONS });
+});
+
+exports.createMember = asyncHandler(async (req, res) => {
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id owner');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const email = normalizeEmail(req.validated.body.email);
+  const user = await User.findOne({ email }).select('_id name email');
+  const member = await EventMember.findOneAndUpdate(
+    { event: event._id, email },
+    {
+      owner: req.user._id,
+      event: event._id,
+      user: user?._id,
+      email,
+      name: req.validated.body.name || user?.name,
+      role: req.validated.body.role,
+      permissions: req.validated.body.permissions || defaultPermissionsForRole(req.validated.body.role),
+      status: user ? 'active' : 'invited',
+      invitedBy: req.user._id,
+      invitedAt: new Date(),
+      ...(user ? { acceptedAt: new Date() } : {})
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  res.status(201).json({ member: serializeMember(member) });
+});
+
+exports.updateMember = asyncHandler(async (req, res) => {
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const member = await EventMember.findOneAndUpdate(
+    { _id: req.params.memberId, owner: req.user._id, event: event._id },
+    {
+      ...req.validated.body,
+      ...(req.validated.body.role && !req.validated.body.permissions ? { permissions: defaultPermissionsForRole(req.validated.body.role) } : {})
+    },
+    { new: true }
+  );
+  if (!member) {
+    const error = new Error('Miembro no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  res.json({ member: serializeMember(member) });
+});
+
+exports.removeMember = asyncHandler(async (req, res) => {
+  const member = await EventMember.findOneAndUpdate(
+    { _id: req.params.memberId, owner: req.user._id, event: req.params.eventId },
+    { status: 'disabled' },
+    { new: true }
+  );
+  if (!member) {
+    const error = new Error('Miembro no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  res.json({ message: 'Miembro desactivado', member: serializeMember(member) });
 });
 
 async function primaryInvitationForEvent(eventId, owner) {

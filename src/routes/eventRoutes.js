@@ -160,6 +160,31 @@ const accessLinkBody = z.object({
   label: z.string().max(120).optional(),
   days: z.number().int().min(1).max(90).optional()
 }).strict();
+const memberPermission = z.enum([
+  'view_event',
+  'edit_event',
+  'view_metrics',
+  'manage_guests',
+  'manage_tables',
+  'check_in',
+  'review_album',
+  'review_dedications',
+  'manage_songs',
+  'view_payments'
+]);
+const memberRole = z.enum(['organizer', 'client', 'venue_owner', 'vendor', 'staff', 'dj', 'photographer']);
+const memberBody = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(120).optional().or(z.literal('')),
+  role: memberRole,
+  permissions: z.array(memberPermission).min(1).max(10).optional()
+}).strict();
+const memberUpdateBody = z.object({
+  name: z.string().min(1).max(120).optional().or(z.literal('')),
+  role: memberRole.optional(),
+  permissions: z.array(memberPermission).min(1).max(10).optional(),
+  status: z.enum(['invited', 'active', 'disabled']).optional()
+}).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo');
 
 router.get('/public/:portalSlug', controller.publicByPortalSlug);
 router.get('/public/:portalSlug/album', albumController.publicEventApproved);
@@ -187,5 +212,9 @@ router.patch('/:eventId/dedications/:dedicationId', validate(z.object({ body: de
 router.get('/:eventId/access-links', controller.listAccessLinks);
 router.post('/:eventId/access-links', validate(z.object({ body: accessLinkBody })), controller.createAccessLink);
 router.delete('/:eventId/access-links/:linkId', controller.revokeAccessLink);
+router.get('/:eventId/members', controller.listMembers);
+router.post('/:eventId/members', validate(z.object({ body: memberBody })), controller.createMember);
+router.patch('/:eventId/members/:memberId', validate(z.object({ body: memberUpdateBody })), controller.updateMember);
+router.delete('/:eventId/members/:memberId', controller.removeMember);
 
 module.exports = router;
