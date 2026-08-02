@@ -202,43 +202,16 @@ async function getOpenWaSessionStatus() {
       headers: { 'X-API-Key': env.openWaApiKey }
     });
     const data = await response.json().catch(() => ({}));
-    const ready = response.ok && data.status === 'ready';
-    const diagnostics = ready ? {} : await openWaSessionDiagnostics(baseUrl);
     return {
       configured: true,
-      ready,
-      configuredSessionId: env.openWaSessionId,
+      ready: response.ok && data.status === 'ready',
       status: data.status || (response.ok ? 'unknown' : 'unreachable'),
       phone: data.phone,
-      pushName: data.pushName,
-      ...diagnostics
+      pushName: data.pushName
     };
   } catch (error) {
-    const diagnostics = await openWaSessionDiagnostics(baseUrl).catch(() => ({}));
-    return { configured: true, ready: false, configuredSessionId: env.openWaSessionId, status: 'unreachable', error: error.message, ...diagnostics };
+    return { configured: true, ready: false, status: 'unreachable', error: error.message };
   }
-}
-
-async function openWaSessionDiagnostics(baseUrl) {
-  const response = await fetch(`${baseUrl}/api/sessions`, {
-    headers: { 'X-API-Key': env.openWaApiKey }
-  });
-  const sessions = await response.json().catch(() => []);
-  if (!response.ok || !Array.isArray(sessions)) return {};
-  const availableSessions = sessions.map((session) => ({
-    id: session.id,
-    name: session.name,
-    status: session.status,
-    phone: session.phone,
-    pushName: session.pushName,
-    lastActive: session.lastActive
-  }));
-  const suggested = availableSessions.find((session) => session.status === 'ready');
-  return {
-    availableSessions,
-    suggestedSessionId: suggested?.id,
-    suggestedStatus: suggested?.status
-  };
 }
 
 function openWaMediaEndpoint(mediaType) {
