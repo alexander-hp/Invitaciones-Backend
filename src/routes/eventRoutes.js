@@ -43,6 +43,7 @@ const eventBody = z.object({
       url: z.string().url(),
       description: z.string().optional()
     }).strict()).max(20).optional(),
+    sectionMusic: z.record(z.string(), z.string()).optional(),
     locations: z.array(z.object({
       type: z.string().optional(),
       name: z.string().optional(),
@@ -136,14 +137,28 @@ const checkInLinkBody = z.object({
 }).strict();
 const tableBody = z.object({
   name: z.string().min(1),
-  capacity: z.number().int().min(1).max(100),
+  capacity: z.number().int().min(0).max(100),
   notes: z.string().optional(),
   order: z.number().int().optional(),
   x: z.number().optional(),
   y: z.number().optional(),
-  shape: z.enum(['round', 'rect', 'oval', 'square']).optional(),
-  width: z.number().int().min(40).max(600).optional(),
-  height: z.number().int().min(40).max(600).optional()
+  shape: z.enum([
+    'round',
+    'rect',
+    'oval',
+    'square',
+    'dance_floor',
+    'stage_dj',
+    'bar',
+    'gift_table',
+    'cake_table',
+    'photobooth',
+    'entrance'
+  ]).optional(),
+  width: z.number().int().min(10).max(1200).optional(),
+  height: z.number().int().min(10).max(1200).optional(),
+  floor: z.number().int().min(1).optional(),
+  floorName: z.string().optional()
 }).strict();
 const tableUpdateBody = tableBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
 const tableAutoAssignBody = z.object({

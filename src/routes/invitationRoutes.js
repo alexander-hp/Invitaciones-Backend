@@ -23,6 +23,7 @@ const invitationContentBody = z.object({
     accent: z.string().optional()
   }).optional(),
   musicUrl: z.string().optional(),
+  sectionMusic: z.record(z.string(), z.string()).optional(),
   coverImageUrl: z.string().optional(),
   gallery: z.array(z.string()).optional(),
   itinerary: z.array(z.object({
@@ -107,7 +108,7 @@ const rsvpSettingsBody = z.object({
   reminderDaysBeforeDeadline: z.number().int().min(0).max(60).optional(),
   identityMethods: z.array(z.enum(['email', 'phone'])).max(2).optional(),
   allowCompanionsDefault: z.boolean().optional(),
-  defaultAllowedCompanions: z.number().int().min(0).max(20).optional(),
+  defaultAllowedCompanions: z.number().int().min(0).max(50).optional(),
   maxAttendees: z.number().int().min(1).max(10000).optional(),
   allowedGuestIds: z.array(z.string().min(12)).max(1000).optional(),
   allowedRoles: z.array(z.string().min(1)).max(50).optional(),

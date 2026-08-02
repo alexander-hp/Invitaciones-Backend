@@ -45,8 +45,13 @@ function publicTemplate(template) {
 }
 
 function publicInvitation(invitation) {
-  const content = invitation.content?.toObject ? invitation.content.toObject() : { ...(invitation.content || {}) };
+  const content = invitation.content?.toObject ? invitation.content.toObject({ flattenMaps: true }) : { ...(invitation.content || {}) };
   delete content.privateAlbum;
+  if (content.sectionMusic && content.sectionMusic instanceof Map) {
+    content.sectionMusic = Object.fromEntries(content.sectionMusic);
+  } else {
+    content.sectionMusic = content.sectionMusic || {};
+  }
   content.giftRegistry = (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
   content.giftSettings = content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true };
   content.dedicationSettings = content.dedicationSettings || { enabled: true, requireApproval: true };
@@ -132,6 +137,20 @@ async function assertInvitationPlanLimits(user, event, payload) {
   }
   if (payload.content?.musicUrl && !limits.music) {
     const error = new Error('La musica requiere Evento Individual o Pro');
+    error.statusCode = 402;
+    throw error;
+  }
+  const secMusicRaw = payload.content?.sectionMusic;
+  const secMusicValues = secMusicRaw
+    ? (secMusicRaw instanceof Map
+        ? Array.from(secMusicRaw.values())
+        : typeof secMusicRaw === 'object'
+          ? Object.values(secMusicRaw)
+          : []
+      ).filter(Boolean)
+    : [];
+  if (secMusicValues.length && !limits.music) {
+    const error = new Error('La musica por seccion requiere Evento Individual o Pro');
     error.statusCode = 402;
     throw error;
   }

@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const invitationSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -36,6 +36,11 @@ const invitationSchema = new mongoose.Schema({
     message: String,
     palette: { primary: String, secondary: String, accent: String },
     musicUrl: String,
+    sectionMusic: {
+      type: Map,
+      of: String,
+      default: {}
+    },
     coverImageUrl: String,
     gallery: [String],
     itinerary: [{

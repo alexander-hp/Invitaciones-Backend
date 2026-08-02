@@ -162,6 +162,7 @@ function safeContent(event) {
     spectacularImages: content.spectacularImages || [],
     musicUrl: content.musicUrl,
     audioSections: content.audioSections || [],
+    sectionMusic: content.sectionMusic?.toObject ? content.sectionMusic.toObject({ flattenMaps: true }) : (content.sectionMusic || {}),
     locations: content.locations?.length ? content.locations : [{
       type: 'principal',
       name: event.venue?.name,
@@ -227,7 +228,7 @@ function assetPayload(event, type) {
   if (type === 'cover') return { coverImageUrl: content.coverImageUrl, heroImageUrl: content.heroImageUrl };
   if (type === 'carousel') return { carousel: content.carousel };
   if (type === 'gallery') return { gallery: content.gallery, spectacularImages: content.spectacularImages };
-  if (type === 'audio') return { musicUrl: content.musicUrl, audioSections: content.audioSections };
+  if (type === 'audio') return { musicUrl: content.musicUrl, audioSections: content.audioSections, sectionMusic: content.sectionMusic };
   if (type === 'map') return { locations: content.locations };
   if (type === 'gifts') return { giftRegistry: content.giftRegistry, digitalEnvelope: content.digitalEnvelope, giftSettings: content.giftSettings };
   return content;

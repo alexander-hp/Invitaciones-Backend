@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -28,6 +28,11 @@ const eventSchema = new mongoose.Schema({
       url: { type: String, trim: true },
       description: { type: String, trim: true }
     }],
+    sectionMusic: {
+      type: Map,
+      of: String,
+      default: {}
+    },
     locations: [{
       type: { type: String, trim: true },
       name: { type: String, trim: true },
