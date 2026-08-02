@@ -16,7 +16,11 @@ function normalizeEmail(email) {
 }
 
 function normalizePhone(phone) {
-  return phone ? String(phone).trim().replace(/[\s().-]/g, '') : '';
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 10) return `+52${digits}`;
+  if (digits.startsWith('521') && digits.length === 13) return `+52${digits.slice(3)}`;
+  return `+${digits}`;
 }
 
 function normalizeGuestPayload(payload) {
