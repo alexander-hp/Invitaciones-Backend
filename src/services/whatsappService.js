@@ -45,6 +45,36 @@ function normalizePhone(phone) {
   return digits.length === 10 ? `52${digits}` : digits;
 }
 
+function normalizeOpenWaPhone(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('521') && digits.length === 13) return digits;
+  if (digits.startsWith('52') && digits.length === 12) return `521${digits.slice(2)}`;
+  return digits.length === 10 ? `521${digits}` : digits;
+}
+
+function sameWhatsAppNumber(left, right) {
+  const leftDigits = normalizeOpenWaPhone(left);
+  const rightDigits = normalizeOpenWaPhone(right);
+  return Boolean(leftDigits && rightDigits && leftDigits === rightDigits);
+}
+
+async function assertOpenWaRecipient(phone) {
+  const session = await getOpenWaSessionStatus();
+  if (!session.ready) {
+    const error = new Error(`WhatsApp conectado pero no listo (${session.status}). Revisa OpenWA antes de enviar.`);
+    error.statusCode = 503;
+    error.providerResponse = session;
+    throw error;
+  }
+  if (sameWhatsAppNumber(phone, session.phone)) {
+    const error = new Error('OpenWA no puede enviar mensajes al mismo numero que esta conectado como sesion. Usa un invitado con otro telefono para pruebas reales.');
+    error.statusCode = 400;
+    error.providerResponse = { sessionPhone: session.phone, targetPhone: normalizeOpenWaPhone(phone) };
+    throw error;
+  }
+}
+
 function publicInvitationUrl(invitation, guest, event) {
   if (!invitation?.slug && event?.externalPortalSlug) {
     const token = guest?.invitationToken ? `?t=${encodeURIComponent(guest.invitationToken)}` : '';
@@ -171,8 +201,9 @@ async function sendOpenWa({ phone, text }) {
     error.statusCode = 501;
     throw error;
   }
+  await assertOpenWaRecipient(phone);
   const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
-  const chatId = `${phone}@c.us`;
+  const chatId = `${normalizeOpenWaPhone(phone)}@c.us`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), env.whatsappOpenWaTimeoutMs);
   const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/send-text`, {
@@ -235,8 +266,9 @@ async function sendOpenWaMedia({ phone, media }) {
     error.statusCode = 400;
     throw error;
   }
+  await assertOpenWaRecipient(phone);
   const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
-  const chatId = `${phone}@c.us`;
+  const chatId = `${normalizeOpenWaPhone(phone)}@c.us`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), env.whatsappOpenWaTimeoutMs);
   const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/${endpoint}`, {
@@ -289,7 +321,7 @@ async function sendViaProvider(provider, { phone, type, guest, event, invitation
 
   const payload = normalizedMedia ? { phone, media: normalizedMedia } : { phone, text };
   return {
-    payload: { chatId: `${phone}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined },
+    payload: { chatId: `${normalizeOpenWaPhone(phone)}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined },
     providerResponse: normalizedMedia ? await sendOpenWaMedia(payload) : await sendOpenWa(payload)
   };
 }
@@ -416,6 +448,7 @@ module.exports = {
   isMetaConfigured,
   isOpenWaConfigured,
   normalizePhone,
+  normalizeOpenWaPhone,
   publicInvitationUrl,
   buildText,
   buildMetaTemplatePayload,
