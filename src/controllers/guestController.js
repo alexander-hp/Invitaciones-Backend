@@ -11,6 +11,8 @@ const whatsappService = require('../services/whatsappService');
 const emailService = require('../services/emailService');
 const env = require('../config/env');
 
+const WHATSAPP_BULK_MEDIA_LIMIT = 30;
+
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
 }
@@ -431,6 +433,16 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType;
   const media = req.validated.body.media;
+  if (media && guests.length > WHATSAPP_BULK_MEDIA_LIMIT) {
+    const error = new Error(`El envio masivo con imagen/media permite maximo ${WHATSAPP_BULK_MEDIA_LIMIT} invitados por campana. Envia media solo a grupos especiales y el resto con mensaje seguro.`);
+    error.statusCode = 400;
+    error.details = {
+      limit: WHATSAPP_BULK_MEDIA_LIMIT,
+      requested: guests.length,
+      recommendation: 'Usa mensaje seguro con link para la lista general.'
+    };
+    throw error;
+  }
   await assertWhatsAppProviderReady(media);
   const results = [];
 
