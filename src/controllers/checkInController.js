@@ -5,6 +5,7 @@ const StaffAccessToken = require('../models/StaffAccessToken');
 const env = require('../config/env');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 function staffGuest(guest) {
   return {
@@ -33,19 +34,14 @@ async function getActiveToken(token) {
 }
 
 exports.createLink = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'checkIn', 'El check-in con QR requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'check_in', select: '_id title plan planExpiresAt' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'checkIn', 'El check-in con QR requiere Evento Individual o Pro');
 
   const token = crypto.randomBytes(24).toString('hex');
   const days = Number(req.validated.body.days || 7);
   const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
   const access = await StaffAccessToken.create({
-    owner: req.user._id,
+    owner: event.owner,
     event: event._id,
     token,
     label: req.validated.body.label,

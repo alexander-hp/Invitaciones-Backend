@@ -5,6 +5,7 @@ const Invitation = require('../models/Invitation');
 const asyncHandler = require('../utils/asyncHandler');
 const { verifyGuestSession } = require('../utils/guestSession');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -146,12 +147,7 @@ exports.createInvitationPublic = asyncHandler(async (req, res) => {
 });
 
 exports.listAdmin = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title externalContent');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'review_dedications', select: '_id title externalContent' });
   const dedications = await Dedication.find({ event: event._id })
     .populate('guest', 'name group roles relationshipLabel tableName')
     .sort('-createdAt')
@@ -160,12 +156,7 @@ exports.listAdmin = asyncHandler(async (req, res) => {
 });
 
 exports.updateAdmin = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'review_dedications', select: '_id externalContent' });
   const dedication = await Dedication.findOneAndUpdate(
     { _id: req.params.dedicationId, event: event._id },
     { status: req.validated.body.status, reviewedAt: new Date() },

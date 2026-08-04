@@ -9,6 +9,7 @@ const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const { verifyGuestSession } = require('../utils/guestSession');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 const s3 = new S3Client({ region: env.awsRegion });
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -55,8 +56,8 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const owner = await User.findById(invitation.owner).select('plan');
-  const event = await Event.findById(invitation.event).select('_id plan');
+  const owner = await User.findById(invitation.owner).select('plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
+  const event = await Event.findById(invitation.event).select('_id plan planExpiresAt');
   assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
 
   let guest = null;
@@ -96,7 +97,7 @@ exports.uploadPublicEvent = asyncHandler(async (req, res) => {
     mode: 'external_dashboard',
     externalPortalEnabled: { $ne: false },
     'externalPortalSettings.albumEnabled': { $ne: false }
-  }).select('_id owner plan externalPortalSettings');
+  }).select('_id owner plan planExpiresAt externalPortalSettings');
   if (!event) {
     const error = new Error('Album no disponible');
     error.statusCode = 404;
@@ -147,14 +148,9 @@ exports.uploadPublicEvent = asyncHandler(async (req, res) => {
 });
 
 exports.list = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan title externalContent');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
-  const assets = await AlbumAsset.find({ owner: req.user._id, event: event._id }).sort('-createdAt');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'review_album', select: '_id plan planExpiresAt title externalContent' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+  const assets = await AlbumAsset.find({ owner: event.owner, event: event._id }).sort('-createdAt');
   res.json({ assets });
 });
 
@@ -165,8 +161,8 @@ exports.publicApproved = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const owner = await User.findById(invitation.owner).select('plan');
-  const event = await Event.findById(invitation.event).select('_id plan');
+  const owner = await User.findById(invitation.owner).select('plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
+  const event = await Event.findById(invitation.event).select('_id plan planExpiresAt');
   assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const assets = await AlbumAsset.find({ invitation: invitation._id, status: 'approved' })
     .select('url uploaderName createdAt')
@@ -181,7 +177,7 @@ exports.publicEventApproved = asyncHandler(async (req, res) => {
     mode: 'external_dashboard',
     externalPortalEnabled: { $ne: false },
     'externalPortalSettings.albumEnabled': { $ne: false }
-  }).select('_id owner plan');
+  }).select('_id owner plan planExpiresAt');
   if (!event) {
     const error = new Error('Album no disponible');
     error.statusCode = 404;
@@ -197,15 +193,10 @@ exports.publicEventApproved = asyncHandler(async (req, res) => {
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'review_album', select: '_id plan planExpiresAt externalContent' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const asset = await AlbumAsset.findOneAndUpdate(
-    { _id: req.params.assetId, owner: req.user._id, event: event._id },
+    { _id: req.params.assetId, owner: event.owner, event: event._id },
     { status: req.validated.body.status, reviewedAt: new Date() },
     { new: true }
   );

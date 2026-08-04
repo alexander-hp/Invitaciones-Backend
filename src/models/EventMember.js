@@ -16,7 +16,7 @@ const PERMISSIONS = [
 const ROLE_PERMISSIONS = {
   owner: PERMISSIONS,
   organizer: ['view_event', 'edit_event', 'view_metrics', 'manage_guests', 'manage_tables', 'check_in', 'review_album', 'review_dedications', 'manage_songs'],
-  client: ['view_event', 'view_metrics'],
+  client: ['view_event'],
   venue_owner: ['view_event', 'view_metrics', 'manage_tables', 'check_in'],
   vendor: ['view_event'],
   staff: ['view_event', 'check_in'],

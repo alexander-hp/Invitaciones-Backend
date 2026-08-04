@@ -1,7 +1,6 @@
 const readXlsxFile = require('read-excel-file/node');
 const { parse } = require('csv-parse/sync');
 const Guest = require('../models/Guest');
-const Event = require('../models/Event');
 const Invitation = require('../models/Invitation');
 const Rsvp = require('../models/Rsvp');
 const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
@@ -10,6 +9,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const whatsappService = require('../services/whatsappService');
 const emailService = require('../services/emailService');
 const env = require('../config/env');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 const WHATSAPP_BULK_MEDIA_LIMIT = 30;
 
@@ -167,36 +167,48 @@ async function findDuplicateGuest({ owner, event, email, phone, excludeGuestId }
   };
 }
 
-exports.list = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
+async function requireGuestEventAccess(eventId, user, permission = 'manage_guests', select = '_id mode plan planExpiresAt') {
+  return requireEventAccess({ eventId, user, permission, select });
+}
+
+async function requireGuestAccess(guestId, user, permission = 'manage_guests') {
+  const guest = await Guest.findById(guestId);
+  if (!guest) {
+    const error = new Error('Invitado no encontrado');
     error.statusCode = 404;
     throw error;
   }
-  const guests = await Guest.find({ owner: req.user._id, event: event._id, ...buildGuestFilters(req.query) }).sort('name');
+
+  const access = await requireGuestEventAccess(guest.event, user, permission);
+  if (String(guest.owner) !== String(access.event.owner)) {
+    const error = new Error('Invitado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return { guest, ...access };
+}
+
+exports.list = asyncHandler(async (req, res) => {
+  const { event } = await requireGuestEventAccess(req.params.eventId, req.user);
+  const guests = await Guest.find({ owner: event.owner, event: event._id, ...buildGuestFilters(req.query) }).sort('name');
   res.json({ guests });
 });
 
 exports.create = asyncHandler(async (req, res) => {
   const payload = normalizeGuestPayload(req.validated.body);
-  const event = await Event.findOne({ _id: payload.event, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event, ownerPlanUser } = await requireGuestEventAccess(payload.event, req.user);
 
   const duplicate = await findDuplicateGuest({
-    owner: req.user._id,
+    owner: event.owner,
     event: event._id,
     email: payload.email,
     phone: payload.phone
   });
   if (duplicate) throw buildDuplicateError(duplicate.guest, duplicate.field);
 
-  const limits = getEffectivePlanLimits(req.user, event);
-  const currentGuests = await Guest.countDocuments({ owner: req.user._id, event: event._id });
+  const limits = getEffectivePlanLimits(ownerPlanUser, event);
+  const currentGuests = await Guest.countDocuments({ owner: event.owner, event: event._id });
   if (currentGuests >= limits.guests) {
     const error = new Error(`Tu plan permite hasta ${limits.guests} invitados por evento`);
     error.statusCode = 402;
@@ -205,7 +217,7 @@ exports.create = asyncHandler(async (req, res) => {
 
   let guest;
   try {
-    guest = await Guest.create({ ...payload, owner: req.user._id, event: event._id });
+    guest = await Guest.create({ ...payload, owner: event.owner, event: event._id });
   } catch (error) {
     throw buildDuplicateKeyError(error);
   }
@@ -213,16 +225,11 @@ exports.create = asyncHandler(async (req, res) => {
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!guest) {
-    const error = new Error('Invitado no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { guest, event } = await requireGuestAccess(req.params.id, req.user);
 
   const payload = normalizeGuestPayload({ ...guest.toObject(), ...req.validated.body });
   const duplicate = await findDuplicateGuest({
-    owner: req.user._id,
+    owner: event.owner,
     event: guest.event,
     email: payload.email,
     phone: payload.phone,
@@ -252,12 +259,7 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.remove = asyncHandler(async (req, res) => {
-  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!guest) {
-    const error = new Error('Invitado no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { guest } = await requireGuestAccess(req.params.id, req.user);
 
   await Rsvp.updateMany({ guest: guest._id }, { $unset: { guest: '' } });
   await Guest.deleteOne({ _id: guest._id });
@@ -265,12 +267,7 @@ exports.remove = asyncHandler(async (req, res) => {
 });
 
 exports.markCommunication = asyncHandler(async (req, res) => {
-  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!guest) {
-    const error = new Error('Invitado no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { guest } = await requireGuestAccess(req.params.id, req.user);
 
   const { communicationStatus, messageType, channel } = req.validated.body;
   guest.communicationStatus = communicationStatus;
@@ -326,20 +323,9 @@ exports.whatsappStatus = asyncHandler(async (_req, res) => {
 });
 
 exports.sendWhatsApp = asyncHandler(async (req, res) => {
-  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!guest) {
-    const error = new Error('Invitado no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  const event = await Event.findOne({ _id: guest.event, owner: req.user._id });
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'whatsappMessaging', 'El envio de WhatsApp requiere Evento Individual o Pro');
-  const invitation = await primaryInvitationForEvent(event._id, req.user._id);
+  const { guest, event, ownerPlanUser } = await requireGuestAccess(req.params.id, req.user);
+  assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappMessaging', 'El envio de WhatsApp requiere Evento Individual o Pro');
+  const invitation = await primaryInvitationForEvent(event._id, event.owner);
   if (!invitation && event.mode !== 'external_dashboard') {
     const error = new Error('Crea una invitacion antes de enviar WhatsApp');
     error.statusCode = 400;
@@ -349,7 +335,7 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
   const type = req.validated.body.messageType;
   await assertWhatsAppProviderReady(req.validated.body.media);
   const result = await whatsappService.sendMessage({
-    owner: req.user._id,
+    owner: event.owner,
     guest,
     event,
     invitation,
@@ -363,24 +349,13 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
 });
 
 exports.sendEmail = asyncHandler(async (req, res) => {
-  const guest = await Guest.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!guest) {
-    const error = new Error('Invitado no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { guest, event } = await requireGuestAccess(req.params.id, req.user);
   if (!guest.email) {
     const error = new Error('El invitado no tiene email');
     error.statusCode = 400;
     throw error;
   }
-  const event = await Event.findOne({ _id: guest.event, owner: req.user._id });
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  const invitation = await primaryInvitationForEvent(event._id, req.user._id);
+  const invitation = await primaryInvitationForEvent(event._id, event.owner);
   if (!invitation) {
     const error = new Error('Crea una invitacion antes de enviar email');
     error.statusCode = 400;
@@ -413,14 +388,9 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
     error.statusCode = 400;
     throw error;
   }
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id });
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'whatsappBulk', 'El envio masivo por WhatsApp requiere plan Pro');
-  const invitation = await primaryInvitationForEvent(event._id, req.user._id);
+  const { event, ownerPlanUser } = await requireGuestEventAccess(req.params.eventId, req.user);
+  assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappBulk', 'El envio masivo por WhatsApp requiere plan Pro');
+  const invitation = await primaryInvitationForEvent(event._id, event.owner);
   if (!invitation && event.mode !== 'external_dashboard') {
     const error = new Error('Crea una invitacion antes de enviar WhatsApp');
     error.statusCode = 400;
@@ -428,7 +398,7 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
   }
 
   const filters = buildGuestFilters(req.validated.body.filters || {});
-  const query = { owner: req.user._id, event: event._id, phone: { $exists: true, $ne: '' }, ...filters };
+  const query = { owner: event.owner, event: event._id, phone: { $exists: true, $ne: '' }, ...filters };
   if (req.validated.body.guestIds?.length) query._id = { $in: req.validated.body.guestIds };
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType;
@@ -448,7 +418,7 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
 
   for (const guest of guests) {
     try {
-      const result = await whatsappService.sendMessage({ owner: req.user._id, guest, event, invitation, type, media });
+      const result = await whatsappService.sendMessage({ owner: event.owner, guest, event, invitation, type, media });
       applyWhatsAppGuestStatus(guest, { status: result.status, type });
       await guest.save();
       results.push({ guest: guest._id, status: result.status, provider: result.provider, log: result.log._id });
@@ -472,20 +442,21 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
 });
 
 exports.listWhatsAppLogs = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  const logs = await WhatsAppMessageLog.find({ owner: req.user._id, event: event._id }).sort('-createdAt').limit(100);
+  const { event } = await requireGuestEventAccess(req.params.eventId, req.user);
+  const logs = await WhatsAppMessageLog.find({ owner: event.owner, event: event._id }).sort('-createdAt').limit(100);
   res.json({ logs });
 });
 
 exports.checkIn = asyncHandler(async (req, res) => {
   const code = String(req.validated.body.code || '').trim().toUpperCase();
-  const guest = await Guest.findOne({ owner: req.user._id, checkInCode: code });
+  const guest = await Guest.findOne({ checkInCode: code });
   if (!guest) {
+    const error = new Error('Codigo de check-in no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const { event } = await requireGuestEventAccess(guest.event, req.user, 'check_in');
+  if (String(guest.owner) !== String(event.owner)) {
     const error = new Error('Codigo de check-in no encontrado');
     error.statusCode = 404;
     throw error;
@@ -503,12 +474,7 @@ exports.importGuests = asyncHandler(async (req, res) => {
     error.statusCode = 400;
     throw error;
   }
-  const event = await Event.findOne({ _id: req.validated.body.event, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event, ownerPlanUser } = await requireGuestEventAccess(req.validated.body.event, req.user);
 
   const ext = (req.file.originalname.split('.').pop() || '').toLowerCase();
   if (!['csv', 'xlsx'].includes(ext)) {
@@ -529,12 +495,12 @@ exports.importGuests = asyncHandler(async (req, res) => {
     }, {}));
   }
 
-  const normalizedRows = rows.map((row, index) => ({ rowNumber: index + 2, guest: normalizeGuestRow(row, event, req.user._id) }));
+  const normalizedRows = rows.map((row, index) => ({ rowNumber: index + 2, guest: normalizeGuestRow(row, event, event.owner) }));
   const payload = normalizedRows.filter((row) => row.guest).map((row) => row.guest);
   const invalidRows = rows.length - payload.length;
 
-  const existingGuests = await Guest.find({ owner: req.user._id, event: event._id }).select('_id name email phone');
-  const limits = getEffectivePlanLimits(req.user, event);
+  const existingGuests = await Guest.find({ owner: event.owner, event: event._id }).select('_id name email phone');
+  const limits = getEffectivePlanLimits(ownerPlanUser, event);
   if (existingGuests.length >= limits.guests) {
     const error = new Error(`Tu plan permite hasta ${limits.guests} invitados por evento`);
     error.statusCode = 402;
@@ -600,15 +566,10 @@ exports.importGuests = asyncHandler(async (req, res) => {
 });
 
 exports.exportGuests = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id title');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'exportData', 'La exportacion de datos requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireGuestEventAccess(req.params.eventId, req.user);
+  assertEffectivePlanFeature(ownerPlanUser, event, 'exportData', 'La exportacion de datos requiere Evento Individual o Pro');
 
-  const guests = await Guest.find({ owner: req.user._id, event: event._id, ...buildGuestFilters(req.query) }).sort('name').lean();
+  const guests = await Guest.find({ owner: event.owner, event: event._id, ...buildGuestFilters(req.query) }).sort('name').lean();
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
   const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
   const rows = [

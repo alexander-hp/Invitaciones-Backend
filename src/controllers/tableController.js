@@ -1,8 +1,8 @@
-const Event = require('../models/Event');
 const EventTable = require('../models/EventTable');
 const Guest = require('../models/Guest');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 function seatCount(guest) {
   return 1 + Math.max(Number(guest.allowedCompanions || 0), Array.isArray(guest.companions) ? guest.companions.length : 0);
@@ -53,16 +53,6 @@ function buildOccupancy(tables, guests) {
   return occupancy;
 }
 
-async function assertEventOwner(eventId, owner) {
-  const event = await Event.findOne({ _id: eventId, owner }).select('_id title plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  return event;
-}
-
 async function tableSummary(owner, eventId) {
   const [tables, guests] = await Promise.all([
     EventTable.find({ owner, event: eventId }).sort('order name').lean(),
@@ -90,22 +80,22 @@ async function tableSummary(owner, eventId) {
 }
 
 exports.list = asyncHandler(async (req, res) => {
-  const event = await assertEventOwner(req.params.eventId, req.user._id);
-  assertEffectivePlanFeature(req.user, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
-  const tables = await tableSummary(req.user._id, event._id);
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
+  const tables = await tableSummary(event.owner, event._id);
   res.json({ tables });
 });
 
 exports.create = asyncHandler(async (req, res) => {
-  const event = await assertEventOwner(req.params.eventId, req.user._id);
-  assertEffectivePlanFeature(req.user, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
-  const table = await EventTable.create({ ...req.validated.body, owner: req.user._id, event: event._id });
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
+  const table = await EventTable.create({ ...req.validated.body, owner: event.owner, event: event._id });
   res.status(201).json({ table });
 });
 
 exports.autoAssign = asyncHandler(async (req, res) => {
-  const event = await assertEventOwner(req.params.eventId, req.user._id);
-  assertEffectivePlanFeature(req.user, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
 
   const {
     strategy = 'fill_order',
@@ -114,8 +104,8 @@ exports.autoAssign = asyncHandler(async (req, res) => {
   } = req.validated.body || {};
 
   const [tables, allGuests] = await Promise.all([
-    EventTable.find({ owner: req.user._id, event: event._id }).sort('order name createdAt'),
-    Guest.find({ owner: req.user._id, event: event._id }).sort('group name')
+    EventTable.find({ owner: event.owner, event: event._id }).sort('order name createdAt'),
+    Guest.find({ owner: event.owner, event: event._id }).sort('group name')
   ]);
 
   if (!tables.length) {
@@ -181,15 +171,15 @@ exports.autoAssign = asyncHandler(async (req, res) => {
   });
 
   await Promise.all(updates);
-  const tablesSummary = await tableSummary(req.user._id, event._id);
+  const tablesSummary = await tableSummary(event.owner, event._id);
   res.json({ assigned, skipped, tables: tablesSummary });
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  const event = await assertEventOwner(req.params.eventId, req.user._id);
-  assertEffectivePlanFeature(req.user, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
   const table = await EventTable.findOneAndUpdate(
-    { _id: req.params.tableId, owner: req.user._id, event: req.params.eventId },
+    { _id: req.params.tableId, owner: event.owner, event: req.params.eventId },
     req.validated.body,
     { new: true }
   );
@@ -202,9 +192,9 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.remove = asyncHandler(async (req, res) => {
-  const event = await assertEventOwner(req.params.eventId, req.user._id);
-  assertEffectivePlanFeature(req.user, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
-  const table = await EventTable.findOneAndDelete({ _id: req.params.tableId, owner: req.user._id, event: req.params.eventId });
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
+  const table = await EventTable.findOneAndDelete({ _id: req.params.tableId, owner: event.owner, event: req.params.eventId });
   if (!table) {
     const error = new Error('Mesa no encontrada');
     error.statusCode = 404;

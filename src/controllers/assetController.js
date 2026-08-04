@@ -2,9 +2,9 @@ const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const env = require('../config/env');
 const { getPlanLimits, getEffectivePlanLimits, assertEffectivePlanFeature } = require('../config/plans');
-const Event = require('../models/Event');
 const WhatsAppMediaAsset = require('../models/WhatsAppMediaAsset');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 const s3 = new S3Client({ region: env.awsRegion });
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -174,26 +174,25 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
   const { fileName, contentType, folder = 'assets', event: eventId, size } = req.validated.body;
   assertMediaAllowed({ folder, contentType, size });
   let event = null;
+  let ownerPlanUser = req.user;
   if (eventId) {
-    event = await Event.findOne({ _id: eventId, owner: req.user._id }).select('_id plan');
-    if (!event) {
-      const error = new Error('Evento no encontrado');
-      error.statusCode = 404;
-      throw error;
-    }
+    const access = await requireEventAccess({ eventId, user: req.user, permission: folder === 'whatsapp-media' ? 'manage_guests' : 'edit_event', select: '_id plan planExpiresAt' });
+    event = access.event;
+    ownerPlanUser = access.ownerPlanUser;
   }
-  const limits = event ? getEffectivePlanLimits(req.user, event) : getPlanLimits(req.user);
+  const limits = event ? getEffectivePlanLimits(ownerPlanUser, event) : getPlanLimits(req.user);
   if (folder === 'music' && !limits.music) {
     const error = new Error('La musica requiere Evento Individual o Pro');
     error.statusCode = 402;
     throw error;
   }
   if (folder === 'whatsapp-media') {
-    assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+    assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   }
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-');
-  const key = `${folder}/${req.user._id}/${Date.now()}-${safeName}`;
+  const assetOwner = event ? event.owner : req.user._id;
+  const key = `${folder}/${assetOwner}/${Date.now()}-${safeName}`;
   const command = new PutObjectCommand({ Bucket: env.s3Bucket, Key: key, ContentType: contentType });
   let uploadUrl;
   try {
@@ -214,17 +213,12 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
 });
 
 exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id plan planExpiresAt' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
 
   const payload = req.validated.body;
   const asset = await WhatsAppMediaAsset.create({
-    owner: req.user._id,
+    owner: event.owner,
     event: event._id,
     key: payload.key,
     url: payload.url,
@@ -239,28 +233,18 @@ exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
 });
 
 exports.listWhatsAppMedia = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id plan planExpiresAt' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
 
-  const assets = await WhatsAppMediaAsset.find({ owner: req.user._id, event: event._id, active: true }).sort('-createdAt');
+  const assets = await WhatsAppMediaAsset.find({ owner: event.owner, event: event._id, active: true }).sort('-createdAt');
   res.json({ assets });
 });
 
 exports.deleteWhatsAppMedia = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id plan planExpiresAt' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappMedia', 'La media para WhatsApp requiere Evento Individual o Pro');
   const asset = await WhatsAppMediaAsset.findOneAndUpdate(
-    { _id: req.params.assetId, event: req.params.eventId, owner: req.user._id },
+    { _id: req.params.assetId, event: event._id, owner: event.owner },
     { active: false },
     { new: true }
   );

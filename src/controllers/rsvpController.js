@@ -6,6 +6,7 @@ const RsvpActivity = require('../models/RsvpActivity');
 const emailService = require('../services/emailService');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 function normalizeEmail(email) {
   return email ? email.toLowerCase().trim() : '';
@@ -497,24 +498,14 @@ exports.submitPublicEvent = asyncHandler(async (req, res) => {
 });
 
 exports.listByEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id' });
   const rsvps = await Rsvp.find({ event: req.params.eventId }).sort('-createdAt');
   res.json({ rsvps });
 });
 
 exports.exportByEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id plan planExpiresAt' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
 
   const rsvps = await Rsvp.find({ event: event._id }).sort('-createdAt').lean();
   const rows = [

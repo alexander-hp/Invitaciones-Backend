@@ -14,6 +14,7 @@ const {
   planExpiresAt
 } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 const stripe = env.stripeSecretKey ? new Stripe(env.stripeSecretKey) : null;
 const CANONICAL_PLAN_KEYS = ['free', 'event_12m', 'external_dashboard_12m', 'planner_pro_monthly', 'planner_pro_yearly'];
@@ -147,13 +148,11 @@ exports.listPlans = asyncHandler(async (_req, res) => {
 exports.status = asyncHandler(async (req, res) => {
   const payments = await Payment.find({ owner: req.user._id }).sort('-createdAt').limit(10);
   let event = null;
+  let ownerPlanUser = req.user;
   if (req.query.eventId) {
-    event = await Event.findOne({ _id: req.query.eventId, owner: req.user._id }).select('_id title mode plan planActivatedAt planExpiresAt');
-    if (!event) {
-      const error = new Error('Evento no encontrado');
-      error.statusCode = 404;
-      throw error;
-    }
+    const access = await requireEventAccess({ eventId: req.query.eventId, user: req.user, permission: 'view_event', select: '_id title mode plan planActivatedAt planExpiresAt' });
+    event = access.event;
+    ownerPlanUser = access.ownerPlanUser;
   }
 
   const subscriptionActive = isSubscriptionActive(req.user);
@@ -167,7 +166,7 @@ exports.status = asyncHandler(async (req, res) => {
     subscriptionActive,
     subscriptionCurrentPeriodEnd: req.user.subscriptionCurrentPeriodEnd,
     eventPlan: event ? normalizePlan(event.plan) : undefined,
-    eventPlanDefinition: event ? getEffectivePlanDefinition(req.user, event) : undefined,
+    eventPlanDefinition: event ? getEffectivePlanDefinition(ownerPlanUser, event) : undefined,
     eventPlanActive: event ? isEventPlanActive(event) : undefined,
     eventPlanActivatedAt: event?.planActivatedAt,
     eventPlanExpiresAt: event?.planExpiresAt,

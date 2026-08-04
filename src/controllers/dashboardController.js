@@ -4,6 +4,7 @@ const Rsvp = require('../models/Rsvp');
 const Invitation = require('../models/Invitation');
 const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 exports.summary = asyncHandler(async (req, res) => {
   const owner = req.user._id;
@@ -42,13 +43,8 @@ exports.summary = asyncHandler(async (req, res) => {
 });
 
 exports.eventSummary = asyncHandler(async (req, res) => {
-  const owner = req.user._id;
-  const event = await Event.findOne({ _id: req.params.eventId, owner }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'view_metrics', select: '_id' });
+  const owner = event.owner;
   const [guests, confirmed, declined, pending, emailSent, whatsappSent, opened, failed, checkedIn] = await Promise.all([
     Guest.countDocuments({ owner, event: event._id }),
     Guest.countDocuments({ owner, event: event._id, status: 'confirmed' }),
