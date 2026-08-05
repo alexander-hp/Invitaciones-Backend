@@ -175,6 +175,19 @@ exports.autoAssign = asyncHandler(async (req, res) => {
   res.json({ assigned, skipped, tables: tablesSummary });
 });
 
+exports.createBatch = asyncHandler(async (req, res) => {
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
+  const tablesData = (req.validated.body.tables || []).map((t, idx) => ({
+    ...t,
+    owner: event.owner,
+    event: event._id,
+    order: t.order !== undefined ? t.order : idx
+  }));
+  const tables = await EventTable.insertMany(tablesData);
+  res.status(201).json({ tables });
+});
+
 exports.update = asyncHandler(async (req, res) => {
   const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
   assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
