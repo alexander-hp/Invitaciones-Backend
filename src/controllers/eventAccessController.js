@@ -47,6 +47,17 @@ function publicGuest(guest) {
   };
 }
 
+function getYouTubeId(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes('youtu.be')) return parsed.pathname.split('/').filter(Boolean)[0] || '';
+    if (parsed.hostname.includes('youtube.com')) return parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop() || '';
+  } catch (_error) {
+    return '';
+  }
+  return '';
+}
+
 exports.session = asyncHandler(async (req, res) => {
   const access = await getActiveAccess(req.params.token);
   const [event, guests, rsvps, tables, albumAssets, songRequests] = await Promise.all([
@@ -168,4 +179,54 @@ exports.updateSong = asyncHandler(async (req, res) => {
   access.lastUsedAt = new Date();
   await access.save();
   res.json({ songRequest });
+});
+
+exports.addSong = asyncHandler(async (req, res) => {
+  const access = await getActiveAccess(req.params.token);
+  if (!hasPermission(access, 'song_review')) {
+    const error = new Error('Este link no permite operar DJ');
+    error.statusCode = 403;
+    throw error;
+  }
+  const event = await Event.findById(access.event);
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const rawUrl = req.validated.body.sourceUrl || req.validated.body.url || req.validated.body.query || '';
+  const cleanTitle = (req.validated.body.title || '').trim();
+  const cleanArtist = (req.validated.body.artist || '').trim();
+  const ytId = getYouTubeId(rawUrl);
+
+  let sourceProvider = 'custom';
+  let sourceUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl : '';
+  let externalId = '';
+  let thumbnailUrl = '';
+
+  if (ytId) {
+    sourceProvider = 'youtube';
+    sourceUrl = `https://www.youtube.com/watch?v=${ytId}`;
+    externalId = ytId;
+    thumbnailUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+  }
+
+  const songRequest = await SongRequest.create({
+    owner: event.owner,
+    event: event._id,
+    requesterName: req.validated.body.requesterName || 'DJ (Cabina)',
+    title: cleanTitle || (ytId ? 'Canción de YouTube' : (rawUrl || 'Canción agregada')),
+    artist: cleanArtist || (ytId ? 'YouTube' : ''),
+    dedication: req.validated.body.dedication || '',
+    sourceProvider,
+    sourceUrl,
+    externalId,
+    thumbnailUrl,
+    status: 'approved',
+    reviewedAt: new Date()
+  });
+
+  access.lastUsedAt = new Date();
+  await access.save();
+  res.status(201).json({ songRequest });
 });

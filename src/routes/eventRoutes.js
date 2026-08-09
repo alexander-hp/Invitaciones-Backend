@@ -159,6 +159,18 @@ const tableBatchBody = z.object({
 }).passthrough();
 const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
 const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
+const songRequestBody = z.object({
+  guest: z.string().min(12).optional(),
+  requesterName: z.string().min(2).optional(),
+  requesterEmail: z.string().email().optional(),
+  title: z.string().min(1).max(180).optional(),
+  artist: z.string().max(180).optional(),
+  dedication: z.string().max(500).optional(),
+  query: z.string().max(300).optional(),
+  url: z.string().url().optional(),
+  sourceUrl: z.string().url().optional(),
+  status: z.enum(['pending', 'approved', 'played', 'rejected']).optional()
+}).strict().refine((body) => body.title || body.query || body.url || body.sourceUrl, 'Se requiere cancion, busqueda o link');
 const dedicationStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'hidden']) }).strict();
 const publicEmailBody = z.object({ email: z.string().email() }).strict();
 const accessLinkBody = z.object({
@@ -213,6 +225,8 @@ router.delete('/:eventId/tables/:tableId', tableController.remove);
 router.get('/:eventId/album', albumController.list);
 router.patch('/:eventId/album/:assetId', validate(z.object({ body: albumStatusBody })), albumController.update);
 router.get('/:eventId/song-requests', songRequestController.list);
+router.post('/:eventId/song-requests', validate(z.object({ body: songRequestBody })), songRequestController.create);
+router.post('/:eventId/song-requests/lookup-youtube', songRequestController.lookupYouTube);
 router.patch('/:eventId/song-requests/:songRequestId', validate(z.object({ body: songRequestStatusBody })), songRequestController.update);
 router.get('/:eventId/dedications', dedicationController.listAdmin);
 router.patch('/:eventId/dedications/:dedicationId', validate(z.object({ body: dedicationStatusBody })), dedicationController.updateAdmin);

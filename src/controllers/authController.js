@@ -243,7 +243,7 @@ exports.requestPasswordReset = asyncHandler(async (req, res) => {
   user.passwordResetExpiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
   await user.save();
 
-  const resetUrl = `${env.frontendUrl}/password-reset/confirm?token=${encodeURIComponent(token)}`;
+  const resetUrl = `${env.frontendUrl}/new/password-reset/confirm?token=${encodeURIComponent(token)}`;
   try {
     await emailService.sendPasswordResetEmail({ to: user.email, name: user.name, resetUrl });
   } catch (error) {

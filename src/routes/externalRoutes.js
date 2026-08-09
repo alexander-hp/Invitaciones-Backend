@@ -39,7 +39,8 @@ const songBody = z.object({
   dedication: z.string().max(500).optional(),
   query: z.string().max(300).optional(),
   url: z.string().url().optional(),
-  sourceUrl: z.string().url().optional()
+  sourceUrl: z.string().url().optional(),
+  status: z.enum(['pending', 'approved', 'played', 'rejected']).optional()
 }).strict().refine((body) => body.title || body.query || body.url || body.sourceUrl, 'Se requiere cancion, busqueda o link');
 
 const songLookupBody = z.object({

@@ -4,8 +4,10 @@ const controller = require('../controllers/rsvpController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
+const env = require('../config/env');
+
 const router = express.Router();
-const publicRsvpLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
+const publicRsvpLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, standardHeaders: true, legacyHeaders: false, skip: () => env.nodeEnv !== 'production' });
 const publicRsvpBody = z.object({
   guest: z.string().min(12).optional(),
   name: z.string().min(2),
