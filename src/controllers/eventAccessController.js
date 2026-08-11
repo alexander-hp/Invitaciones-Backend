@@ -1,3 +1,4 @@
+const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const AlbumAsset = require('../models/AlbumAsset');
 const Event = require('../models/Event');
 const EventAccessToken = require('../models/EventAccessToken');
@@ -5,19 +6,60 @@ const EventTable = require('../models/EventTable');
 const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
 const SongRequest = require('../models/SongRequest');
+const env = require('../config/env');
 const asyncHandler = require('../utils/asyncHandler');
 const { notifyReviewStatus } = require('../utils/moderation');
+
+const s3 = new S3Client({ region: env.awsRegion });
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
 
 const ROLE_PERMISSIONS = {
   check_in: ['check_in'],
   album_review: ['album_review'],
+  photographer: ['album_review', 'album_upload'],
   client_view: ['client_view'],
   guest_ops: ['check_in', 'album_review', 'client_view', 'guest_ops', 'song_review'],
-  dj: ['song_review']
+  dj: ['song_review'],
+  integration_api: ['external_api']
 };
 
 function hasPermission(access, permission) {
   return ROLE_PERMISSIONS[access.role]?.includes(permission);
+}
+
+function buildPublicUrl(key) {
+  const baseUrl = env.mediaPublicBaseUrl;
+  if (baseUrl) return `${baseUrl.replace(/\/$/, '')}/${key}`;
+  return `https://${env.s3Bucket}.s3.${env.awsRegion}.amazonaws.com/${key}`;
+}
+
+async function uploadAlbumFile(file, ownerId, eventId) {
+  if (!env.s3Bucket) {
+    const error = new Error('AWS_S3_BUCKET no configurado');
+    error.statusCode = 501;
+    throw error;
+  }
+  if (!file) {
+    const error = new Error('Archivo requerido');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!IMAGE_TYPES.has(file.mimetype)) {
+    const error = new Error('Tipo de imagen no soportado');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    const error = new Error('La imagen excede 8MB');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '-');
+  const key = `album/${ownerId}/${eventId}/photographer-${Date.now()}-${safeName}`;
+  await s3.send(new PutObjectCommand({ Bucket: env.s3Bucket, Key: key, ContentType: file.mimetype, Body: file.buffer }));
+  return { key, url: buildPublicUrl(key) };
 }
 
 async function getActiveAccess(token) {
@@ -137,6 +179,39 @@ exports.updateAlbum = asyncHandler(async (req, res) => {
   access.lastUsedAt = new Date();
   await access.save();
   res.json({ asset });
+});
+
+exports.uploadAlbum = asyncHandler(async (req, res) => {
+  const access = await getActiveAccess(req.params.token);
+  if (!hasPermission(access, 'album_upload')) {
+    const error = new Error('Este link no permite subir fotos');
+    error.statusCode = 403;
+    throw error;
+  }
+  const event = await Event.findById(access.event).select('_id owner title externalContent');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const upload = await uploadAlbumFile(req.file, event.owner, event._id);
+  const requestedStatus = req.validated.body.status;
+  const status = requestedStatus === 'approved' && hasPermission(access, 'album_review') ? 'approved' : 'pending';
+  const asset = await AlbumAsset.create({
+    owner: event.owner,
+    event: event._id,
+    uploaderName: req.validated.body.uploaderName || access.label || 'Fotografo',
+    uploaderEmail: req.validated.body.uploaderEmail,
+    key: upload.key,
+    url: upload.url,
+    status,
+    reviewedAt: status === 'approved' ? new Date() : undefined
+  });
+
+  access.lastUsedAt = new Date();
+  await access.save();
+  res.status(201).json({ asset });
 });
 
 exports.updateSong = asyncHandler(async (req, res) => {

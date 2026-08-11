@@ -174,7 +174,7 @@ const songRequestBody = z.object({
 const dedicationStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'hidden']) }).strict();
 const publicEmailBody = z.object({ email: z.string().email() }).strict();
 const accessLinkBody = z.object({
-  role: z.enum(['check_in', 'album_review', 'client_view', 'guest_ops', 'dj']),
+  role: z.enum(['check_in', 'album_review', 'client_view', 'guest_ops', 'dj', 'photographer', 'integration_api']),
   label: z.string().max(120).optional(),
   days: z.number().int().min(1).max(90).optional()
 }).strict();

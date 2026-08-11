@@ -71,5 +71,6 @@ router.post('/:portalSlug/dedications', validate(z.object({ body: dedicationBody
 router.post('/:portalSlug/song-lookup', validate(z.object({ body: songLookupBody })), controller.songLookup);
 router.post('/:portalSlug/song-requests', validate(z.object({ body: songBody })), controller.songRequest);
 router.get('/:portalSlug/embed-manifest', controller.embedManifest);
+router.get('/:portalSlug/integration-token/status', controller.integrationTokenStatus);
 
 module.exports = router;

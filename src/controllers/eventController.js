@@ -244,6 +244,8 @@ exports.listAccessLinks = asyncHandler(async (req, res) => {
     id: link._id,
     role: link.role,
     label: link.label,
+    tokenPreview: `${String(link.token).slice(0, 6)}...${String(link.token).slice(-4)}`,
+    accessToken: link.role === 'integration_api' ? link.token : undefined,
     expiresAt: link.expiresAt,
     revokedAt: link.revokedAt,
     lastUsedAt: link.lastUsedAt,
@@ -273,6 +275,8 @@ exports.createAccessLink = asyncHandler(async (req, res) => {
       id: access._id,
       role: access.role,
       label: access.label,
+      tokenPreview: `${String(access.token).slice(0, 6)}...${String(access.token).slice(-4)}`,
+      accessToken: access.role === 'integration_api' ? access.token : undefined,
       expiresAt: access.expiresAt,
       url: `${env.clientUrl}/external-access/${access.token}`
     }
