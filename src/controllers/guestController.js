@@ -35,7 +35,8 @@ function normalizeGuestPayload(payload) {
         .map((companion) => ({
           name: companion.name ? String(companion.name).trim() : undefined,
           tableName: companion.tableName ? String(companion.tableName).trim() : undefined,
-          seatLabel: companion.seatLabel ? String(companion.seatLabel).trim() : undefined
+          seatLabel: companion.seatLabel ? String(companion.seatLabel).trim() : undefined,
+          checkedIn: companion.checkedIn !== undefined ? Boolean(companion.checkedIn) : undefined
         }))
     : undefined;
   return {
@@ -249,6 +250,9 @@ exports.update = asyncHandler(async (req, res) => {
   guest.seatLabel = payload.seatLabel;
   guest.companions = payload.companions || [];
   guest.allowedCompanions = payload.allowedCompanions;
+  if (payload.checkedIn !== undefined) {
+    guest.checkedIn = payload.checkedIn;
+  }
   try {
     await guest.save();
   } catch (error) {
