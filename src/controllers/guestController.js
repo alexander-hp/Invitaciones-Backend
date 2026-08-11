@@ -51,7 +51,8 @@ function normalizeGuestPayload(payload) {
     tableName: payload.tableName ? String(payload.tableName).trim() : undefined,
     seatLabel: payload.seatLabel ? String(payload.seatLabel).trim() : undefined,
     companions,
-    allowedCompanions: Number(payload.allowedCompanions || 0)
+    allowedCompanions: Number(payload.allowedCompanions || 0),
+    checkedIn: payload.checkedIn === true
   };
 }
 
@@ -249,6 +250,8 @@ exports.update = asyncHandler(async (req, res) => {
   guest.seatLabel = payload.seatLabel;
   guest.companions = payload.companions || [];
   guest.allowedCompanions = payload.allowedCompanions;
+  guest.checkedIn = payload.checkedIn;
+  guest.checkedInAt = payload.checkedIn ? (guest.checkedInAt || new Date()) : undefined;
   try {
     await guest.save();
   } catch (error) {
