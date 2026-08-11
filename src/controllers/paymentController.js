@@ -146,7 +146,6 @@ exports.listPlans = asyncHandler(async (_req, res) => {
 });
 
 exports.status = asyncHandler(async (req, res) => {
-  const payments = await Payment.find({ owner: req.user._id }).sort('-createdAt').limit(10);
   let event = null;
   let ownerPlanUser = req.user;
   if (req.query.eventId) {
@@ -154,24 +153,28 @@ exports.status = asyncHandler(async (req, res) => {
     event = access.event;
     ownerPlanUser = access.ownerPlanUser;
   }
+  const paymentOwner = event ? event.owner : req.user._id;
+  const payments = await Payment.find({ owner: paymentOwner }).sort('-createdAt').limit(10);
 
-  const subscriptionActive = isSubscriptionActive(req.user);
-  const accountPlan = subscriptionActive ? normalizePlan(req.user.subscriptionPlan) : normalizePlan(req.user.plan);
+  const accountUser = event ? ownerPlanUser : req.user;
+  const subscriptionActive = isSubscriptionActive(accountUser);
+  const accountPlan = subscriptionActive ? normalizePlan(accountUser.subscriptionPlan) : normalizePlan(accountUser.plan);
 
   res.json({
     plan: accountPlan,
     planDefinition: getPlanDefinition(accountPlan),
-    subscriptionPlan: req.user.subscriptionPlan,
-    subscriptionStatus: req.user.subscriptionStatus || 'inactive',
+    subscriptionPlan: accountUser.subscriptionPlan,
+    subscriptionStatus: accountUser.subscriptionStatus || 'inactive',
     subscriptionActive,
-    subscriptionCurrentPeriodEnd: req.user.subscriptionCurrentPeriodEnd,
+    subscriptionCurrentPeriodEnd: accountUser.subscriptionCurrentPeriodEnd,
     eventPlan: event ? normalizePlan(event.plan) : undefined,
     eventPlanDefinition: event ? getEffectivePlanDefinition(ownerPlanUser, event) : undefined,
     eventPlanActive: event ? isEventPlanActive(event) : undefined,
     eventPlanActivatedAt: event?.planActivatedAt,
     eventPlanExpiresAt: event?.planExpiresAt,
     eventMode: event?.mode,
-    payments
+    payments,
+    inheritedFromEventOwner: event ? String(event.owner) !== String(req.user._id) : false
   });
 });
 
@@ -194,7 +197,7 @@ exports.createCheckout = asyncHandler(async (req, res) => {
 
   const payment = await Payment.create({
     owner: req.user._id,
-    event: event?._id,
+    event: selected.scope === 'event' ? event?._id : undefined,
     invitation: payload.invitation,
     package: selected.key,
     billingType: selected.billingType === 'subscription' ? 'subscription' : 'one_time',
