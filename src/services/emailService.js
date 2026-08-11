@@ -664,6 +664,83 @@ async function sendGuestReviewStatusEmail({ to, name, event, itemType, status, i
   return sendMail({ to, subject, text, html });
 }
 
+async function sendEventMemberInviteEmail({ to, name, event, inviter, role, permissions = [], inviteUrl, hasAccount }) {
+  const safeName = name || to;
+  const eventTitle = event?.title || 'Evento';
+  const inviterName = inviter?.name || inviter?.email || 'El organizador';
+  const subject = `${inviterName} te invito a colaborar en ${eventTitle}`;
+  const roleLabel = {
+    organizer: 'Organizador',
+    client: 'Cliente',
+    venue_owner: 'Dueno de salon / venue',
+    vendor: 'Proveedor',
+    staff: 'Staff / recepcion',
+    dj: 'DJ',
+    photographer: 'Fotografo'
+  }[role] || role;
+  const actionText = hasAccount ? 'Inicia sesion y acepta el acceso' : 'Crea tu cuenta y acepta el acceso';
+  const text = [
+    `Hola ${safeName},`,
+    '',
+    `${inviterName} te invito a colaborar en el evento "${eventTitle}" dentro de KyndraSoft Invitaciones.`,
+    `Rol asignado: ${roleLabel}`,
+    permissions.length ? `Permisos: ${permissions.join(', ')}` : '',
+    '',
+    `${actionText}:`,
+    inviteUrl,
+    '',
+    'Este enlace es personal y expira en 14 dias. No compartas este acceso con otras personas.'
+  ].filter(Boolean).join('\n');
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invitacion de equipo</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f8f6f2; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#2d2926;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f8f6f2; padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:560px; background-color:#ffffff; border-radius:16px; border:1px solid #e8dfd5; overflow:hidden;">
+          <tr>
+            <td style="background:#2d2620; padding:28px 34px; text-align:center; color:#ffffff;">
+              <div style="font-family:Georgia, serif; font-size:24px; font-weight:bold;">KyndraSoft Invitaciones</div>
+              <div style="margin-top:8px; color:#dec9b1; font-size:14px;">Acceso de equipo interno</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:34px;">
+              <h1 style="margin:0 0 12px; font-size:24px; color:#2d2926;">Te invitaron a colaborar</h1>
+              <p style="margin:0 0 18px; line-height:1.6;">Hola <strong>${escapeHtml(safeName)}</strong>, ${escapeHtml(inviterName)} te agrego al evento <strong>${escapeHtml(eventTitle)}</strong>.</p>
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#f8f6f2; border:1px solid #e8dfd5; border-radius:12px; margin:18px 0;">
+                <tr>
+                  <td style="padding:16px;">
+                    <p style="margin:0 0 8px;"><strong>Rol:</strong> ${escapeHtml(roleLabel)}</p>
+                    <p style="margin:0;"><strong>Permisos:</strong> ${escapeHtml(permissions.length ? permissions.join(', ') : 'Acceso basico al evento')}</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 22px; line-height:1.6;">${escapeHtml(actionText)}. No enviamos contrasenas por correo; cada persona crea o usa su propia cuenta.</p>
+              <p style="margin:0 0 24px;">
+                <a href="${escapeHtml(inviteUrl)}" style="display:inline-block; background:#c09c78; color:#ffffff; text-decoration:none; padding:13px 22px; border-radius:10px; font-weight:700;">Aceptar invitacion</a>
+              </p>
+              <p style="margin:0; color:#787067; font-size:13px; line-height:1.5;">El enlace expira en 14 dias y es personal. Si no esperabas este acceso, puedes ignorar este correo.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+
+  return sendMail({ to, subject, text, html });
+}
+
 module.exports = {
   isEmailConfigured,
   sendMail,
@@ -673,5 +750,6 @@ module.exports = {
   sendInvitationPublishedEmail,
   sendRsvpReminderEmail,
   sendGuestInvitationEmail,
-  sendGuestReviewStatusEmail
+  sendGuestReviewStatusEmail,
+  sendEventMemberInviteEmail
 };

@@ -14,6 +14,15 @@ function normalizeEmail(email) {
   return String(email || '').toLowerCase().trim();
 }
 
+function buildInviteToken() {
+  const token = crypto.randomBytes(32).toString('hex');
+  return {
+    token,
+    hash: crypto.createHash('sha256').update(token).digest('hex'),
+    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14)
+  };
+}
+
 function serializeMember(member) {
   return {
     id: member._id,
@@ -24,6 +33,8 @@ function serializeMember(member) {
     permissions: member.permissions || [],
     status: member.status,
     invitedAt: member.invitedAt,
+    inviteTokenExpiresAt: member.inviteTokenExpiresAt,
+    inviteEmailSentAt: member.inviteEmailSentAt,
     acceptedAt: member.acceptedAt,
     lastUsedAt: member.lastUsedAt,
     createdAt: member.createdAt,
@@ -48,6 +59,10 @@ async function activateInvitedMembersForUser(user) {
         user: user._id,
         status: 'active',
         acceptedAt: new Date()
+      },
+      $unset: {
+        inviteTokenHash: '',
+        inviteTokenExpiresAt: ''
       }
     }
   );
@@ -75,6 +90,8 @@ async function findOwnedOrMemberEvent(eventId, user, permission = 'view_event') 
       invited.user = user._id;
       invited.status = 'active';
       invited.acceptedAt = invited.acceptedAt || new Date();
+      invited.inviteTokenHash = undefined;
+      invited.inviteTokenExpiresAt = undefined;
       await invited.save();
       if ((invited.permissions || []).includes(permission)) member = invited;
     }
@@ -345,7 +362,7 @@ exports.listMembers = asyncHandler(async (req, res) => {
 });
 
 exports.createMember = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id owner');
+  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id owner title date');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
@@ -353,6 +370,7 @@ exports.createMember = asyncHandler(async (req, res) => {
   }
   const email = normalizeEmail(req.validated.body.email);
   const user = await User.findOne({ email }).select('_id name email');
+  const invite = buildInviteToken();
   const member = await EventMember.findOneAndUpdate(
     { event: event._id, email },
     {
@@ -364,13 +382,102 @@ exports.createMember = asyncHandler(async (req, res) => {
       role: req.validated.body.role,
       permissions: req.validated.body.permissions || defaultPermissionsForRole(req.validated.body.role),
       status: user ? 'active' : 'invited',
+      inviteTokenHash: invite.hash,
+      inviteTokenExpiresAt: invite.expiresAt,
       invitedBy: req.user._id,
       invitedAt: new Date(),
       ...(user ? { acceptedAt: new Date() } : {})
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
-  res.status(201).json({ member: serializeMember(member) });
+  const inviteUrl = `${env.frontendUrl.replace(/\/$/, '')}/new/member-invite/${invite.token}`;
+  let inviteEmailSent = false;
+  let inviteEmailError = '';
+  if (emailService.isEmailConfigured()) {
+    try {
+      await emailService.sendEventMemberInviteEmail({
+        to: email,
+        name: member.name || user?.name || email,
+        event,
+        inviter: req.user,
+        role: member.role,
+        permissions: member.permissions || [],
+        inviteUrl,
+        hasAccount: Boolean(user)
+      });
+      member.inviteEmailSentAt = new Date();
+      await member.save();
+      inviteEmailSent = true;
+    } catch (error) {
+      inviteEmailError = error.message;
+      console.warn('Event member invite email failed:', error.message);
+    }
+  } else {
+    inviteEmailError = 'SMTP no configurado';
+  }
+  res.status(201).json({ member: serializeMember(member), inviteEmailSent, inviteEmailError });
+});
+
+exports.getMemberInvite = asyncHandler(async (req, res) => {
+  const hash = crypto.createHash('sha256').update(String(req.params.token || '')).digest('hex');
+  const member = await EventMember.findOne({ inviteTokenHash: hash, status: { $ne: 'disabled' } })
+    .populate('event', 'title date')
+    .select('email name role permissions status inviteTokenExpiresAt acceptedAt event');
+  if (!member) {
+    const error = new Error('Invitacion no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (member.inviteTokenExpiresAt && member.inviteTokenExpiresAt < new Date()) {
+    const error = new Error('La invitacion expiro. Solicita un nuevo acceso al dueno del evento.');
+    error.statusCode = 410;
+    throw error;
+  }
+  const user = await User.findOne({ email: member.email }).select('_id');
+  res.json({
+    invite: {
+      email: member.email,
+      name: member.name,
+      role: member.role,
+      permissions: member.permissions || [],
+      status: member.status,
+      acceptedAt: member.acceptedAt,
+      hasAccount: Boolean(user),
+      event: member.event ? {
+        id: member.event._id,
+        title: member.event.title,
+        date: member.event.date
+      } : undefined
+    }
+  });
+});
+
+exports.acceptMemberInvite = asyncHandler(async (req, res) => {
+  const hash = crypto.createHash('sha256').update(String(req.params.token || '')).digest('hex');
+  const member = await EventMember.findOne({ inviteTokenHash: hash, status: { $ne: 'disabled' } }).populate('event', 'title');
+  if (!member) {
+    const error = new Error('Invitacion no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (member.inviteTokenExpiresAt && member.inviteTokenExpiresAt < new Date()) {
+    const error = new Error('La invitacion expiro. Solicita un nuevo acceso al dueno del evento.');
+    error.statusCode = 410;
+    throw error;
+  }
+  if (normalizeEmail(req.user.email) !== member.email) {
+    const error = new Error('Esta invitacion pertenece a otro correo');
+    error.statusCode = 403;
+    throw error;
+  }
+  member.user = req.user._id;
+  member.status = 'active';
+  member.acceptedAt = member.acceptedAt || new Date();
+  member.lastUsedAt = new Date();
+  member.inviteTokenHash = undefined;
+  member.inviteTokenExpiresAt = undefined;
+  await member.save();
+  res.json({ member: serializeMember(member), eventId: member.event?._id || member.event });
 });
 
 exports.updateMember = asyncHandler(async (req, res) => {

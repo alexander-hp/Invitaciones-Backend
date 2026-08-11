@@ -48,6 +48,8 @@ async function requireEventAccess({ eventId, user, permission = 'view_event', se
       invited.user = user._id;
       invited.status = 'active';
       invited.acceptedAt = invited.acceptedAt || new Date();
+      invited.inviteTokenHash = undefined;
+      invited.inviteTokenExpiresAt = undefined;
       await invited.save();
       if ((invited.permissions || []).includes(permission)) member = invited;
     }

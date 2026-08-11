@@ -52,6 +52,10 @@ async function activateInvitedEventMemberships(user) {
         user: user._id,
         status: 'active',
         acceptedAt: new Date()
+      },
+      $unset: {
+        inviteTokenHash: '',
+        inviteTokenExpiresAt: ''
       }
     }
   );
