@@ -22,7 +22,8 @@ const guestBody = z.object({
   companions: z.array(z.object({
     name: z.string().optional(),
     tableName: z.string().optional(),
-    seatLabel: z.string().optional()
+    seatLabel: z.string().optional(),
+    checkedIn: z.boolean().optional()
   }).strict()).optional(),
   allowedCompanions: z.number().int().min(0).max(20).optional(),
   checkedIn: z.boolean().optional()
