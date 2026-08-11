@@ -60,7 +60,11 @@ async function sendMail({ to = env.emailTo, subject, text, html, replyTo }) {
 
 async function sendContactMessage({ name, email, message }) {
   const safeName = name || 'Visitante';
+  const htmlName = escapeHtml(safeName);
+  const htmlEmail = escapeHtml(email || 'Sin correo');
+  const htmlMessage = escapeHtml(message || '').replace(/\r?\n/g, '<br>');
   const subject = `Mensaje desde Invitaciones - ${safeName}`;
+
   const text = [
     `Nombre: ${safeName}`,
     `Correo: ${email}`,
@@ -69,9 +73,115 @@ async function sendContactMessage({ name, email, message }) {
     message
   ].join('\n');
 
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mensaje de Contacto</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f8f6f2; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#2d2926; -webkit-font-smoothing:antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f8f6f2; padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:560px; background-color:#ffffff; border-radius:16px; border:1px solid #e8dfd5; box-shadow:0 10px 25px rgba(0,0,0,0.04); overflow:hidden;">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="background:linear-gradient(135deg, #1e1b18 0%, #2d2620 100%); padding:32px 36px; text-align:center; border-bottom:3px solid #c09c78;">
+              <table align="center" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="background:linear-gradient(135deg, #c09c78, #a8825c); width:36px; height:36px; border-radius:10px; text-align:center; vertical-align:middle; color:#ffffff; font-weight:bold; font-size:18px;">
+                    💬
+                  </td>
+                  <td style="padding-left:12px; font-family:'Georgia', serif; font-size:22px; font-weight:bold; color:#ffffff; letter-spacing:0.5px;">
+                    Invitaciones.mx
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td style="padding:36px 36px 32px;">
+              
+              <!-- Badge -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:20px;">
+                <tr>
+                  <td>
+                    <span style="display:inline-block; padding:6px 14px; background-color:#f4ebe1; border:1px solid #e8dfd5; border-radius:20px; font-size:12px; font-weight:700; color:#a8825c; letter-spacing:0.5px; text-transform:uppercase;">
+                      📩 NUEVO MENSAJE DE CONTACTO
+                    </span>
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="margin:0 0 16px; font-size:22px; font-weight:700; color:#1e1b18; line-height:1.3;">
+                Has recibido una nueva consulta
+              </h1>
+              
+              <p style="margin:0 0 24px; font-size:15px; line-height:1.6; color:#524c46;">
+                Se ha enviado un nuevo mensaje desde el formulario de contacto del sitio web.
+              </p>
+
+              <!-- Remitente Info Box -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:24px; background-color:#fcfaf7; border:1px solid #efe4d8; border-radius:12px; padding:16px;">
+                <tr>
+                  <td style="padding:6px 0; font-size:14px; color:#524c46;">
+                    <strong style="color:#1e1b18;">👤 Remitente:</strong> ${htmlName}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0; font-size:14px; color:#524c46;">
+                    <strong style="color:#1e1b18;">✉️ Correo:</strong> <a href="mailto:${htmlEmail}" style="color:#a8825c; text-decoration:none; font-weight:600;">${htmlEmail}</a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Mensaje Card -->
+              <div style="margin-bottom:28px;">
+                <div style="margin-bottom:8px; font-size:13px; font-weight:700; color:#888077; text-transform:uppercase; letter-spacing:0.5px;">Mensaje recibido:</div>
+                <div style="background-color:#ffffff; border-left:4px solid #c09c78; border-top:1px solid #f0e9e1; border-right:1px solid #f0e9e1; border-bottom:1px solid #f0e9e1; border-radius:0 12px 12px 0; padding:20px; font-size:15px; line-height:1.7; color:#2d2926; font-style:italic;">
+                  "${htmlMessage}"
+                </div>
+              </div>
+
+              <!-- CTA Button -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
+                <tr>
+                  <td align="center">
+                    <a href="mailto:${htmlEmail}?subject=Re:%20Mensaje%20desde%20Invitaciones" target="_blank" style="display:inline-block; padding:14px 32px; background:linear-gradient(135deg, #c09c78 0%, #a8825c 100%); color:#ffffff; text-decoration:none; font-weight:700; font-size:15px; border-radius:10px; box-shadow:0 4px 12px rgba(192, 156, 120, 0.35);">
+                      ↩️ Responder a ${htmlName}
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#faf7f2; padding:20px 36px; text-align:center; border-top:1px solid #e8dfd5; font-size:12px; color:#999085;">
+              <p style="margin:0 0 6px;">Este correo fue generado automáticamente por el sistema de contacto de Invitaciones.mx.</p>
+              <p style="margin:0; font-weight:600; color:#787067;">© Invitaciones.mx — Todos los derechos reservados.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+
   return sendMail({
     subject,
     text,
+    html,
     replyTo: email
   });
 }
