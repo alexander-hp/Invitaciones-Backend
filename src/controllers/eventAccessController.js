@@ -17,7 +17,8 @@ const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
 const ROLE_PERMISSIONS = {
   check_in: ['check_in'],
   album_review: ['album_review'],
-  photographer: ['album_review', 'album_upload'],
+  photographer: ['album_upload'],
+  album_view: ['album_view'],
   client_view: ['client_view'],
   guest_ops: ['check_in', 'album_review', 'client_view', 'guest_ops', 'song_review'],
   dj: ['song_review'],
@@ -107,7 +108,7 @@ exports.session = asyncHandler(async (req, res) => {
     hasPermission(access, 'check_in') || hasPermission(access, 'client_view') ? Guest.find({ event: access.event }).sort('name') : [],
     hasPermission(access, 'client_view') ? Rsvp.find({ event: access.event }).sort('-createdAt').limit(200) : [],
     hasPermission(access, 'client_view') ? EventTable.find({ event: access.event }).sort('order name') : [],
-    hasPermission(access, 'album_review') ? AlbumAsset.find({ event: access.event }).sort('-createdAt').limit(100) : [],
+    hasPermission(access, 'album_review') || hasPermission(access, 'album_view') || hasPermission(access, 'album_upload') ? AlbumAsset.find({ event: access.event }).sort('-createdAt').limit(200) : [],
     hasPermission(access, 'song_review') ? SongRequest.find({ event: access.event }).populate('guest', 'name group roles relationshipLabel visibilityGroup tableName').sort({ sortOrder: 1, createdAt: -1 }).limit(200) : []
   ]);
   access.lastUsedAt = new Date();
@@ -304,4 +305,19 @@ exports.addSong = asyncHandler(async (req, res) => {
   access.lastUsedAt = new Date();
   await access.save();
   res.status(201).json({ songRequest });
+});
+title: cleanTitle || (ytId ? 'Canción de YouTube' : (rawUrl || 'Canción agregada')),
+  artist: cleanArtist || (ytId ? 'YouTube' : ''),
+    dedication: req.validated.body.dedication || '',
+      sourceProvider,
+      sourceUrl,
+      externalId,
+      thumbnailUrl,
+      status: 'approved',
+        reviewedAt: new Date()
+  });
+
+access.lastUsedAt = new Date();
+await access.save();
+res.status(201).json({ songRequest });
 });
