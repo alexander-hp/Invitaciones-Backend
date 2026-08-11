@@ -30,12 +30,29 @@ async function requireEventAccess({ eventId, user, permission = 'view_event', se
     return { event, ownerPlanUser: user, access: accessForOwner() };
   }
 
-  const member = await EventMember.findOne({
+  let member = await EventMember.findOne({
     event: event._id,
     user: user._id,
     status: 'active',
     permissions: permission
   });
+
+  if (!member && user.email) {
+    const invited = await EventMember.findOne({
+      event: event._id,
+      email: String(user.email).toLowerCase().trim(),
+      status: 'invited',
+      $or: [{ user: { $exists: false } }, { user: null }, { user: user._id }]
+    });
+    if (invited) {
+      invited.user = user._id;
+      invited.status = 'active';
+      invited.acceptedAt = invited.acceptedAt || new Date();
+      await invited.save();
+      if ((invited.permissions || []).includes(permission)) member = invited;
+    }
+  }
+
   if (!member) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;

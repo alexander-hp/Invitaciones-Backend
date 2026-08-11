@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const EventMember = require('../models/EventMember');
 const env = require('../config/env');
 const emailService = require('../services/emailService');
 const asyncHandler = require('../utils/asyncHandler');
@@ -36,6 +37,24 @@ function normalizeAccountRole(role, accountType) {
   if (normalizedAccountType === 'planner') return 'organizer';
   if (normalizedAccountType === 'staff') return 'vendor';
   return normalizedAccountType || 'client';
+}
+
+async function activateInvitedEventMemberships(user) {
+  if (!user?.email) return;
+  await EventMember.updateMany(
+    {
+      email: String(user.email).toLowerCase().trim(),
+      status: 'invited',
+      $or: [{ user: { $exists: false } }, { user: null }, { user: user._id }]
+    },
+    {
+      $set: {
+        user: user._id,
+        status: 'active',
+        acceptedAt: new Date()
+      }
+    }
+  );
 }
 
 function hashResetToken(token) {
@@ -200,6 +219,7 @@ exports.register = asyncHandler(async (req, res) => {
   const passwordHash = await User.hashPassword(password);
   const roleValue = normalizeAccountRole(role, accountType);
   const user = await User.create({ name, email, passwordHash, role: roleValue, accountType: accountType || roleValue, authProviders: ['password'] });
+  await activateInvitedEventMemberships(user);
   res.status(201).json({ token: signToken(user), user: sanitizeUser(user) });
 });
 
@@ -211,6 +231,7 @@ exports.login = asyncHandler(async (req, res) => {
     error.statusCode = 401;
     throw error;
   }
+  await activateInvitedEventMemberships(user);
   res.json({ token: signToken(user), user: sanitizeUser(user) });
 });
 
@@ -228,6 +249,7 @@ exports.socialLogin = asyncHandler(async (req, res) => {
 
   const socialProfile = await resolveSocialProfile({ provider, idToken, accessToken, profile });
   const user = await findOrCreateSocialUser({ provider, socialProfile, role, accountType });
+  await activateInvitedEventMemberships(user);
   res.json({ token: signToken(user), user: sanitizeUser(user) });
 });
 

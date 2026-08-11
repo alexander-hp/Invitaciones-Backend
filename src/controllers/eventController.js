@@ -35,16 +35,51 @@ function defaultPermissionsForRole(role) {
   return EventMember.ROLE_PERMISSIONS[role] || EventMember.ROLE_PERMISSIONS.client;
 }
 
+async function activateInvitedMembersForUser(user) {
+  if (!user?.email) return;
+  await EventMember.updateMany(
+    {
+      email: normalizeEmail(user.email),
+      status: 'invited',
+      $or: [{ user: { $exists: false } }, { user: null }, { user: user._id }]
+    },
+    {
+      $set: {
+        user: user._id,
+        status: 'active',
+        acceptedAt: new Date()
+      }
+    }
+  );
+}
+
 async function findOwnedOrMemberEvent(eventId, user, permission = 'view_event') {
   const owned = await Event.findOne({ _id: eventId, owner: user._id });
   if (owned) return { event: owned, access: { owner: true, permissions: EventMember.PERMISSIONS } };
 
-  const member = await EventMember.findOne({
+  let member = await EventMember.findOne({
     event: eventId,
     user: user._id,
     status: 'active',
     permissions: permission
   });
+
+  if (!member && user.email) {
+    const invited = await EventMember.findOne({
+      event: eventId,
+      email: normalizeEmail(user.email),
+      status: 'invited',
+      $or: [{ user: { $exists: false } }, { user: null }, { user: user._id }]
+    });
+    if (invited) {
+      invited.user = user._id;
+      invited.status = 'active';
+      invited.acceptedAt = invited.acceptedAt || new Date();
+      await invited.save();
+      if ((invited.permissions || []).includes(permission)) member = invited;
+    }
+  }
+
   if (!member) return null;
   member.lastUsedAt = new Date();
   await member.save();
@@ -123,6 +158,7 @@ function publicExternalEvent(event) {
 }
 
 exports.list = asyncHandler(async (req, res) => {
+  await activateInvitedMembersForUser(req.user);
   const memberships = await EventMember.find({ user: req.user._id, status: 'active', permissions: 'view_event' }).select('event role permissions').lean();
   const memberEventIds = memberships.map((member) => member.event);
   const membershipByEvent = new Map(memberships.map((member) => [String(member.event), member]));
