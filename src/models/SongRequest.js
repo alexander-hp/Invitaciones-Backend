@@ -15,6 +15,7 @@ const songRequestSchema = new mongoose.Schema({
   thumbnailUrl: { type: String, trim: true },
   previewUrl: { type: String, trim: true },
   durationMs: Number,
+  sortOrder: { type: Number, default: 0, index: true },
   status: { type: String, enum: ['pending', 'approved', 'rejected', 'played'], default: 'pending', index: true },
   reviewedAt: Date,
   playedAt: Date

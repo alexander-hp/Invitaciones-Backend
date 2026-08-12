@@ -4,11 +4,13 @@ const Rsvp = require('../models/Rsvp');
 const SongRequest = require('../models/SongRequest');
 const AlbumAsset = require('../models/AlbumAsset');
 const Dedication = require('../models/Dedication');
+const EventAccessToken = require('../models/EventAccessToken');
 const asyncHandler = require('../utils/asyncHandler');
 const albumController = require('./albumController');
 const dedicationController = require('./dedicationController');
 const env = require('../config/env');
 const { signGuestSession, verifyGuestSession } = require('../utils/guestSession');
+const { initialModerationStatus } = require('../utils/moderation');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -161,6 +163,7 @@ function safeContent(event) {
     spectacularImages: content.spectacularImages || [],
     musicUrl: content.musicUrl,
     audioSections: content.audioSections || [],
+    sectionMusic: content.sectionMusic?.toObject ? content.sectionMusic.toObject({ flattenMaps: true }) : (content.sectionMusic || {}),
     locations: content.locations?.length ? content.locations : [{
       type: 'principal',
       name: event.venue?.name,
@@ -170,6 +173,7 @@ function safeContent(event) {
     sections: (content.sections || []).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)),
     rsvpSettings: content.rsvpSettings || {},
     songRequestSettings: content.songRequestSettings || { enabled: true, maxRequestsPerGuest: 3, allowDedications: true },
+    moderationSettings: content.moderationSettings || { notifyOnReview: true },
     giftRegistry: (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0)),
     digitalEnvelope: content.digitalEnvelope || {},
     giftSettings: content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true },
@@ -220,12 +224,42 @@ async function getPublicEvent(portalSlug) {
   return event;
 }
 
+function integrationTokenFrom(req) {
+  const auth = String(req.get('authorization') || '');
+  if (auth.toLowerCase().startsWith('bearer ')) return auth.slice(7).trim();
+  return String(req.get('x-kyndra-access-token') || req.query.accessToken || '').trim();
+}
+
+async function verifyIntegrationAccess(req, event) {
+  const token = integrationTokenFrom(req);
+  if (!token) {
+    const error = new Error('Token de integracion requerido');
+    error.statusCode = 401;
+    throw error;
+  }
+  const access = await EventAccessToken.findOne({
+    token,
+    event: event._id,
+    role: 'integration_api',
+    revokedAt: { $exists: false },
+    expiresAt: { $gt: new Date() }
+  });
+  if (!access) {
+    const error = new Error('Token de integracion invalido o expirado');
+    error.statusCode = 403;
+    throw error;
+  }
+  access.lastUsedAt = new Date();
+  await access.save();
+  return access;
+}
+
 function assetPayload(event, type) {
   const content = safeContent(event);
   if (type === 'cover') return { coverImageUrl: content.coverImageUrl, heroImageUrl: content.heroImageUrl };
   if (type === 'carousel') return { carousel: content.carousel };
   if (type === 'gallery') return { gallery: content.gallery, spectacularImages: content.spectacularImages };
-  if (type === 'audio') return { musicUrl: content.musicUrl, audioSections: content.audioSections };
+  if (type === 'audio') return { musicUrl: content.musicUrl, audioSections: content.audioSections, sectionMusic: content.sectionMusic };
   if (type === 'map') return { locations: content.locations };
   if (type === 'gifts') return { giftRegistry: content.giftRegistry, digitalEnvelope: content.digitalEnvelope, giftSettings: content.giftSettings };
   return content;
@@ -363,6 +397,12 @@ exports.songRequest = asyncHandler(async (req, res) => {
     title: req.validated.body.title,
     artist: req.validated.body.artist
   });
+  const status = initialModerationStatus({
+    guest,
+    settings: event.externalContent?.moderationSettings || {},
+    kind: 'song',
+    requireApproval: event.externalContent?.songRequestSettings?.requireApproval !== false
+  });
   const songRequest = await SongRequest.create({
     owner: event.owner,
     event: event._id,
@@ -377,7 +417,9 @@ exports.songRequest = asyncHandler(async (req, res) => {
     externalId: lookup.externalId,
     thumbnailUrl: lookup.thumbnailUrl,
     previewUrl: lookup.previewUrl,
-    durationMs: lookup.durationMs
+    durationMs: lookup.durationMs,
+    status,
+    reviewedAt: status === 'approved' ? new Date() : undefined
   });
   res.status(201).json({ songRequest: publicSongRequest(songRequest) });
 });
@@ -419,6 +461,12 @@ exports.embedManifest = asyncHandler(async (req, res) => {
       fullDetails: widget('full-details'),
       fullPortal: widget('full-portal')
     },
+    apiAuth: {
+      header: 'Authorization: Bearer <integration_api_token>',
+      alternateHeader: 'X-Kyndra-Access-Token: <integration_api_token>',
+      verifyEndpoint: `/api/external/${slug}/integration-token/status`,
+      note: 'El token integration_api identifica a la pagina externa cliente; los datos publicos siguen sanitizados.'
+    },
     snippets: {
       rsvp: `<iframe src="${widget('rsvp')}" width="100%" height="720" style="border:0"></iframe>`,
       album: `<iframe src="${widget('album')}" width="100%" height="720" style="border:0"></iframe>`,
@@ -428,6 +476,22 @@ exports.embedManifest = asyncHandler(async (req, res) => {
       dedications: `<iframe src="${widget('dedications')}" width="100%" height="640" style="border:0"></iframe>`,
       fullDetails: `<iframe src="${widget('full-details')}" width="100%" height="760" style="border:0"></iframe>`,
       script: `<div data-kyndra-widget="rsvp" data-portal="${slug}"></div><script src="${base}/assets/kyndra-embed.js"></script>`
+    }
+  });
+});
+
+exports.integrationTokenStatus = asyncHandler(async (req, res) => {
+  const event = await getPublicEvent(req.params.portalSlug);
+  const access = await verifyIntegrationAccess(req, event);
+  res.json({
+    ok: true,
+    portalSlug: event.externalPortalSlug,
+    event: { id: event._id, title: event.title, mode: event.mode },
+    access: {
+      role: access.role,
+      label: access.label,
+      expiresAt: access.expiresAt,
+      lastUsedAt: access.lastUsedAt
     }
   });
 });

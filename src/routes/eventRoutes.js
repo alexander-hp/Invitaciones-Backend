@@ -43,6 +43,7 @@ const eventBody = z.object({
       url: z.string().url(),
       description: z.string().optional()
     }).strict()).max(20).optional(),
+    sectionMusic: z.record(z.string(), z.string()).optional(),
     locations: z.array(z.object({
       type: z.string().optional(),
       name: z.string().optional(),
@@ -79,7 +80,18 @@ const eventBody = z.object({
     songRequestSettings: z.object({
       enabled: z.boolean().optional(),
       maxRequestsPerGuest: z.number().int().min(1).max(20).optional(),
-      allowDedications: z.boolean().optional()
+      allowDedications: z.boolean().optional(),
+      requireApproval: z.boolean().optional()
+    }).strict().optional(),
+    moderationSettings: z.object({
+      notifyOnReview: z.boolean().optional(),
+      autoApproveRoles: z.array(z.string()).max(50).optional(),
+      autoApproveGroups: z.array(z.string()).max(100).optional(),
+      autoApproveEmails: z.array(z.string().email()).max(1000).optional(),
+      autoApprovePhones: z.array(z.string().min(6).max(30)).max(1000).optional(),
+      autoApproveAlbum: z.boolean().optional(),
+      autoApproveSongs: z.boolean().optional(),
+      autoApproveDedications: z.boolean().optional()
     }).strict().optional(),
     giftRegistry: z.array(z.object({
       store: z.string().optional(),
@@ -125,50 +137,107 @@ const checkInLinkBody = z.object({
 }).strict();
 const tableBody = z.object({
   name: z.string().min(1),
-  capacity: z.number().int().min(1).max(100),
+  capacity: z.number().int().min(0).max(100),
   notes: z.string().optional(),
   order: z.number().int().optional(),
   x: z.number().optional(),
   y: z.number().optional(),
-  shape: z.enum(['round', 'rect', 'oval', 'square']).optional(),
-  width: z.number().int().min(40).max(600).optional(),
-  height: z.number().int().min(40).max(600).optional()
-}).strict();
+  floor: z.number().int().optional(),
+  floorName: z.string().optional(),
+  shape: z.string().optional(),
+  width: z.number().int().min(10).max(1200).optional(),
+  height: z.number().int().min(10).max(1200).optional()
+}).passthrough();
 const tableUpdateBody = tableBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
+const tableAutoAssignBody = z.object({
+  strategy: z.enum(['fill_order', 'by_group']).optional(),
+  includeStatuses: z.array(z.enum(['pending', 'confirmed', 'declined'])).min(1).max(3).optional(),
+  overwrite: z.boolean().optional()
+}).strict();
+const tableBatchBody = z.object({
+  tables: z.array(tableBody).min(1).max(100)
+}).passthrough();
 const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
-const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']) }).strict();
+const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
+const songRequestBody = z.object({
+  guest: z.string().min(12).optional(),
+  requesterName: z.string().min(2).optional(),
+  requesterEmail: z.string().email().optional(),
+  title: z.string().min(1).max(180).optional(),
+  artist: z.string().max(180).optional(),
+  dedication: z.string().max(500).optional(),
+  query: z.string().max(300).optional(),
+  url: z.string().url().optional(),
+  sourceUrl: z.string().url().optional(),
+  status: z.enum(['pending', 'approved', 'played', 'rejected']).optional()
+}).strict().refine((body) => body.title || body.query || body.url || body.sourceUrl, 'Se requiere cancion, busqueda o link');
 const dedicationStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'hidden']) }).strict();
 const publicEmailBody = z.object({ email: z.string().email() }).strict();
 const accessLinkBody = z.object({
-  role: z.enum(['check_in', 'album_review', 'client_view', 'guest_ops']),
+  role: z.enum(['check_in', 'album_review', 'photographer', 'album_view', 'client_view', 'guest_ops', 'dj', 'integration_api']),
   label: z.string().max(120).optional(),
   days: z.number().int().min(1).max(90).optional()
 }).strict();
+const memberPermission = z.enum([
+  'view_event',
+  'edit_event',
+  'view_metrics',
+  'manage_guests',
+  'manage_tables',
+  'check_in',
+  'review_album',
+  'review_dedications',
+  'manage_songs',
+  'view_payments'
+]);
+const memberRole = z.enum(['organizer', 'client', 'venue_owner', 'vendor', 'staff', 'dj', 'photographer']);
+const memberBody = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(120).optional().or(z.literal('')),
+  role: memberRole,
+  permissions: z.array(memberPermission).min(1).max(10).optional()
+}).strict();
+const memberUpdateBody = z.object({
+  name: z.string().min(1).max(120).optional().or(z.literal('')),
+  role: memberRole.optional(),
+  permissions: z.array(memberPermission).min(1).max(10).optional(),
+  status: z.enum(['invited', 'active', 'disabled']).optional()
+}).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo');
 
 router.get('/public/:portalSlug', controller.publicByPortalSlug);
 router.get('/public/:portalSlug/album', albumController.publicEventApproved);
 router.post('/public/:portalSlug/guest-access', validate(z.object({ body: publicEmailBody })), controller.publicGuestAccess);
 router.get('/public/:portalSlug/guest-token/:token', controller.publicGuestByToken);
 router.post('/public/:portalSlug/album', upload.single('file'), albumController.uploadPublicEvent);
+router.get('/member-invites/:token', controller.getMemberInvite);
 router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: eventBody })), controller.create);
+router.post('/member-invites/:token/accept', controller.acceptMemberInvite);
 router.get('/:id', controller.get);
 router.patch('/:id', validate(z.object({ body: eventUpdateBody })), controller.update);
 router.post('/:eventId/send-email', validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: messageTypeBody })), controller.sendEmailBulk);
 router.post('/:eventId/check-in-link', validate(z.object({ body: checkInLinkBody })), checkInController.createLink);
 router.get('/:eventId/tables', tableController.list);
+router.post('/:eventId/tables/batch', validate(z.object({ body: tableBatchBody })), tableController.createBatch);
 router.post('/:eventId/tables', validate(z.object({ body: tableBody })), tableController.create);
+router.post('/:eventId/tables/auto-assign', validate(z.object({ body: tableAutoAssignBody })), tableController.autoAssign);
 router.patch('/:eventId/tables/:tableId', validate(z.object({ body: tableUpdateBody })), tableController.update);
 router.delete('/:eventId/tables/:tableId', tableController.remove);
 router.get('/:eventId/album', albumController.list);
 router.patch('/:eventId/album/:assetId', validate(z.object({ body: albumStatusBody })), albumController.update);
 router.get('/:eventId/song-requests', songRequestController.list);
+router.post('/:eventId/song-requests', validate(z.object({ body: songRequestBody })), songRequestController.create);
+router.post('/:eventId/song-requests/lookup-youtube', songRequestController.lookupYouTube);
 router.patch('/:eventId/song-requests/:songRequestId', validate(z.object({ body: songRequestStatusBody })), songRequestController.update);
 router.get('/:eventId/dedications', dedicationController.listAdmin);
 router.patch('/:eventId/dedications/:dedicationId', validate(z.object({ body: dedicationStatusBody })), dedicationController.updateAdmin);
 router.get('/:eventId/access-links', controller.listAccessLinks);
 router.post('/:eventId/access-links', validate(z.object({ body: accessLinkBody })), controller.createAccessLink);
 router.delete('/:eventId/access-links/:linkId', controller.revokeAccessLink);
+router.get('/:eventId/members', controller.listMembers);
+router.post('/:eventId/members', validate(z.object({ body: memberBody })), controller.createMember);
+router.patch('/:eventId/members/:memberId', validate(z.object({ body: memberUpdateBody })), controller.updateMember);
+router.delete('/:eventId/members/:memberId', controller.removeMember);
 
 module.exports = router;

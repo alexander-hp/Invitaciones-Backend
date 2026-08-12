@@ -22,9 +22,11 @@ const guestBody = z.object({
   companions: z.array(z.object({
     name: z.string().optional(),
     tableName: z.string().optional(),
-    seatLabel: z.string().optional()
+    seatLabel: z.string().optional(),
+    checkedIn: z.boolean().optional()
   }).strict()).optional(),
-  allowedCompanions: z.number().int().min(0).max(20).optional()
+  allowedCompanions: z.number().int().min(0).max(20).optional(),
+  checkedIn: z.boolean().optional()
 }).strict();
 
 const guestUpdateBody = guestBody.omit({ event: true }).partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');

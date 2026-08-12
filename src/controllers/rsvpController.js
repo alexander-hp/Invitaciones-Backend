@@ -6,9 +6,18 @@ const RsvpActivity = require('../models/RsvpActivity');
 const emailService = require('../services/emailService');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 function normalizeEmail(email) {
   return email ? email.toLowerCase().trim() : '';
+}
+
+function normalizePhoneDigits(value) {
+  return value ? String(value).replace(/\D/g, '') : '';
+}
+
+function payloadPhoneDigits(payload) {
+  return normalizePhoneDigits(payload.phone || [payload.phoneCountryCode, payload.phoneNationalNumber].filter(Boolean).join(''));
 }
 
 function escapeCsv(value) {
@@ -22,7 +31,16 @@ function csvResponse(res, filename, rows) {
   res.send(`\uFEFF${rows.map((row) => row.map(escapeCsv).join(',')).join('\n')}`);
 }
 
-function normalizePhone({ phoneCountryCode, phoneNationalNumber }) {
+function normalizePhone({ phone, phoneCountryCode, phoneNationalNumber }) {
+  if (phone && !phoneCountryCode && !phoneNationalNumber) {
+    const nationalNumber = normalizePhoneDigits(phone);
+    return {
+      phoneNationalNumber: nationalNumber,
+      phoneE164: nationalNumber,
+      phoneVerified: false,
+      phoneVerificationStatus: 'not_started'
+    };
+  }
   if (!phoneCountryCode || !phoneNationalNumber) return {};
   const countryCode = phoneCountryCode.trim();
   const nationalNumber = phoneNationalNumber.replace(/\D/g, '');
@@ -36,13 +54,23 @@ function normalizePhone({ phoneCountryCode, phoneNationalNumber }) {
 }
 
 function getRsvpSettings(invitation) {
+  const raw = invitation.rsvpSettings || {};
   return {
-    deadline: invitation.rsvpSettings?.deadline,
-    allowMaybe: invitation.rsvpSettings?.allowMaybe !== false,
-    allowChangesUntilDeadline: invitation.rsvpSettings?.allowChangesUntilDeadline !== false,
-    declineRequiresConfirmation: invitation.rsvpSettings?.declineRequiresConfirmation !== false,
-    reminderDaysBeforeDeadline: invitation.rsvpSettings?.reminderDaysBeforeDeadline ?? 3,
-    customQuestions: invitation.rsvpSettings?.customQuestions || []
+    deadline: raw.deadline,
+    allowMaybe: raw.allowMaybe !== false,
+    allowChangesUntilDeadline: raw.allowChangesUntilDeadline !== false,
+    declineRequiresConfirmation: raw.declineRequiresConfirmation !== false,
+    reminderDaysBeforeDeadline: raw.reminderDaysBeforeDeadline ?? 3,
+    identityMethods: raw.identityMethods?.length ? raw.identityMethods : ['email', 'phone'],
+    allowCompanionsDefault: raw.allowCompanionsDefault === true,
+    defaultAllowedCompanions: Number(raw.defaultAllowedCompanions || 0),
+    maxAttendees: raw.maxAttendees ? Number(raw.maxAttendees) : undefined,
+    allowedGuestIds: (raw.allowedGuestIds || []).map(String),
+    allowedRoles: (raw.allowedRoles || []).map((value) => String(value || '').toLowerCase().trim()).filter(Boolean),
+    allowedGroups: (raw.allowedGroups || []).map((value) => String(value || '').trim()).filter(Boolean),
+    allowedEmails: (raw.allowedEmails || []).map(normalizeEmail).filter(Boolean),
+    allowedPhones: (raw.allowedPhones || []).map(normalizePhoneDigits).filter(Boolean),
+    customQuestions: raw.customQuestions || []
   };
 }
 
@@ -140,13 +168,17 @@ function buildRsvpData({ invitation, guest, payload, emailNormalized }) {
   };
 }
 
-async function findExistingRsvp(invitation, guest, emailNormalized) {
+async function findExistingRsvp(invitation, guest, emailNormalized, phoneE164) {
   if (guest) {
     const byGuest = await Rsvp.findOne({ invitation: invitation._id, guest: guest._id });
     if (byGuest) return byGuest;
   }
   if (emailNormalized) {
-    return Rsvp.findOne({ invitation: invitation._id, emailNormalized });
+    const byEmail = await Rsvp.findOne({ invitation: invitation._id, emailNormalized });
+    if (byEmail) return byEmail;
+  }
+  if (phoneE164) {
+    return Rsvp.findOne({ invitation: invitation._id, phoneE164 });
   }
   return null;
 }
@@ -171,7 +203,7 @@ async function updateGuestStatus(guest, response) {
 }
 
 async function saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings }) {
-  const existingRsvp = await findExistingRsvp(invitation, guest, emailNormalized);
+  const existingRsvp = await findExistingRsvp(invitation, guest, emailNormalized, rsvpData.phoneE164);
   let rsvp;
   let statusCode = 201;
   let previousSnapshot;
@@ -202,7 +234,7 @@ async function saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings
     return { rsvp, statusCode, previousSnapshot };
   } catch (error) {
     if (error?.code !== 11000) throw error;
-    const duplicate = await findExistingRsvp(invitation, guest, emailNormalized);
+    const duplicate = await findExistingRsvp(invitation, guest, emailNormalized, rsvpData.phoneE164);
     if (!duplicate || !settings.allowChangesUntilDeadline) {
       const conflict = new Error('Ya existe una respuesta para esta invitacion');
       conflict.statusCode = 409;
@@ -244,6 +276,72 @@ async function saveEventRsvp({ event, guest, emailNormalized, rsvpData }) {
   }
 }
 
+async function findGuestByIdentity(eventId, payload, emailNormalized, phoneDigits) {
+  if (payload.guest) {
+    const guest = await Guest.findOne({ _id: payload.guest, event: eventId });
+    if (!guest) {
+      const error = new Error('Invitado no pertenece a esta invitacion');
+      error.statusCode = 400;
+      throw error;
+    }
+    return guest;
+  }
+  if (emailNormalized) {
+    const guest = await Guest.findOne({ event: eventId, email: emailNormalized });
+    if (guest) return guest;
+  }
+  if (!phoneDigits) return null;
+  const candidates = await Guest.find({ event: eventId, phone: { $exists: true, $ne: '' } });
+  return candidates.find((guest) => {
+    const stored = normalizePhoneDigits(guest.phone);
+    return stored && (stored.endsWith(phoneDigits) || phoneDigits.endsWith(stored));
+  }) || null;
+}
+
+function assertIdentityAllowed(emailNormalized, phoneDigits, settings) {
+  const acceptsEmail = settings.identityMethods.includes('email');
+  const acceptsPhone = settings.identityMethods.includes('phone');
+  if ((emailNormalized && acceptsEmail) || (phoneDigits && acceptsPhone)) return;
+  const required = [acceptsEmail ? 'correo' : '', acceptsPhone ? 'telefono' : ''].filter(Boolean).join(' o ');
+  const error = new Error(`Para confirmar esta invitacion necesitas ${required}`);
+  error.statusCode = 400;
+  throw error;
+}
+
+function guestMatchesSpecificRules(guest, settings) {
+  if (!guest) return false;
+  if (settings.allowedGuestIds.includes(String(guest._id))) return true;
+  const email = normalizeEmail(guest.email);
+  const phone = normalizePhoneDigits(guest.phone);
+  const roles = (guest.roles || []).map((value) => String(value || '').toLowerCase().trim());
+  const groups = [guest.group, guest.visibilityGroup].map((value) => String(value || '').trim()).filter(Boolean);
+  return (
+    (email && settings.allowedEmails.includes(email)) ||
+    (phone && settings.allowedPhones.some((allowed) => phone.endsWith(allowed) || allowed.endsWith(phone))) ||
+    roles.some((role) => settings.allowedRoles.includes(role)) ||
+    groups.some((group) => settings.allowedGroups.includes(group))
+  );
+}
+
+function allowedCompanionsFor(guest, settings) {
+  if (guest && Number(guest.allowedCompanions || 0) > 0) return Number(guest.allowedCompanions || 0);
+  return settings.allowCompanionsDefault ? Number(settings.defaultAllowedCompanions || 0) : 0;
+}
+
+async function assertInvitationCapacity(invitation, existingRsvp, nextAttendingCount, settings) {
+  if (!settings.maxAttendees || nextAttendingCount <= 0) return;
+  const confirmed = await Rsvp.find({
+    invitation: invitation._id,
+    response: 'confirmed',
+    ...(existingRsvp?._id ? { _id: { $ne: existingRsvp._id } } : {})
+  }).select('attendingCount companions');
+  const currentTotal = confirmed.reduce((sum, rsvp) => sum + Number(rsvp.attendingCount || (1 + Number(rsvp.companions || 0))), 0);
+  if (currentTotal + nextAttendingCount <= settings.maxAttendees) return;
+  const error = new Error(`El cupo maximo de ${settings.maxAttendees} asistentes ya fue alcanzado`);
+  error.statusCode = 409;
+  throw error;
+}
+
 exports.submitPublic = asyncHandler(async (req, res) => {
   const payload = req.validated.body;
   const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).populate('owner', 'email name');
@@ -256,6 +354,7 @@ exports.submitPublic = asyncHandler(async (req, res) => {
   const accessMode = invitation.accessMode || 'open';
   const settings = getRsvpSettings(invitation);
   const emailNormalized = normalizeEmail(payload.email);
+  const phoneDigits = payloadPhoneDigits(payload);
 
   if (settings.deadline && new Date(settings.deadline) < new Date()) {
     await createRsvpActivity({ invitation, action: 'blocked_deadline', metadata: { email: emailNormalized } });
@@ -266,37 +365,29 @@ exports.submitPublic = asyncHandler(async (req, res) => {
   assertResponseAllowed(payload, settings);
   assertCustomAnswers(payload, settings);
 
-  if (accessMode === 'open' && !emailNormalized) {
-    const error = new Error('El email es obligatorio para confirmar asistencia');
-    error.statusCode = 400;
+  assertIdentityAllowed(emailNormalized, phoneDigits, settings);
+
+  const guest = await findGuestByIdentity(invitation.event, payload, emailNormalized, phoneDigits);
+  const privateAccess = accessMode === 'guest_list' || accessMode === 'specific_users';
+  if (privateAccess && !guest) {
+    const error = new Error('Invitado no autorizado para esta invitacion');
+    error.statusCode = 403;
     throw error;
   }
-
-  let guest = null;
-  if (payload.guest) {
-    guest = await Guest.findOne({ _id: payload.guest, event: invitation.event });
-    if (!guest) {
-      const error = new Error('Invitado no pertenece a esta invitacion');
-      error.statusCode = 400;
-      throw error;
-    }
-  } else if (emailNormalized) {
-    guest = await Guest.findOne({ event: invitation.event, email: emailNormalized });
-  }
-
-  if (accessMode === 'guest_list' && !guest) {
-    const error = new Error('Invitado no autorizado para esta invitacion');
+  if (accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, settings)) {
+    const error = new Error('Esta invitacion esta disponible solo para usuarios especificos');
     error.statusCode = 403;
     throw error;
   }
 
   const requestedCompanions = Number(payload.companions || (payload.companionNames || []).filter(Boolean).length || 0);
-  if (payload.response === 'confirmed' && guest && requestedCompanions > guest.allowedCompanions) {
+  const allowedCompanions = allowedCompanionsFor(guest, settings);
+  if (payload.response === 'confirmed' && requestedCompanions > allowedCompanions) {
     await createRsvpActivity({
       invitation,
       guest,
       action: 'blocked_capacity',
-      metadata: { companions: requestedCompanions, allowedCompanions: guest.allowedCompanions }
+      metadata: { companions: requestedCompanions, allowedCompanions }
     });
     const error = new Error('El numero de acompanantes excede lo permitido');
     error.statusCode = 400;
@@ -304,6 +395,8 @@ exports.submitPublic = asyncHandler(async (req, res) => {
   }
 
   const rsvpData = buildRsvpData({ invitation, guest, payload, emailNormalized });
+  const existingRsvp = await findExistingRsvp(invitation, guest, emailNormalized, rsvpData.phoneE164);
+  await assertInvitationCapacity(invitation, existingRsvp, rsvpData.attendingCount, settings);
   const { rsvp, statusCode, previousSnapshot } = await saveRsvp({ invitation, guest, emailNormalized, rsvpData, settings });
 
   await createRsvpActivity({
@@ -405,24 +498,14 @@ exports.submitPublicEvent = asyncHandler(async (req, res) => {
 });
 
 exports.listByEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+  const { event } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id' });
   const rsvps = await Rsvp.find({ event: req.params.eventId }).sort('-createdAt');
   res.json({ rsvps });
 });
 
 exports.exportByEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findOne({ _id: req.params.eventId, owner: req.user._id }).select('_id plan');
-  if (!event) {
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
-  assertEffectivePlanFeature(req.user, event, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
+  const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_guests', select: '_id plan planExpiresAt' });
+  assertEffectivePlanFeature(ownerPlanUser, event, 'exportData', 'La exportacion de RSVP requiere Evento Individual o Pro');
 
   const rsvps = await Rsvp.find({ event: event._id }).sort('-createdAt').lean();
   const rows = [

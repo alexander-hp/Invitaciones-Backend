@@ -45,8 +45,13 @@ function publicTemplate(template) {
 }
 
 function publicInvitation(invitation) {
-  const content = invitation.content?.toObject ? invitation.content.toObject() : { ...(invitation.content || {}) };
+  const content = invitation.content?.toObject ? invitation.content.toObject({ flattenMaps: true }) : { ...(invitation.content || {}) };
   delete content.privateAlbum;
+  if (content.sectionMusic && content.sectionMusic instanceof Map) {
+    content.sectionMusic = Object.fromEntries(content.sectionMusic);
+  } else {
+    content.sectionMusic = content.sectionMusic || {};
+  }
   content.giftRegistry = (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
   content.giftSettings = content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true };
   content.dedicationSettings = content.dedicationSettings || { enabled: true, requireApproval: true };
@@ -68,6 +73,11 @@ function publicGuest(guest) {
     id: guest._id,
     name: guest.name,
     email: guest.email,
+    group: guest.group,
+    roles: guest.roles || [],
+    tags: guest.tags || [],
+    relationshipLabel: guest.relationshipLabel,
+    visibilityGroup: guest.visibilityGroup,
     allowedCompanions: guest.allowedCompanions,
     status: guest.status,
     checkInCode: guest.checkInCode,
@@ -76,6 +86,45 @@ function publicGuest(guest) {
     seatLabel: guest.seatLabel,
     companions: guest.companions || []
   };
+}
+
+function normalizePhoneDigits(value) {
+  return value ? String(value).replace(/\D/g, '') : '';
+}
+
+async function findGuestByPublicIdentity(eventId, { email, phone }) {
+  const emailNormalized = email ? email.toLowerCase().trim() : '';
+  if (emailNormalized) {
+    const guest = await Guest.findOne({ event: eventId, email: emailNormalized }).select('name email phone group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+    if (guest) return guest;
+  }
+  const phoneDigits = normalizePhoneDigits(phone);
+  if (!phoneDigits) return null;
+  const candidates = await Guest.find({ event: eventId, phone: { $exists: true, $ne: '' } }).select('name email phone group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+  return candidates.find((guest) => {
+    const stored = normalizePhoneDigits(guest.phone);
+    return stored && (stored.endsWith(phoneDigits) || phoneDigits.endsWith(stored));
+  }) || null;
+}
+
+function guestMatchesSpecificRules(guest, rsvpSettings = {}) {
+  if (!guest) return false;
+  const allowedGuestIds = (rsvpSettings.allowedGuestIds || []).map(String);
+  if (allowedGuestIds.includes(String(guest._id))) return true;
+  const allowedRoles = (rsvpSettings.allowedRoles || []).map((value) => String(value || '').toLowerCase().trim()).filter(Boolean);
+  const allowedGroups = (rsvpSettings.allowedGroups || []).map((value) => String(value || '').trim()).filter(Boolean);
+  const allowedEmails = (rsvpSettings.allowedEmails || []).map((value) => String(value || '').toLowerCase().trim()).filter(Boolean);
+  const allowedPhones = (rsvpSettings.allowedPhones || []).map(normalizePhoneDigits).filter(Boolean);
+  const email = guest.email ? String(guest.email).toLowerCase().trim() : '';
+  const phone = normalizePhoneDigits(guest.phone);
+  const roles = (guest.roles || []).map((value) => String(value || '').toLowerCase().trim());
+  const groups = [guest.group, guest.visibilityGroup].map((value) => String(value || '').trim()).filter(Boolean);
+  return (
+    (email && allowedEmails.includes(email)) ||
+    (phone && allowedPhones.some((allowed) => phone.endsWith(allowed) || allowed.endsWith(phone))) ||
+    roles.some((role) => allowedRoles.includes(role)) ||
+    groups.some((group) => allowedGroups.includes(group))
+  );
 }
 
 async function assertInvitationPlanLimits(user, event, payload) {
@@ -88,6 +137,20 @@ async function assertInvitationPlanLimits(user, event, payload) {
   }
   if (payload.content?.musicUrl && !limits.music) {
     const error = new Error('La musica requiere Evento Individual o Pro');
+    error.statusCode = 402;
+    throw error;
+  }
+  const secMusicRaw = payload.content?.sectionMusic;
+  const secMusicValues = secMusicRaw
+    ? (secMusicRaw instanceof Map
+        ? Array.from(secMusicRaw.values())
+        : typeof secMusicRaw === 'object'
+          ? Object.values(secMusicRaw)
+          : []
+      ).filter(Boolean)
+    : [];
+  if (secMusicValues.length && !limits.music) {
+    const error = new Error('La musica por seccion requiere Evento Individual o Pro');
     error.statusCode = 402;
     throw error;
   }
@@ -186,20 +249,22 @@ exports.publicBySlug = asyncHandler(async (req, res) => {
 });
 
 exports.guestAccess = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event accessMode rsvpSettings');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
     throw error;
   }
 
-  const guest = await Guest.findOne({
-    event: invitation.event,
-    email: req.validated.body.email.toLowerCase().trim()
-  }).select('name email allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+  const guest = await findGuestByPublicIdentity(invitation.event, req.validated.body);
 
   if (!guest) {
-    const error = new Error('Este correo no esta en la lista de invitados');
+    const error = new Error('Este invitado no esta en la lista registrada');
+    error.statusCode = 403;
+    throw error;
+  }
+  if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
+    const error = new Error('Esta invitacion esta disponible solo para usuarios especificos');
     error.statusCode = 403;
     throw error;
   }

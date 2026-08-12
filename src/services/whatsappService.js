@@ -42,7 +42,65 @@ function isFallbackEnabled() {
 function normalizePhone(phone) {
   const digits = String(phone || '').replace(/\D/g, '');
   if (!digits) return '';
+  if (digits.startsWith('521') && digits.length === 13) return `52${digits.slice(3)}`;
   return digits.length === 10 ? `52${digits}` : digits;
+}
+
+function normalizeOpenWaPhone(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('521') && digits.length === 13) return digits;
+  if (digits.startsWith('52') && digits.length === 12) return `521${digits.slice(2)}`;
+  return digits.length === 10 ? `521${digits}` : digits;
+}
+
+function sameWhatsAppNumber(left, right) {
+  const leftDigits = normalizeOpenWaPhone(left);
+  const rightDigits = normalizeOpenWaPhone(right);
+  return Boolean(leftDigits && rightDigits && leftDigits === rightDigits);
+}
+
+async function checkOpenWaNumber(phone) {
+  const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
+  const number = normalizeOpenWaPhone(phone);
+  const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/contacts/check/${encodeURIComponent(number)}`, {
+    headers: { 'X-API-Key': env.openWaApiKey }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data?.message || 'No se pudo validar el numero en OpenWA');
+    error.statusCode = response.status;
+    error.providerResponse = data;
+    throw error;
+  }
+  if (data.exists === false) {
+    const error = new Error(`El numero ${number} no existe en WhatsApp o no puede recibir mensajes.`);
+    error.statusCode = 400;
+    error.providerResponse = data;
+    throw error;
+  }
+  return data.whatsappId || `${number}@c.us`;
+}
+
+async function assertOpenWaRecipient(phone) {
+  const session = await getOpenWaSessionStatus();
+  if (!session.ready) {
+    const error = new Error(`WhatsApp conectado pero no listo (${session.status}). Revisa OpenWA antes de enviar.`);
+    error.statusCode = 503;
+    error.providerResponse = session;
+    throw error;
+  }
+  if (sameWhatsAppNumber(phone, session.phone)) {
+    const error = new Error('OpenWA no puede enviar mensajes al mismo numero que esta conectado como sesion. Usa un invitado con otro telefono para pruebas reales.');
+    error.statusCode = 400;
+    error.providerResponse = { sessionPhone: session.phone, targetPhone: normalizeOpenWaPhone(phone) };
+    throw error;
+  }
+  return checkOpenWaNumber(phone);
+}
+
+function isOpenWaAckBug(response, data) {
+  return response.status === 500 && String(data?.message || '').toLowerCase() === 'internal server error';
 }
 
 function publicInvitationUrl(invitation, guest, event) {
@@ -171,8 +229,8 @@ async function sendOpenWa({ phone, text }) {
     error.statusCode = 501;
     throw error;
   }
+  const chatId = await assertOpenWaRecipient(phone);
   const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
-  const chatId = `${phone}@c.us`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), env.whatsappOpenWaTimeoutMs);
   const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/send-text`, {
@@ -186,6 +244,13 @@ async function sendOpenWa({ phone, text }) {
   }).finally(() => clearTimeout(timeout));
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (isOpenWaAckBug(response, data)) {
+      return {
+        ackUnconfirmed: true,
+        message: 'OpenWA envio el mensaje, pero fallo al devolver el acuse/messageId.',
+        providerResponse: data
+      };
+    }
     const error = new Error(data?.message || 'OpenWA rechazo el mensaje');
     error.statusCode = response.status;
     error.providerResponse = data;
@@ -235,8 +300,8 @@ async function sendOpenWaMedia({ phone, media }) {
     error.statusCode = 400;
     throw error;
   }
+  const chatId = await assertOpenWaRecipient(phone);
   const baseUrl = env.openWaBaseUrl.replace(/\/$/, '');
-  const chatId = `${phone}@c.us`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), env.whatsappOpenWaTimeoutMs);
   const response = await fetch(`${baseUrl}/api/sessions/${encodeURIComponent(env.openWaSessionId)}/messages/${endpoint}`, {
@@ -289,7 +354,7 @@ async function sendViaProvider(provider, { phone, type, guest, event, invitation
 
   const payload = normalizedMedia ? { phone, media: normalizedMedia } : { phone, text };
   return {
-    payload: { chatId: `${phone}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined },
+    payload: { chatId: `${normalizeOpenWaPhone(phone)}@c.us`, media: normalizedMedia ? { type: normalizedMedia.type, url: normalizedMedia.url, filename: normalizedMedia.filename } : undefined },
     providerResponse: normalizedMedia ? await sendOpenWaMedia(payload) : await sendOpenWa(payload)
   };
 }
@@ -416,6 +481,7 @@ module.exports = {
   isMetaConfigured,
   isOpenWaConfigured,
   normalizePhone,
+  normalizeOpenWaPhone,
   publicInvitationUrl,
   buildText,
   buildMetaTemplatePayload,
