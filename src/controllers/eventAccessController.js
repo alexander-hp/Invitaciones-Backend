@@ -306,18 +306,3 @@ exports.addSong = asyncHandler(async (req, res) => {
   await access.save();
   res.status(201).json({ songRequest });
 });
-title: cleanTitle || (ytId ? 'Canción de YouTube' : (rawUrl || 'Canción agregada')),
-  artist: cleanArtist || (ytId ? 'YouTube' : ''),
-    dedication: req.validated.body.dedication || '',
-      sourceProvider,
-      sourceUrl,
-      externalId,
-      thumbnailUrl,
-      status: 'approved',
-        reviewedAt: new Date()
-  });
-
-access.lastUsedAt = new Date();
-await access.save();
-res.status(201).json({ songRequest });
-});
