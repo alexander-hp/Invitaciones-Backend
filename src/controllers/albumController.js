@@ -165,7 +165,7 @@ exports.publicApproved = asyncHandler(async (req, res) => {
   const event = await Event.findById(invitation.event).select('_id plan planExpiresAt');
   assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const assets = await AlbumAsset.find({ invitation: invitation._id, status: 'approved' })
-    .select('url uploaderName createdAt')
+    .select('url uploaderName createdAt tags')
     .sort('-createdAt')
     .limit(100);
   res.json({ assets });
@@ -186,7 +186,7 @@ exports.publicEventApproved = asyncHandler(async (req, res) => {
   const owner = await User.findById(event.owner).select('plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
   assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
   const assets = await AlbumAsset.find({ event: event._id, status: 'approved' })
-    .select('url uploaderName createdAt')
+    .select('url uploaderName createdAt tags')
     .sort('-createdAt')
     .limit(100);
   res.json({ assets });
@@ -195,9 +195,19 @@ exports.publicEventApproved = asyncHandler(async (req, res) => {
 exports.update = asyncHandler(async (req, res) => {
   const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'review_album', select: '_id plan planExpiresAt externalContent' });
   assertEffectivePlanFeature(ownerPlanUser, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
+  
+  const updateData = {};
+  if (req.validated.body.status) {
+    updateData.status = req.validated.body.status;
+    updateData.reviewedAt = new Date();
+  }
+  if (req.validated.body.tags !== undefined) {
+    updateData.tags = req.validated.body.tags;
+  }
+
   const asset = await AlbumAsset.findOneAndUpdate(
     { _id: req.params.assetId, owner: event.owner, event: event._id },
-    { status: req.validated.body.status, reviewedAt: new Date() },
+    updateData,
     { new: true }
   );
   if (!asset) {
@@ -205,16 +215,18 @@ exports.update = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  await asset.populate('guest', 'name email');
-  await notifyReviewStatus({
-    guest: asset.guest,
-    email: asset.uploaderEmail,
-    name: asset.uploaderName,
-    event,
-    itemType: 'album',
-    status: asset.status,
-    itemTitle: asset.url,
-    settings: event.externalContent?.moderationSettings || {}
-  });
+  if (req.validated.body.status) {
+    await asset.populate('guest', 'name email');
+    await notifyReviewStatus({
+      guest: asset.guest,
+      email: asset.uploaderEmail,
+      name: asset.uploaderName,
+      event,
+      itemType: 'album',
+      status: asset.status,
+      itemTitle: asset.url,
+      settings: event.externalContent?.moderationSettings || {}
+    });
+  }
   res.json({ asset });
 });

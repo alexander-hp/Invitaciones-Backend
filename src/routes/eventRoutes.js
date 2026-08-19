@@ -157,7 +157,7 @@ const tableAutoAssignBody = z.object({
 const tableBatchBody = z.object({
   tables: z.array(tableBody).min(1).max(100)
 }).passthrough();
-const albumStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict();
+const albumUpdateBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']).optional(), tags: z.array(z.string().trim().min(1).max(50)).optional() }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo');
 const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
 const songRequestBody = z.object({
   guest: z.string().min(12).optional(),
@@ -225,7 +225,7 @@ router.post('/:eventId/tables/auto-assign', validate(z.object({ body: tableAutoA
 router.patch('/:eventId/tables/:tableId', validate(z.object({ body: tableUpdateBody })), tableController.update);
 router.delete('/:eventId/tables/:tableId', tableController.remove);
 router.get('/:eventId/album', albumController.list);
-router.patch('/:eventId/album/:assetId', validate(z.object({ body: albumStatusBody })), albumController.update);
+router.patch('/:eventId/album/:assetId', validate(z.object({ body: albumUpdateBody })), albumController.update);
 router.get('/:eventId/song-requests', songRequestController.list);
 router.post('/:eventId/song-requests', validate(z.object({ body: songRequestBody })), songRequestController.create);
 router.post('/:eventId/song-requests/lookup-youtube', songRequestController.lookupYouTube);

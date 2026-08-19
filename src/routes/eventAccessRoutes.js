@@ -15,7 +15,7 @@ router.post('/:token/album', upload.single('file'), validate(z.object({
     status: z.enum(['pending', 'approved']).optional()
   }).strict()
 })), controller.uploadAlbum);
-router.patch('/:token/album/:assetId', validate(z.object({ body: z.object({ status: z.enum(['pending', 'approved', 'rejected']) }).strict() })), controller.updateAlbum);
+router.patch('/:token/album/:assetId', validate(z.object({ body: z.object({ status: z.enum(['pending', 'approved', 'rejected']).optional(), tags: z.array(z.string().trim().min(1).max(50)).optional() }).strict().refine((b) => Object.keys(b).length > 0, 'Se requiere al menos un campo') })), controller.updateAlbum);
 router.patch('/:token/song-requests/:songRequestId', validate(z.object({
   body: z.object({
     status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(),

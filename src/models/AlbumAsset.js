@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const albumAssetSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -10,7 +10,10 @@ const albumAssetSchema = new mongoose.Schema({
   key: { type: String, required: true },
   url: { type: String, required: true },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
+  tags: [{ type: String, trim: true }],
   reviewedAt: Date
 }, { timestamps: true });
+
+albumAssetSchema.index({ event: 1, tags: 1 });
 
 module.exports = mongoose.model('AlbumAsset', albumAssetSchema);
