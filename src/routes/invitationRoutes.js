@@ -16,6 +16,7 @@ const guestAccessLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 2000, stan
 const albumUploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false, skip: () => env.nodeEnv !== 'production' });
 const optionalHttpUrl = z.string().url().refine((url) => /^https?:\/\//i.test(url), 'URL debe iniciar con http o https').or(z.literal('')).optional();
 const invitationContentBody = z.object({
+  template: z.string().optional(),
   headline: z.string().optional(),
   subheadline: z.string().optional(),
   message: z.string().optional(),
@@ -127,14 +128,14 @@ const rsvpSettingsBody = z.object({
 }).strict();
 const invitationCreateBody = z.object({
   event: z.string().min(12),
-  template: z.string().min(12).optional(),
+  template: z.string().min(12).nullable().optional(),
   slug: z.string().min(1).optional(),
   accessMode: z.enum(['open', 'public', 'guest_list', 'specific_users']).optional(),
   rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict();
 const invitationUpdateBody = z.object({
-  template: z.string().min(12).optional(),
+  template: z.string().min(12).nullable().optional(),
   slug: z.string().min(1).optional(),
   accessMode: z.enum(['open', 'public', 'guest_list', 'specific_users']).optional(),
   rsvpSettings: rsvpSettingsBody.optional(),
