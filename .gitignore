@@ -1,6 +1,7 @@
-﻿node_modules
+node_modules
 .env
 .DS_Store
 coverage
 uploads
 graphify-out/cache/
+.agents/docs/
