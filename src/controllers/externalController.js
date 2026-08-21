@@ -11,6 +11,7 @@ const dedicationController = require('./dedicationController');
 const env = require('../config/env');
 const { signGuestSession, verifyGuestSession } = require('../utils/guestSession');
 const { initialModerationStatus } = require('../utils/moderation');
+const { logEventActivity } = require('../services/eventLogService');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -421,6 +422,17 @@ exports.songRequest = asyncHandler(async (req, res) => {
     status,
     reviewedAt: status === 'approved' ? new Date() : undefined
   });
+
+  logEventActivity({
+    eventId: event._id,
+    actor: guest ? { _id: guest._id, name: guest.name, email: guest.email } : undefined,
+    actorType: guest ? 'guest' : 'system',
+    category: 'music',
+    action: 'song_requested',
+    description: `Canción solicitada por ${songRequest.requesterName || 'un invitado'}: ${songRequest.title}${songRequest.artist ? ' - ' + songRequest.artist : ''}`,
+    metadata: { songRequestId: songRequest._id, title: songRequest.title, artist: songRequest.artist, status: songRequest.status }
+  });
+
   res.status(201).json({ songRequest: publicSongRequest(songRequest) });
 });
 

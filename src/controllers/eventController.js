@@ -7,6 +7,7 @@ const EventAccessToken = require('../models/EventAccessToken');
 const EventMember = require('../models/EventMember');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
+const { logEventActivity } = require('../services/eventLogService');
 const emailService = require('../services/emailService');
 const env = require('../config/env');
 
@@ -569,17 +570,31 @@ exports.sendEmailBulk = asyncHandler(async (req, res) => {
   if (req.validated.body.guestIds?.length) query._id = { $in: req.validated.body.guestIds };
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType || 'invitation';
+  const attachPass = req.validated.body.attachPass;
   const results = [];
 
   for (const guest of guests) {
     try {
+      let attachments;
+      if (attachPass) {
+        const passImageService = require('../services/passImageService');
+        const passData = passImageService.generatePassDataForGuest({ guest, event, invitation });
+        const passHtml = passImageService.generateGuestPassHtml(passData);
+        const passBase64 = await passImageService.generatePassImageBase64(passHtml);
+        attachments = [{
+          filename: `pase_${guest.name.replace(/\s+/g, '_')}.png`,
+          content: Buffer.from(passBase64, 'base64'),
+          contentType: 'image/png'
+        }];
+      }
       await emailService.sendGuestInvitationEmail({
         to: guest.email,
         guest,
         event,
         invitation,
         publicUrl: personalizedPublicUrl(invitation, guest),
-        type
+        type,
+        attachments
       });
       markEmailResult(guest, { type, status: 'sent' });
       await guest.save();

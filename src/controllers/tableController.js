@@ -3,6 +3,7 @@ const Guest = require('../models/Guest');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const { requireEventAccess } = require('../utils/eventAccess');
+const { logEventActivity } = require('../services/eventLogService');
 
 function seatCount(guest) {
   return 1 + Math.max(Number(guest.allowedCompanions || 0), Array.isArray(guest.companions) ? guest.companions.length : 0);
@@ -90,6 +91,17 @@ exports.create = asyncHandler(async (req, res) => {
   const { event, ownerPlanUser } = await requireEventAccess({ eventId: req.params.eventId, user: req.user, permission: 'manage_tables', select: '_id title plan' });
   assertEffectivePlanFeature(ownerPlanUser, event, 'seating', 'La gestion de mesas requiere Evento Individual o Pro');
   const table = await EventTable.create({ ...req.validated.body, owner: event.owner, event: event._id });
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'table',
+    action: 'table_created',
+    description: `Mesa creada: "${table.name}" (Capacidad: ${table.capacity})`,
+    metadata: { tableId: table._id, name: table.name, capacity: table.capacity }
+  });
+
   res.status(201).json({ table });
 });
 
@@ -172,6 +184,17 @@ exports.autoAssign = asyncHandler(async (req, res) => {
 
   await Promise.all(updates);
   const tablesSummary = await tableSummary(event.owner, event._id);
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'table',
+    action: 'tables_auto_assigned',
+    description: `Auto-asignación de mesas realizada (${assigned.length} invitados asignados)`,
+    metadata: { assignedCount: assigned.length, skippedCount: skipped.length }
+  });
+
   res.json({ assigned, skipped, tables: tablesSummary });
 });
 
@@ -185,6 +208,17 @@ exports.createBatch = asyncHandler(async (req, res) => {
     order: t.order !== undefined ? t.order : idx
   }));
   const tables = await EventTable.insertMany(tablesData);
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'table',
+    action: 'tables_batch_created',
+    description: `Lote de ${tables.length} mesas creadas`,
+    metadata: { count: tables.length }
+  });
+
   res.status(201).json({ tables });
 });
 
@@ -201,6 +235,17 @@ exports.update = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+
+  logEventActivity({
+    eventId: table.event,
+    actor: req.user,
+    actorType: 'user',
+    category: 'table',
+    action: 'table_updated',
+    description: `Mesa modificada: "${table.name}"`,
+    metadata: { tableId: table._id, name: table.name, capacity: table.capacity }
+  });
+
   res.json({ table });
 });
 
@@ -213,5 +258,16 @@ exports.remove = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+
+  logEventActivity({
+    eventId: req.params.eventId,
+    actor: req.user,
+    actorType: 'user',
+    category: 'table',
+    action: 'table_deleted',
+    description: `Mesa eliminada: "${table.name}"`,
+    metadata: { tableId: table._id, name: table.name }
+  });
+
   res.json({ message: 'Mesa eliminada' });
 });

@@ -2,6 +2,7 @@ const Event = require('../models/Event');
 const SongRequest = require('../models/SongRequest');
 const asyncHandler = require('../utils/asyncHandler');
 const { notifyReviewStatus } = require('../utils/moderation');
+const { logEventActivity } = require('../services/eventLogService');
 
 function getYouTubeId(url) {
   try {
@@ -120,6 +121,16 @@ exports.create = asyncHandler(async (req, res) => {
   const saved = await songRequest.save();
   console.log(`[SongRequestController:create] ¡Canción guardada con éxito! ID=${saved._id}, Titulo="${saved.title}", Estado=${saved.status}`);
 
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'music',
+    action: 'song_requested',
+    description: `Canción solicitada: ${saved.title}${saved.artist ? ' - ' + saved.artist : ''}`,
+    metadata: { songRequestId: saved._id, title: saved.title, artist: saved.artist, status: saved.status }
+  });
+
   res.status(201).json({ songRequest: saved });
 });
 
@@ -157,6 +168,17 @@ exports.update = asyncHandler(async (req, res) => {
       settings: event.externalContent?.moderationSettings || {}
     });
   }
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'music',
+    action: songRequest.status === 'approved' ? 'song_approved' : songRequest.status === 'rejected' ? 'song_rejected' : songRequest.status === 'played' ? 'song_played' : 'song_updated',
+    description: songRequest.status === 'approved' ? `Canción aprobada: ${songRequest.title}` : songRequest.status === 'rejected' ? `Canción denegada: ${songRequest.title}` : songRequest.status === 'played' ? `Canción reproducida: ${songRequest.title}` : `Petición de canción actualizada`,
+    metadata: { songRequestId: songRequest._id, title: songRequest.title, artist: songRequest.artist, status: songRequest.status }
+  });
+
   res.json({ songRequest });
 });
 
@@ -197,4 +219,3 @@ exports.lookupYouTube = asyncHandler(async (req, res) => {
   const video = await searchYouTubeVideo(query);
   res.json({ video, query });
 });
-

@@ -6,6 +6,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { verifyGuestSession } = require('../utils/guestSession');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { requireEventAccess } = require('../utils/eventAccess');
+const { logEventActivity } = require('../services/eventLogService');
 
 function normalizeEmail(email) {
   return email ? String(email).toLowerCase().trim() : '';
@@ -99,6 +100,17 @@ exports.createExternalPublic = asyncHandler(async (req, res) => {
     reviewedAt: status === 'approved' ? new Date() : undefined,
     visibility: req.validated.body.visibility || 'public'
   });
+
+  logEventActivity({
+    eventId: event._id,
+    actor: guest ? { _id: guest._id, name: guest.name, email: guest.email } : undefined,
+    actorType: guest ? 'guest' : 'system',
+    category: 'dedication',
+    action: 'dedication_submitted',
+    description: `Nueva dedicatoria enviada por ${dedication.publicName || 'un invitado'}`,
+    metadata: { dedicationId: dedication._id, status: dedication.status, type: dedication.type }
+  });
+
   res.status(201).json({ dedication: publicDedication(dedication) });
 });
 
@@ -143,6 +155,17 @@ exports.createInvitationPublic = asyncHandler(async (req, res) => {
     reviewedAt: status === 'approved' ? new Date() : undefined,
     visibility: req.validated.body.visibility || 'public'
   });
+
+  logEventActivity({
+    eventId: invitation.event,
+    actor: guest ? { _id: guest._id, name: guest.name, email: guest.email } : undefined,
+    actorType: guest ? 'guest' : 'system',
+    category: 'dedication',
+    action: 'dedication_submitted',
+    description: `Nueva dedicatoria enviada por ${dedication.publicName || 'un invitado'}`,
+    metadata: { dedicationId: dedication._id, status: dedication.status, type: dedication.type }
+  });
+
   res.status(201).json({ dedication: publicDedication(dedication) });
 });
 
@@ -177,6 +200,17 @@ exports.updateAdmin = asyncHandler(async (req, res) => {
     itemTitle: dedication.message,
     settings: event.externalContent?.moderationSettings || {}
   });
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'dedication',
+    action: dedication.status === 'approved' ? 'dedication_approved' : dedication.status === 'rejected' ? 'dedication_rejected' : 'dedication_updated',
+    description: dedication.status === 'approved' ? 'Dedicatoria aprobada' : dedication.status === 'rejected' ? 'Dedicatoria denegada' : 'Dedicatoria actualizada',
+    metadata: { dedicationId: dedication._id, status: dedication.status, publicName: dedication.publicName }
+  });
+
   res.json({ dedication: adminDedication(dedication) });
 });
 

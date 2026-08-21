@@ -10,6 +10,7 @@ const whatsappService = require('../services/whatsappService');
 const emailService = require('../services/emailService');
 const env = require('../config/env');
 const { requireEventAccess } = require('../utils/eventAccess');
+const { logEventActivity } = require('../services/eventLogService');
 
 const WHATSAPP_BULK_MEDIA_LIMIT = 30;
 
@@ -267,6 +268,17 @@ exports.remove = asyncHandler(async (req, res) => {
 
   await Rsvp.updateMany({ guest: guest._id }, { $unset: { guest: '' } });
   await Guest.deleteOne({ _id: guest._id });
+
+  logEventActivity({
+    eventId: guest.event,
+    actor: req.user,
+    actorType: 'user',
+    category: 'guest',
+    action: 'guest_deleted',
+    description: `Invitado eliminado: ${guest.name}`,
+    metadata: { guestId: guest._id, name: guest.name }
+  });
+
   res.json({ message: 'Invitado eliminado' });
 });
 
@@ -349,6 +361,17 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
   });
   applyWhatsAppGuestStatus(guest, { status: result.status, type });
   await guest.save();
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'communication',
+    action: 'whatsapp_sent',
+    description: `Mensaje de WhatsApp (${type}) enviado a ${guest.name}`,
+    metadata: { guestId: guest._id, name: guest.name, type }
+  });
+
   res.json({ guest, messageLog: result.log, provider: result.provider, status: result.status, manualText: result.manualText });
 });
 
@@ -378,6 +401,17 @@ exports.sendEmail = asyncHandler(async (req, res) => {
     });
     applyEmailGuestStatus(guest, { status: 'sent', type });
     await guest.save();
+
+    logEventActivity({
+      eventId: event._id,
+      actor: req.user,
+      actorType: 'user',
+      category: 'communication',
+      action: 'email_sent',
+      description: `Correo electrónico (${type}) enviado a ${guest.name}`,
+      metadata: { guestId: guest._id, name: guest.name, type }
+    });
+
     res.json({ guest, status: 'sent' });
   } catch (error) {
     applyEmailGuestStatus(guest, { status: 'failed', type, error: error.message });
@@ -556,6 +590,18 @@ exports.importGuests = asyncHandler(async (req, res) => {
   } catch (error) {
     throw buildDuplicateKeyError(error);
   }
+  if (guests.length > 0) {
+    logEventActivity({
+      eventId: event._id,
+      actor: req.user,
+      actorType: 'user',
+      category: 'guest',
+      action: 'guests_imported',
+      description: `Importación masiva: ${guests.length} invitados añadidos`,
+      metadata: { count: guests.length, skipped: invalidRows + duplicates.length }
+    });
+  }
+
   res.status(201).json({
     created: guests.length,
     updated: 0,
@@ -613,4 +659,67 @@ exports.exportGuests = asyncHandler(async (req, res) => {
   ];
 
   csvResponse(res, `invitados-${event._id}.csv`, rows);
+});
+
+exports.downloadGuestPassImage = asyncHandler(async (req, res) => {
+  const guest = await Guest.findById(req.params.id);
+  if (!guest) {
+    const error = new Error('Invitado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const { event } = await requireGuestEventAccess(guest.event, req.user);
+
+  const EventModel = require('../models/Event');
+  const fullEvent = await EventModel.findById(guest.event).populate('venue');
+  const invitation = await Invitation.findOne({ event: guest.event });
+
+  const passImageService = require('../services/passImageService');
+  const passData = passImageService.generatePassDataForGuest({ guest, event: fullEvent, invitation });
+  const passHtml = passImageService.generateGuestPassHtml(passData);
+  const buffer = await passImageService.generatePassImageBuffer(passHtml);
+
+  const safeName = guest.name.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_') || 'Invitado';
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Disposition', 'attachment; filename="Pase_VIP_' + safeName + '.png"');
+  res.send(buffer);
+});
+
+exports.downloadAllPassesZip = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;
+  const { event } = await requireGuestEventAccess(eventId, req.user);
+
+  const guests = await Guest.find({ owner: event.owner, event: eventId });
+  if (!guests.length) {
+    const error = new Error('No hay invitados en este evento');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const EventModel = require('../models/Event');
+  const fullEvent = await EventModel.findById(eventId).populate('venue');
+  const invitation = await Invitation.findOne({ event: eventId });
+
+  const passImageService = require('../services/passImageService');
+  const JSZip = require('jszip');
+
+  const items = guests.map((guest) => {
+    const passData = passImageService.generatePassDataForGuest({ guest, event: fullEvent, invitation });
+    return {
+      filename: 'Pase_VIP_' + (guest.name.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_') || 'Invitado') + '.png',
+      data: passData
+    };
+  });
+
+  const images = await passImageService.generateBatchPassImages(items);
+  const zip = new JSZip();
+  for (const img of images) {
+    zip.file(img.filename, img.buffer);
+  }
+  const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+  const safeTitle = (fullEvent?.title || 'Evento').replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_');
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', 'attachment; filename="Pases_VIP_' + safeTitle + '.zip"');
+  res.send(zipBuffer);
 });

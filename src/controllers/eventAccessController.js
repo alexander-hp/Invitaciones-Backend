@@ -9,6 +9,7 @@ const SongRequest = require('../models/SongRequest');
 const env = require('../config/env');
 const asyncHandler = require('../utils/asyncHandler');
 const { notifyReviewStatus } = require('../utils/moderation');
+const { logEventActivity } = require('../services/eventLogService');
 
 const s3 = new S3Client({ region: env.awsRegion });
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -179,6 +180,17 @@ exports.updateAlbum = asyncHandler(async (req, res) => {
   });
   access.lastUsedAt = new Date();
   await access.save();
+
+  logEventActivity({
+    eventId: access.event,
+    actor: { name: access.label || 'Staff', role: access.role },
+    actorType: 'staff',
+    category: 'album',
+    action: asset.status === 'approved' ? 'album_approved' : asset.status === 'rejected' ? 'album_rejected' : 'album_updated',
+    description: asset.status === 'approved' ? 'Foto aprobada por staff' : asset.status === 'rejected' ? 'Foto denegada por staff' : 'Foto de álbum actualizada por staff',
+    metadata: { assetId: asset._id, status: asset.status, uploaderName: asset.uploaderName }
+  });
+
   res.json({ asset });
 });
 
@@ -212,6 +224,17 @@ exports.uploadAlbum = asyncHandler(async (req, res) => {
 
   access.lastUsedAt = new Date();
   await access.save();
+
+  logEventActivity({
+    eventId: event._id,
+    actor: { name: access.label || 'Fotógrafo', role: access.role },
+    actorType: 'staff',
+    category: 'album',
+    action: 'album_upload',
+    description: `Foto subida por fotógrafo/staff: ${asset.uploaderName}`,
+    metadata: { assetId: asset._id, status: asset.status }
+  });
+
   res.status(201).json({ asset });
 });
 
@@ -254,6 +277,17 @@ exports.updateSong = asyncHandler(async (req, res) => {
   }
   access.lastUsedAt = new Date();
   await access.save();
+
+  logEventActivity({
+    eventId: access.event,
+    actor: { name: access.label || 'DJ / Staff', role: access.role },
+    actorType: 'staff',
+    category: 'music',
+    action: songRequest.status === 'approved' ? 'song_approved' : songRequest.status === 'rejected' ? 'song_rejected' : songRequest.status === 'played' ? 'song_played' : 'song_updated',
+    description: songRequest.status === 'approved' ? `Canción aprobada por DJ: ${songRequest.title}` : songRequest.status === 'rejected' ? `Canción denegada por DJ: ${songRequest.title}` : songRequest.status === 'played' ? `Canción reproducida: ${songRequest.title}` : `Canción actualizada por DJ`,
+    metadata: { songRequestId: songRequest._id, title: songRequest.title, status: songRequest.status }
+  });
+
   res.json({ songRequest });
 });
 
@@ -304,5 +338,16 @@ exports.addSong = asyncHandler(async (req, res) => {
 
   access.lastUsedAt = new Date();
   await access.save();
+
+  logEventActivity({
+    eventId: event._id,
+    actor: { name: access.label || 'DJ / Staff', role: access.role },
+    actorType: 'staff',
+    category: 'music',
+    action: 'song_requested',
+    description: `Canción agregada por DJ: ${songRequest.title}${songRequest.artist ? ' - ' + songRequest.artist : ''}`,
+    metadata: { songRequestId: songRequest._id, title: songRequest.title, artist: songRequest.artist }
+  });
+
   res.status(201).json({ songRequest });
 });

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const slugify = require('slugify');
 const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');

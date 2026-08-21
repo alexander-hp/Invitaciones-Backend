@@ -3,6 +3,7 @@ const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Rsvp = require('../models/Rsvp');
 const RsvpActivity = require('../models/RsvpActivity');
+const { logEventActivity } = require('../services/eventLogService');
 const emailService = require('../services/emailService');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
@@ -95,6 +96,24 @@ function snapshotRsvp(rsvp) {
 }
 
 async function createRsvpActivity({ invitation, guest, rsvp, action, previous, next, metadata }) {
+  const targetEventId = invitation?.event || rsvp?.event || guest?.event;
+  const guestName = guest?.name || rsvp?.name || 'Invitado';
+  let friendlyDesc = `RSVP (${action}): ${guestName}`;
+  if (action === 'confirmed') friendlyDesc = `Asistencia confirmada por ${guestName}${rsvp?.attendingCount ? ' (' + rsvp.attendingCount + ' personas)' : ''}`;
+  else if (action === 'declined') friendlyDesc = `Asistencia declinada por ${guestName}`;
+  else if (action === 'maybe') friendlyDesc = `Respuesta tentativa (tal vez) de ${guestName}`;
+  else if (action === 'updated') friendlyDesc = `Respuesta RSVP modificada por ${guestName}`;
+
+  if (targetEventId) {
+    logEventActivity({
+      eventId: targetEventId,
+      actorType: 'guest',
+      category: 'rsvp',
+      action: `rsvp_${action}`,
+      description: friendlyDesc,
+      metadata: { guestId: guest?._id, rsvpId: rsvp?._id, guestName, action, metadata }
+    });
+  }
   await RsvpActivity.create({
     invitation: invitation?._id,
     event: invitation?.event || rsvp?.event || guest?.event,

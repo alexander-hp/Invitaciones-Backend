@@ -5,6 +5,7 @@ const StaffAccessToken = require('../models/StaffAccessToken');
 const env = require('../config/env');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+const { logEventActivity } = require('../services/eventLogService');
 const { requireEventAccess } = require('../utils/eventAccess');
 
 function staffGuest(guest) {

@@ -6,6 +6,7 @@ const checkInController = require('../controllers/checkInController');
 const tableController = require('../controllers/tableController');
 const songRequestController = require('../controllers/songRequestController');
 const dedicationController = require('../controllers/dedicationController');
+const eventLogController = require('../controllers/eventLogController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
@@ -14,7 +15,8 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 *
 const messageTypeBody = z.object({
   confirm: z.boolean().optional(),
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional(),
-  guestIds: z.array(z.string().min(12)).max(200).optional()
+  guestIds: z.array(z.string().min(12)).max(200).optional(),
+  attachPass: z.boolean().optional()
 }).strict();
 const eventBody = z.object({
   mode: z.enum(['invitation', 'external_dashboard']).optional(),
@@ -214,6 +216,7 @@ router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: eventBody })), controller.create);
 router.post('/member-invites/:token/accept', controller.acceptMemberInvite);
+router.get('/:eventId/logs', eventLogController.list);
 router.get('/:id', controller.get);
 router.patch('/:id', validate(z.object({ body: eventUpdateBody })), controller.update);
 router.post('/:eventId/send-email', validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: messageTypeBody })), controller.sendEmailBulk);

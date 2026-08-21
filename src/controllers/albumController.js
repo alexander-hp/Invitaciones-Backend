@@ -10,6 +10,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { verifyGuestSession } = require('../utils/guestSession');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { requireEventAccess } = require('../utils/eventAccess');
+const { logEventActivity } = require('../services/eventLogService');
 
 const s3 = new S3Client({ region: env.awsRegion });
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -88,6 +89,16 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
     reviewedAt: status === 'approved' ? new Date() : undefined
   });
 
+  logEventActivity({
+    eventId: invitation.event,
+    actor: guest ? { _id: guest._id, name: guest.name, email: guest.email } : undefined,
+    actorType: guest ? 'guest' : 'system',
+    category: 'album',
+    action: 'album_upload_submitted',
+    description: `Foto subida al álbum por ${asset.uploaderName || 'un invitado'}`,
+    metadata: { assetId: asset._id, url: asset.url, status: asset.status }
+  });
+
   res.status(201).json({ asset: { id: asset._id, status: asset.status } });
 });
 
@@ -134,6 +145,16 @@ exports.uploadPublicEvent = asyncHandler(async (req, res) => {
     url: upload.url,
     status,
     reviewedAt: status === 'approved' ? new Date() : undefined
+  });
+
+  logEventActivity({
+    eventId: event._id,
+    actor: guest ? { _id: guest._id, name: guest.name, email: guest.email } : undefined,
+    actorType: guest ? 'guest' : 'system',
+    category: 'album',
+    action: 'album_upload_submitted',
+    description: `Foto subida al álbum por ${asset.uploaderName || 'un invitado'}`,
+    metadata: { assetId: asset._id, url: asset.url, status: asset.status }
   });
 
   res.status(201).json({
@@ -228,5 +249,16 @@ exports.update = asyncHandler(async (req, res) => {
       settings: event.externalContent?.moderationSettings || {}
     });
   }
+
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'album',
+    action: asset.status === 'approved' ? 'album_approved' : asset.status === 'rejected' ? 'album_rejected' : 'album_updated',
+    description: asset.status === 'approved' ? 'Foto aprobada para el álbum' : asset.status === 'rejected' ? 'Foto denegada del álbum' : 'Foto del álbum actualizada',
+    metadata: { assetId: asset._id, status: asset.status, uploaderName: asset.uploaderName }
+  });
+
   res.json({ asset });
 });
