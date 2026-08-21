@@ -41,7 +41,7 @@ function escapeHtml(value) {
   }[char]));
 }
 
-async function sendMail({ to = env.emailTo, subject, text, html, replyTo }) {
+async function sendMail({ to = env.emailTo, subject, text, html, replyTo, attachments }) {
   const transporter = createTransporter();
   if (!to) {
     const error = new Error('EMAIL_TO no configurado');
@@ -54,7 +54,8 @@ async function sendMail({ to = env.emailTo, subject, text, html, replyTo }) {
     subject,
     text,
     html,
-    replyTo
+    replyTo,
+    attachments
   });
 }
 
@@ -545,13 +546,13 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
   `.trim();
 }
 
-async function sendGuestInvitationEmail({ to, guest, event, invitation, publicUrl, type = 'invitation' }) {
+async function sendGuestInvitationEmail({ to, guest, event, invitation, publicUrl, type = 'invitation', attachments }) {
   const subject = messageSubject(type, event);
   const rows = buildGuestMessage({ guest, event, invitation, publicUrl, type }).filter(Boolean);
   const text = rows.join('\n\n');
   const html = buildGuestEmailHtml({ guest, event, invitation, publicUrl, type });
 
-  return sendMail({ to, subject, text, html });
+  return sendMail({ to, subject, text, html, attachments });
 }
 
 async function sendGuestReviewStatusEmail({ to, name, event, itemType, status, itemTitle }) {
