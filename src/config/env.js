@@ -53,5 +53,8 @@ module.exports = {
   whatsappAppSecret: process.env.WHATSAPP_APP_SECRET || '',
   openWaBaseUrl: process.env.OPENWA_BASE_URL || '',
   openWaApiKey: process.env.OPENWA_API_KEY || '',
-  openWaSessionId: process.env.OPENWA_SESSION_ID || ''
+  openWaSessionId: process.env.OPENWA_SESSION_ID || '',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
+  geminiProjectId: process.env.GEMINI_PROJECT_ID || '',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-1.5-flash'
 };
