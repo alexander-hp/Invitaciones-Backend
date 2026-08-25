@@ -101,7 +101,11 @@ const invitationContentBody = z.object({
     url: z.string().url().or(z.literal('')).optional()
   }).strict()).optional(),
   privateAlbum: z.array(z.string()).optional(),
-  privateAlbumEnabled: z.boolean().optional()
+  privateAlbumEnabled: z.boolean().optional(),
+  template: z.string().optional(),
+  customHtml: z.string().optional(),
+  customCss: z.string().optional(),
+  customPageApproved: z.boolean().optional()
 }).strict();
 const rsvpSettingsBody = z.object({
   deadline: z.string().datetime().or(z.string().min(1)).or(z.date()).optional(),
@@ -128,7 +132,7 @@ const rsvpSettingsBody = z.object({
 }).strict();
 const invitationCreateBody = z.object({
   event: z.string().min(12),
-  template: z.string().min(12).nullable().optional(),
+  template: z.string().nullable().optional(),
   slug: z.string().min(1).optional(),
   accessMode: z.enum(['open', 'public', 'guest_list', 'specific_users']).optional(),
   rsvpSettings: rsvpSettingsBody.optional(),

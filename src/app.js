@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -16,15 +16,15 @@ app.use((req, res, next) => {
   const allowedOrigins = new Set([
     env.clientUrl,
     env.frontendUrl,
-    ...(isExternalApi ? env.externalAllowedOrigins : [])
+    ...env.externalAllowedOrigins
   ].filter(Boolean));
   cors({
     credentials: true,
     origin(origin, callback) {
       if (!origin) return callback(null, true);
-      if (origin === 'null' && env.nodeEnv !== 'production' && isExternalApi) return callback(null, true);
+      if (origin === 'null' && env.nodeEnv !== 'production') return callback(null, true);
       if (allowedOrigins.has(origin)) return callback(null, true);
-      if (env.nodeEnv !== 'production' && isExternalApi && /^https?:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
+      if (env.nodeEnv !== 'production' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return callback(null, true);
       const error = new Error('Origen no permitido por CORS');
       error.statusCode = 403;
       return callback(error);

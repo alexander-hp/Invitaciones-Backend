@@ -56,5 +56,7 @@ module.exports = {
   openWaSessionId: process.env.OPENWA_SESSION_ID || '',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiProjectId: process.env.GEMINI_PROJECT_ID || '',
-  geminiModel: process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
+  openaiModel: process.env.OPENAI_MODEL || 'gpt-4o'
 };

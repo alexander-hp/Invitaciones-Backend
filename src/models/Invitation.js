@@ -115,7 +115,11 @@ const invitationSchema = new mongoose.Schema({
       url: String
     }],
     privateAlbum: [String],
-    privateAlbumEnabled: { type: Boolean, default: false }
+    privateAlbumEnabled: { type: Boolean, default: false },
+    template: String,
+    customHtml: String,
+    customCss: String,
+    customPageApproved: { type: Boolean, default: false }
   },
   premiumLocked: { type: Boolean, default: false },
   publishedAt: Date

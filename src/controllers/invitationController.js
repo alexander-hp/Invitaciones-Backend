@@ -1,3 +1,4 @@
+const CustomTemplateSubmission = require('../models/CustomTemplateSubmission');
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const Invitation = require('../models/Invitation');
@@ -240,12 +241,114 @@ exports.unpublish = asyncHandler(async (req, res) => {
 });
 
 exports.publicBySlug = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).populate('event template');
+  const rawSlug = String(req.params.slug || '').toLowerCase().trim();
+  let invitation = await Invitation.findOne({ slug: rawSlug }).populate('event template');
+
+  // Fallback 1: Buscar por externalPortalSlug en Event
   if (!invitation) {
-    const error = new Error('Invitacion no encontrada o no publicada');
+    const event = await Event.findOne({ externalPortalSlug: rawSlug });
+    if (event) {
+      invitation = await Invitation.findOne({ event: event._id });
+      const customSub = await CustomTemplateSubmission.findOne({
+        $or: [{ event: event._id }, { eventId: String(event._id) }, { eventSlug: rawSlug }],
+        status: 'approved'
+      });
+
+      if (!invitation) {
+        invitation = await Invitation.create({
+          owner: event.owner,
+          event: event._id,
+          slug: rawSlug,
+          status: 'published',
+          publishedAt: new Date(),
+          content: {
+            headline: event.title,
+            template: customSub ? 'custom-html' : 'envelope-cards',
+            customHtml: customSub ? customSub.htmlCode : '',
+            customCss: customSub ? (customSub.cssCode || '') : '',
+            customPageApproved: !!customSub
+          }
+        });
+        await invitation.populate('event template');
+      } else {
+        if (customSub) {
+          invitation.content = invitation.content || {};
+          invitation.content.template = 'custom-html';
+          invitation.content.customHtml = customSub.htmlCode;
+          invitation.content.customCss = customSub.cssCode || '';
+          invitation.content.customPageApproved = true;
+        }
+        if (invitation.status !== 'published') {
+          invitation.status = 'published';
+          invitation.publishedAt = new Date();
+        }
+        await invitation.save();
+        await invitation.populate('event template');
+      }
+    }
+  }
+
+  // Fallback 2: Buscar por CustomTemplateSubmission aprobada
+  if (!invitation) {
+    const customSub = await CustomTemplateSubmission.findOne({
+      $or: [{ eventSlug: rawSlug }, { slug: rawSlug }],
+      status: 'approved'
+    });
+    if (customSub) {
+      let event = null;
+      if (customSub.eventId) {
+        event = await Event.findById(customSub.eventId);
+      } else if (customSub.event) {
+        event = await Event.findById(customSub.event);
+      }
+      if (customSub.invitation) {
+        invitation = await Invitation.findById(customSub.invitation).populate('event template');
+      }
+      if (!invitation && event) {
+        invitation = await Invitation.findOne({ event: event._id }).populate('event template');
+      }
+      if (!invitation) {
+        invitation = await Invitation.create({
+          owner: event ? event.owner : customSub.owner,
+          event: event ? event._id : undefined,
+          slug: rawSlug,
+          status: 'published',
+          publishedAt: new Date(),
+          content: {
+            headline: customSub.eventTitle || customSub.name,
+            template: 'custom-html',
+            customHtml: customSub.htmlCode,
+            customCss: customSub.cssCode || '',
+            customPageApproved: true
+          }
+        });
+        if (event) await invitation.populate('event template');
+      } else {
+        invitation.status = 'published';
+        invitation.publishedAt = new Date();
+        invitation.content = invitation.content || {};
+        invitation.content.template = 'custom-html';
+        invitation.content.customHtml = customSub.htmlCode;
+        invitation.content.customCss = customSub.cssCode || '';
+        invitation.content.customPageApproved = true;
+        await invitation.save();
+      }
+    }
+  }
+
+  if (!invitation) {
+    const error = new Error('Invitacion no encontrada');
     error.statusCode = 404;
     throw error;
   }
+
+  if (invitation.status !== 'published') {
+    const error = new Error('Invitación no publicada');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Permitir devolver los datos para renderizar la página pública si está publicada
   res.json({ invitation: publicInvitation(invitation) });
 });
 
