@@ -107,7 +107,9 @@ const invitationSchema = new mongoose.Schema({
       lodging: { type: Boolean, default: true },
       gallery: { type: Boolean, default: true },
       guestAlbum: { type: Boolean, default: true },
-      dedications: { type: Boolean, default: true }
+      dedications: { type: Boolean, default: true },
+      backgroundMusic: { type: Boolean, default: true },
+      songRequests: { type: Boolean, default: true }
     },
     lodging: [{
       name: String,

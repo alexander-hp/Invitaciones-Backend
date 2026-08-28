@@ -93,7 +93,9 @@ const invitationContentBody = z.object({
     lodging: z.boolean().optional(),
     gallery: z.boolean().optional(),
     guestAlbum: z.boolean().optional(),
-    dedications: z.boolean().optional()
+    dedications: z.boolean().optional(),
+    backgroundMusic: z.boolean().optional(),
+    songRequests: z.boolean().optional()
   }).strict().optional(),
   lodging: z.array(z.object({
     name: z.string().optional(),
