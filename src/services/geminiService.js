@@ -1,3 +1,4 @@
+const slugify = require('slugify');
 const env = require('../config/env');
 
 const GEMINI_MODELS = [
@@ -142,10 +143,16 @@ async function callAiApi(prompt, systemInstruction = '') {
 const SYSTEM_INSTRUCTION = `
 Desarrolla una página web interactiva completa en HTML5, CSS3 y JavaScript nativo para una invitación digital de evento (Boda, XV Años, Graduación, Aniversario, Bautizo, Cumpleaños).
 
+REGLA FUNDAMENTAL DE MANEJO DE VARIABLES Y ENDPOINTS EN JAVASCRIPT:
+- NUNCA insertes texto literal como "\${slug}" sin haber definido previamente la variable en JavaScript.
+- En el código JavaScript de la plantilla web generada, DEBES declarar obligatoriamente al inicio la constante EVENT_SLUG usando el slug real provisto en el prompt, con fallback dinámico:
+  const EVENT_SLUG = window.EVENT_SLUG || 'SLUG_DEL_EVENTO' || window.location.pathname.split('/').filter(Boolean).pop();
+- En todos los llamados fetch() asíncronos a los endpoints del backend, utiliza siempre esa variable EVENT_SLUG.
+- URL Base: Usa rutas relativas (ej. \`/api/invitations/public/\${EVENT_SLUG}\`) o \`\${window.location.origin}/api/...\` para compatibilidad local y en producción.
+
 DOCUMENTACIÓN TÉCNICA DEL ENDPOINT PRINCIPAL Y ESPECIFICACIÓN DE DATOS:
 La invitación se alimenta y consume la API REST del backend (Invitaciones-Backend) a través del endpoint principal:
-- Método: GET /api/invitations/public/:slug (donde :slug es el identificador único del evento o invitación).
-- URL Base: Usa rutas relativas (ej. \`/api/invitations/public/\${slug}\`) o \`\${window.location.origin}/api/...\` (en desarrollo local http://localhost:4000).
+- Método: GET /api/invitations/public/\${EVENT_SLUG}
 
 ESTRUCTURA DEL PAYLOAD JSON (GET /api/invitations/public/:slug):
 {
@@ -261,18 +268,18 @@ ESTRUCTURA DEL PAYLOAD JSON (GET /api/invitations/public/:slug):
 
 ENDPOINTS INTERACTIVOS ADICIONALES DEL SISTEMA (MÓDULOS DE ACCIÓN):
 1. Álbum Interactivo de Fotos de Invitados ('guestAlbum'):
-   - Consultar fotos aprobadas: GET /api/invitations/public/:slug/album -> Devuelve { "photos": [{ "_id", "photoUrl", "uploaderName", "caption", "createdAt" }] }
-   - Subir nueva foto: POST /api/invitations/public/:slug/album-upload -> Enviar multipart/form-data con los campos 'file' (imagen obligatoria), 'uploaderName' (opcional) y 'caption' (opcional).
+   - Consultar fotos aprobadas: GET /api/invitations/public/\${EVENT_SLUG}/album -> Devuelve { "photos": [{ "_id", "photoUrl", "uploaderName", "caption", "createdAt" }] }
+   - Subir nueva foto: POST /api/invitations/public/\${EVENT_SLUG}/album-upload -> Enviar multipart/form-data con los campos 'file' (imagen obligatoria), 'uploaderName' (opcional) y 'caption' (opcional).
 2. Galería Oficial de Fotos ('gallery'):
-   - Fotos destacadas obtenidas del array 'content.gallery' en GET /api/invitations/public/:slug.
+   - Fotos destacadas obtenidas del array 'content.gallery' en GET /api/invitations/public/\${EVENT_SLUG}.
 3. Dedicatorias y Libro de Firmas Digital ('dedications'):
-   - Consultar dedicatorias aprobadas: GET /api/invitations/public/:slug/dedications -> Devuelve { "dedications": [{ "_id", "publicName", "message", "type", "createdAt" }] }
-   - Publicar dedicatoria: POST /api/invitations/public/:slug/dedications -> Enviar JSON: { "publicName": string, "email": string (opcional), "message": string, "type": "wish" | "dedication" | "memory" | "toast", "visibility": "public" }.
+   - Consultar dedicatorias aprobadas: GET /api/invitations/public/\${EVENT_SLUG}/dedications -> Devuelve { "dedications": [{ "_id", "publicName", "message", "type", "createdAt" }] }
+   - Publicar dedicatoria: POST /api/invitations/public/\${EVENT_SLUG}/dedications -> Enviar JSON: { "publicName": string, "email": string (opcional), "message": string, "type": "wish" | "dedication" | "memory" | "toast", "visibility": "public" }.
 4. Confirmación de Asistencia ('rsvp'):
-   - Consultar configuración RSVP: GET /api/rsvp/public/:slug
-   - Enviar confirmación: POST /api/rsvp/public/:slug -> Enviar JSON: { "name": string, "email": string, "phone": string, "status": "confirmed" | "declined" | "maybe", "adults": number, "children": number, "companionNames": [string], "answers": [{ "questionKey": string, "answer": any }], "note": string }.
+   - Consultar configuración RSVP: GET /api/rsvp/public/\${EVENT_SLUG}
+   - Enviar confirmación: POST /api/rsvp/public/\${EVENT_SLUG} -> Enviar JSON: { "name": string, "email": string, "phone": string, "status": "confirmed" | "declined" | "maybe", "adults": number, "children": number, "companionNames": [string], "answers": [{ "questionKey": string, "answer": any }], "note": string }.
 5. Pedir Canciones al DJ / Música ('songRequests'):
-   - Enviar sugerencia de canción: POST /api/external/:slug/song-requests -> Enviar JSON: { "title": string, "artist": string, "dedication": string, "requesterName": string }.
+   - Enviar sugerencia de canción: POST /api/external/\${EVENT_SLUG}/song-requests -> Enviar JSON: { "title": string, "artist": string, "dedication": string, "requesterName": string }.
 6. Música de Fondo ('backgroundMusic'):
    - Reproductor flotante con botón interactivo (Play / Pausa) y barras de sonido animadas usando 'content.musicUrl'.
 7. Cuenta Regresiva ('countdown'):
@@ -311,12 +318,12 @@ function attachModelInfo(templateObj, modelUsed) {
   return templateObj;
 }
 
-exports.getPromptPreview = function ({ event, style, palette, vibe, sections, customPrompt }) {
+exports.getPromptPreview = function ({ event, invitation, style, palette, vibe, sections, customPrompt }) {
   const eventTitle = event?.title || 'Boda Sofía & Alejandro';
   const eventType = event?.type || 'boda';
   const eventDate = event?.date || '2026-11-20T18:00:00.000Z';
   const eventVenue = event?.venue?.name || event?.venue?.address || 'Hacienda Los Laureles, Salón Principal';
-  const eventSlug = event?.externalPortalSlug || event?.slug || 'invitacion-especial';
+  const eventSlug = invitation?.slug || event?.externalPortalSlug || event?.slug || (event?.title ? slugify(event.title, { lower: true, strict: true }) : 'invitacion-digital-especial');
   const primaryColor = palette?.primary || '#1c2434';
   const secondaryColor = palette?.secondary || '#f8f5f0';
   const accentColor = palette?.accent || '#c59b6c';
@@ -327,19 +334,29 @@ exports.getPromptPreview = function ({ event, style, palette, vibe, sections, cu
 
   const userPrompt = `El usuario solicita la creación de la siguiente plantilla web de invitación en específico:
 
-1. DATOS DEL EVENTO:
-- Usa los endpoints que se especifican en la documentación técnica y especificación de endpoints del sistema para obtener los datos del evento.
+1. DATOS REALES DEL EVENTO:
+- Título del Evento: "${eventTitle}"
+- Tipo de Evento: "${eventType}"
+- Fecha y Hora Oficial: "${eventDate}"
+- Slug Oficial del Evento (EVENT_SLUG): "${eventSlug}"
 
 2. PETICIÓN Y PREFERENCIAS ESPECÍFICAS DEL USUARIO:
 - Petición / Prompt Libre del Usuario: "${customPrompt || ''}"
 - Estilo Visual Deseado: ${style || ''}
 - Atmósfera / Vibra: ${vibe || ''}
 - Paleta de Colores: Primario: ${primaryColor}, Secundario: ${secondaryColor}, Acento: ${accentColor}
-- Secciones Solicitadas: ${sectionsList}
+- Secciones Solicitadas: ${sectionsList || 'Todas las secciones requeridas'}
 
-
-3. INDICACIÓN DE INTEGRACIÓN DE ENDPOINTS REALES DE LA PLATAFORMA:
-- Usa los endpoints que se especifican en la documentación técnica y especificación de endpoints del sistema para obtener los datos del evento. solo de los que esten en las secciones solicitadas no agregres datos de mas
+3. INDICACIÓN DE INTEGRACIÓN DE ENDPOINTS REALES:
+- En el código JavaScript de la plantilla generada, define obligatoriamente al inicio:
+  const EVENT_SLUG = window.EVENT_SLUG || '${eventSlug}' || window.location.pathname.split('/').filter(Boolean).pop();
+- Usa esa constante EVENT_SLUG en todas las peticiones fetch a la API del backend:
+  * GET /api/invitations/public/\${EVENT_SLUG} (para cargar datos dinámicos del evento, anfitriones, itinerario, etc.)
+  * POST /api/invitations/public/\${EVENT_SLUG}/album-upload (para subir fotos al álbum de invitados)
+  * GET / POST /api/invitations/public/\${EVENT_SLUG}/dedications (para consultar y enviar dedicatorias)
+  * GET / POST /api/rsvp/public/\${EVENT_SLUG} (para consultar configuración y enviar confirmaciones RSVP)
+  * POST /api/external/\${EVENT_SLUG}/song-requests (para sugerir canciones al DJ)
+- Incluye ÚNICAMENTE los módulos y llamadas fetch correspondientes a las secciones solicitadas (${sectionsList || 'todas las secciones requeridas'}).
 
 Genera el código HTML y CSS completo respetando la petición específica del usuario.`;
 
@@ -349,8 +366,8 @@ Genera el código HTML y CSS completo respetando la petición específica del us
   };
 };
 
-exports.generateTemplateFromPrompt = async function ({ event, style, palette, vibe, sections, customPrompt }) {
-  const { systemInstruction, userPrompt } = exports.getPromptPreview({ event, style, palette, vibe, sections, customPrompt });
+exports.generateTemplateFromPrompt = async function ({ event, invitation, style, palette, vibe, sections, customPrompt }) {
+  const { systemInstruction, userPrompt } = exports.getPromptPreview({ event, invitation, style, palette, vibe, sections, customPrompt });
 
   console.log('\n================================================================');
   console.log('🔍 [INSPECCIÓN DE MENSAJE] PAYLOAD QUE SE ENVIARÁ A LA IA:');
@@ -378,9 +395,10 @@ exports.generateTemplateFromPrompt = async function ({ event, style, palette, vi
   }
 };
 
-exports.refineTemplate = async function ({ currentHtml, currentCss, userFeedback, event }) {
+exports.refineTemplate = async function ({ currentHtml, currentCss, userFeedback, event, invitation }) {
+  const eventSlug = invitation?.slug || event?.externalPortalSlug || event?.slug || (event?.title ? slugify(event.title, { lower: true, strict: true }) : 'invitacion-digital-especial');
   const prompt = `
-Tienes la siguiente plantilla web de invitación:
+Tienes la siguiente plantilla web de invitación para el evento con slug oficial "${eventSlug}":
 
 CÓDIGO HTML ACTUAL:
 ${currentHtml}
@@ -391,8 +409,10 @@ ${currentCss}
 SOLICITUD DE REFINAMIENTO DEL USUARIO:
 "${userFeedback}"
 
-Aplica las modificaciones solicitadas manteniendo la coherencia del diseño, el funcionamiento de los scripts y la interactividad.
-Devuelve el JSON actualizado con { name, description, html, css, features }.
+REGLAS DE REFINAMIENTO:
+- Aplica las modificaciones solicitadas manteniendo la coherencia del diseño, el funcionamiento de los scripts y la interactividad.
+- Asegúrate de que las llamadas fetch utilicen la variable EVENT_SLUG (con valor "${eventSlug}") y nunca un literal "\${slug}" sin definir.
+- Devuelve el JSON actualizado con { name, description, html, css, features }.
 `;
 
   try {

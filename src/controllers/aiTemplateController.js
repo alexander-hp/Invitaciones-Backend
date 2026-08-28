@@ -8,14 +8,28 @@ const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
 
 exports.previewPrompt = asyncHandler(async (req, res) => {
-  const { eventId, style, palette, vibe, sections, customPrompt } = req.body;
+  const { eventId, invitationId, style, palette, vibe, sections, customPrompt } = req.body;
   let event = null;
-  if (eventId) {
+  let invitation = null;
+
+  if (invitationId) {
+    invitation = await Invitation.findById(invitationId);
+    if (invitation && !eventId) {
+      event = await Event.findById(invitation.event);
+    }
+  }
+
+  if (eventId && !event) {
     event = await Event.findById(eventId);
+  }
+
+  if (event && !invitation) {
+    invitation = await Invitation.findOne({ event: event._id });
   }
 
   const promptPreview = geminiService.getPromptPreview({
     event,
+    invitation,
     style,
     palette,
     vibe,
@@ -31,15 +45,29 @@ exports.previewPrompt = asyncHandler(async (req, res) => {
 });
 
 exports.generate = asyncHandler(async (req, res) => {
-  const { eventId, style, palette, vibe, sections, customPrompt, previewOnly } = req.body;
+  const { eventId, invitationId, style, palette, vibe, sections, customPrompt, previewOnly } = req.body;
   let event = null;
-  if (eventId) {
+  let invitation = null;
+
+  if (invitationId) {
+    invitation = await Invitation.findById(invitationId);
+    if (invitation && !eventId) {
+      event = await Event.findById(invitation.event);
+    }
+  }
+
+  if (eventId && !event) {
     event = await Event.findById(eventId);
+  }
+
+  if (event && !invitation) {
+    invitation = await Invitation.findOne({ event: event._id });
   }
 
   if (previewOnly) {
     const promptPreview = geminiService.getPromptPreview({
       event,
+      invitation,
       style,
       palette,
       vibe,
@@ -56,6 +84,7 @@ exports.generate = asyncHandler(async (req, res) => {
 
   const generated = await geminiService.generateTemplateFromPrompt({
     event,
+    invitation,
     style,
     palette,
     vibe,
@@ -70,7 +99,7 @@ exports.generate = asyncHandler(async (req, res) => {
 });
 
 exports.refine = asyncHandler(async (req, res) => {
-  const { currentHtml, currentCss, userFeedback, eventId } = req.body;
+  const { currentHtml, currentCss, userFeedback, eventId, invitationId } = req.body;
   if (!currentHtml || !userFeedback) {
     const error = new Error('Código HTML actual y feedback del usuario son requeridos');
     error.statusCode = 400;
@@ -78,15 +107,29 @@ exports.refine = asyncHandler(async (req, res) => {
   }
 
   let event = null;
-  if (eventId) {
+  let invitation = null;
+
+  if (invitationId) {
+    invitation = await Invitation.findById(invitationId);
+    if (invitation && !eventId) {
+      event = await Event.findById(invitation.event);
+    }
+  }
+
+  if (eventId && !event) {
     event = await Event.findById(eventId);
+  }
+
+  if (event && !invitation) {
+    invitation = await Invitation.findOne({ event: event._id });
   }
 
   const refined = await geminiService.refineTemplate({
     currentHtml,
     currentCss: currentCss || '',
     userFeedback,
-    event
+    event,
+    invitation
   });
 
   res.json({
