@@ -39,12 +39,12 @@ router.get('/', controller.list);
 router.post('/', protect, requireRole('admin'), validate(z.object({ body: templateBody })), controller.create);
 
 // ── Custom HTML/CSS Template Submissions ──
-router.get('/custom-submissions', protect, controller.listCustomSubmissions);
-router.get('/custom-submissions/:id', protect, controller.getCustomSubmission);
+router.get('/custom-submissions', protect, requireRole('admin'), controller.listCustomSubmissions);
+router.get('/custom-submissions/:id', protect, requireRole('admin'), controller.getCustomSubmission);
 router.post('/custom-submissions', protect, validate(z.object({ body: customSubmissionBody })), controller.submitCustom);
-router.post('/custom-submissions/:id/approve', protect, controller.approveCustom);
-router.post('/custom-submissions/:id/reject', protect, controller.rejectCustom);
-router.delete('/custom-submissions/:id', protect, controller.deleteCustom);
+router.post('/custom-submissions/:id/approve', protect, requireRole('admin'), controller.approveCustom);
+router.post('/custom-submissions/:id/reject', protect, requireRole('admin'), controller.rejectCustom);
+router.delete('/custom-submissions/:id', protect, requireRole('admin'), controller.deleteCustom);
 
 // ── AI Template Generation (Gemini / OpenAI) ──
 router.post('/ai/preview-prompt', protect, aiController.previewPrompt);
