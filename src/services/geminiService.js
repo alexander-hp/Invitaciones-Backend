@@ -61,6 +61,10 @@ Tu misión es recibir las especificaciones de un evento (nombres, fechas, paleta
 5. MICRO-INTERACCIONES Y EFECTOS LUXURY:
    - Aplicar Glassmorphism (backdrop-filter: blur(12px), background: rgba(...)), gradientes lineales suaves, bordes dorados tenues, sombras sutiles multicapa y transiciones fluidas con curvas cúbicas (cubic-bezier(0.16, 1, 0.3, 1)).
 
+6. PROHIBICIÓN ESTRICTA DE ARCHIVOS EXTERNOS LOCALES:
+   - ❌ NUNCA incluyas <link rel="stylesheet" href="styles.css"> ni enlaces a hojas de estilo externas que no existan. Todo el CSS debe estar en la propiedad "css" del JSON devuelto.
+   - ❌ NUNCA incluyas <script src="script.js"></script> ni enlaces a scripts externos no disponibles. Todo el código JavaScript funcional DEBE estar completamente escrito dentro de la etiqueta <script>...</script> en el HTML generado.
+
 ══════════════════════════════════════════════════════════════════════════
 📐 ESTRUCTURA NARRATIVA Y JERARQUÍA DE SECCIONES RECOMENDADA
 ══════════════════════════════════════════════════════════════════════════
@@ -315,27 +319,29 @@ async function callOpenAiApi(prompt, systemInstruction = '') {
 async function callAiApi(prompt, systemInstruction = '') {
   let lastError = null;
 
-  if (env.openaiApiKey) {
-    try {
-      console.log(`Intentando llamada a OpenAI API (${env.openaiModel || 'gpt-4o'})...`);
-      return await callOpenAiApi(prompt, systemInstruction);
-    } catch (err) {
-      console.warn(`Error llamando OpenAI (${env.openaiModel || 'gpt-4o'}): ${err.message}. Probando fallback a Gemini...`);
-      lastError = err;
-    }
-  }
-
+  // 1. Priorizar Gemini API si la API Key está configurada
   if (env.geminiApiKey) {
     try {
       console.log('Intentando llamada a Gemini API...');
       return await callGeminiApi(prompt, systemInstruction);
     } catch (err) {
-      console.warn(`Error llamando Gemini API: ${err.message}`);
+      console.warn(`Error llamando Gemini API: ${err.message}. Probando fallback a OpenAI...`);
       lastError = err;
     }
   }
 
-  throw lastError || new Error('No hay claves de API válidas para OpenAI ni Gemini.');
+  // 2. Fallback a OpenAI API si Gemini falla o no tiene key
+  if (env.openaiApiKey) {
+    try {
+      console.log(`Intentando llamada a OpenAI API (${env.openaiModel || 'gpt-4o'})...`);
+      return await callOpenAiApi(prompt, systemInstruction);
+    } catch (err) {
+      console.warn(`Error llamando OpenAI (${env.openaiModel || 'gpt-4o'}): ${err.message}`);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('No hay claves de API válidas para Gemini ni OpenAI.');
 }
 
 function buildEventPayload({ event, invitation, style, palette, vibe, sections, customPrompt }) {
@@ -479,8 +485,31 @@ function buildEventPayload({ event, invitation, style, palette, vibe, sections, 
   };
 }
 
-function attachModelInfo(templateObj, modelUsed) {
-  if (!templateObj || typeof templateObj !== 'object') return templateObj;
+function normalizeAiTemplateResult(templateObj, modelUsed) {
+  if (!templateObj || typeof templateObj !== 'object') {
+    templateObj = {};
+  }
+
+  let html = typeof templateObj.html === 'string' ? templateObj.html.trim() : '';
+  let css = typeof templateObj.css === 'string' ? templateObj.css.trim() : '';
+
+  // 1. Limpiar enlaces a archivos externos ficticios generados por la IA
+  html = html
+    .replace(/<link\b[^>]*href=["'][^"']*styles?\.css["'][^>]*>/gi, '')
+    .replace(/<link\b[^>]*href=["'][^"']*\.css["'][^>]*rel=["']stylesheet["'][^>]*>/gi, '')
+    .replace(/<script\b[^>]*src=["'][^"']*scripts?\.js["'][^>]*>\s*<\/script>/gi, '')
+    .replace(/<script\b[^>]*src=["'][^"']*\.js["'][^>]*>\s*<\/script>/gi, '');
+
+  // 2. Si el CSS vino dentro de <style> en el HTML y el campo css está vacío, extraerlo
+  if (!css && html.includes('<style')) {
+    const match = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i);
+    if (match && match[1]) {
+      css = match[1].trim();
+    }
+  }
+
+  templateObj.html = html;
+  templateObj.css = css;
   templateObj.modelUsed = modelUsed;
 
   if (!Array.isArray(templateObj.features)) {
@@ -488,10 +517,6 @@ function attachModelInfo(templateObj, modelUsed) {
   }
   if (!templateObj.features.some(f => typeof f === 'string' && f.toLowerCase().includes('modelo'))) {
     templateObj.features.push(`Modelo IA: ${modelUsed}`);
-  }
-
-  if (templateObj.html && typeof templateObj.html === 'string' && !templateObj.html.includes('<!-- Modelo IA:')) {
-    templateObj.html += `\n<!-- Modelo IA utilizado: ${modelUsed} -->`;
   }
 
   return templateObj;
@@ -532,6 +557,7 @@ ${JSON.stringify(payloadData, null, 2)}
   * VALIDACIÓN & PASE VIP: Incluye Tarjeta de Validación VIP y Tarjeta de Pase VIP Oficial con Código QR dinámico (con campos mesa, asiento y pases).
   * PROTOCOLO INTEROPERABILIDAD: Incluye la función global dispatchInvitationEvent(type, payload).
   * MOBILE-FIRST & RESPONSIVE: Diseño impecable de 360px a 4K con Glassmorphism y microinteracciones de lujo.
+  * NO USAR ARCHIVOS EXTERNOS: No enlaces <link rel="stylesheet" href="styles.css"> ni <script src="script.js">. Todo el código CSS va en "css" y los scripts van directamente dentro de <script>...</script> en el HTML.
 
 Genera el código HTML y CSS completo respetando estas especificaciones y devuelve ÚNICAMENTE el JSON estructurado.`;
 
@@ -555,7 +581,7 @@ exports.generateTemplateFromPrompt = async function ({ event, invitation, style,
   try {
     const { text: rawJson, modelUsed } = await callAiApi(userPrompt, systemInstruction);
     const parsed = parseAiJsonResponse(rawJson);
-    const result = attachModelInfo(parsed, modelUsed);
+    const result = normalizeAiTemplateResult(parsed, modelUsed);
     result.compiledPrompt = { systemInstruction, userPrompt };
     return result;
   } catch (apiError) {
@@ -581,6 +607,7 @@ SOLICITUD DE REFINAMIENTO DEL USUARIO:
 REGLAS DE REFINAMIENTO:
 - Aplica las modificaciones solicitadas manteniendo la coherencia del diseño, el funcionamiento de los scripts y la interactividad.
 - Cumple estrictamente con las Reglas de Oro: CERO EMOJIS (solo iconos SVG inline), CERO COLORES HARDCODEADOS (usar variables CSS :root), Validaciones VIP, Iframe Bridge y Mobile-first.
+- NO enlaces a archivos externos styles.css ni script.js.
 - Asegúrate de que las llamadas fetch utilicen la constante EVENT_SLUG (con valor "${eventSlug}") y nunca un literal "\${slug}" sin definir.
 - Devuelve el JSON actualizado estructurado exactamente con { name, description, html, css, features }.
 `;
@@ -588,10 +615,11 @@ REGLAS DE REFINAMIENTO:
   try {
     const { text: rawJson, modelUsed } = await callAiApi(prompt, SYSTEM_INSTRUCTION);
     const parsed = parseAiJsonResponse(rawJson);
-    return attachModelInfo(parsed, modelUsed);
+    return normalizeAiTemplateResult(parsed, modelUsed);
   } catch (apiError) {
     console.error('Error refinando plantilla con la IA:', apiError.message);
     throw new Error(`Error en el refinamiento con IA: ${apiError.message}`);
   }
 };
+
 
