@@ -4,6 +4,7 @@ const multer = require('multer');
 const albumController = require('../controllers/albumController');
 const controller = require('../controllers/invitationController');
 const dedicationController = require('../controllers/dedicationController');
+const songRequestController = require('../controllers/songRequestController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
@@ -20,6 +21,8 @@ const invitationContentBody = z.object({
   headline: z.string().optional(),
   subheadline: z.string().optional(),
   message: z.string().optional(),
+  storyTitle: z.string().optional(),
+  storyBody: z.string().optional(),
   palette: z.object({
     primary: z.string().optional(),
     secondary: z.string().optional(),
@@ -65,6 +68,12 @@ const invitationContentBody = z.object({
     introText: z.string().max(600).optional(),
     showRegistry: z.boolean().optional(),
     showEnvelope: z.boolean().optional()
+  }).strict().optional(),
+  songRequestSettings: z.object({
+    enabled: z.boolean().optional(),
+    maxRequestsPerGuest: z.number().int().min(1).max(20).optional(),
+    allowDedications: z.boolean().optional(),
+    requireApproval: z.boolean().optional()
   }).strict().optional(),
   dedicationSettings: z.object({
     enabled: z.boolean().optional(),
@@ -147,6 +156,19 @@ const invitationUpdateBody = z.object({
   rsvpSettings: rsvpSettingsBody.optional(),
   content: invitationContentBody.optional()
 }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');
+const publicSongRequestBody = z.object({
+  guest: z.string().min(12).optional(),
+  requesterName: z.string().min(1).max(120).optional(),
+  requesterEmail: z.string().email().optional(),
+  title: z.string().min(1).max(180).optional(),
+  artist: z.string().max(180).optional(),
+  dedication: z.string().max(500).optional(),
+  query: z.string().max(300).optional(),
+  url: z.string().url().optional(),
+  sourceUrl: z.string().url().optional(),
+  status: z.enum(['pending', 'approved', 'played', 'rejected']).optional()
+}).strict().refine((body) => body.title || body.query || body.url || body.sourceUrl, 'Se requiere canción, búsqueda o link');
+
 const dedicationBody = z.object({
   guest: z.string().min(12).optional(),
   publicName: z.string().min(2).max(120).optional(),
@@ -166,6 +188,10 @@ router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object(
 }).strict().refine((body) => body.email || body.phone, 'Email o telefono requerido') })), controller.guestAccess);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
 router.post('/public/:slug/dedications', publicInvitationLimiter, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
+router.get('/public/:slug/song-requests', publicInvitationLimiter, songRequestController.listPublicByInvitation);
+router.post('/public/:slug/song-requests', publicInvitationLimiter, validate(z.object({ body: publicSongRequestBody })), songRequestController.createPublicByInvitation);
+router.post('/public/:slug/song-lookup', publicInvitationLimiter, songRequestController.lookupYouTubePublic);
+
 router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);

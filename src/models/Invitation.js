@@ -34,6 +34,8 @@ const invitationSchema = new mongoose.Schema({
     headline: String,
     subheadline: String,
     message: String,
+    storyTitle: String,
+    storyBody: String,
     palette: { primary: String, secondary: String, accent: String },
     musicUrl: String,
     sectionMusic: {
@@ -79,6 +81,12 @@ const invitationSchema = new mongoose.Schema({
       introText: String,
       showRegistry: { type: Boolean, default: true },
       showEnvelope: { type: Boolean, default: true }
+    },
+    songRequestSettings: {
+      enabled: { type: Boolean, default: true },
+      maxRequestsPerGuest: { type: Number, default: 3, min: 1, max: 20 },
+      allowDedications: { type: Boolean, default: true },
+      requireApproval: { type: Boolean, default: true }
     },
     dedicationSettings: {
       enabled: { type: Boolean, default: true },

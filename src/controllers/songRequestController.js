@@ -1,7 +1,9 @@
 const Event = require('../models/Event');
+const Guest = require('../models/Guest');
+const Invitation = require('../models/Invitation');
 const SongRequest = require('../models/SongRequest');
 const asyncHandler = require('../utils/asyncHandler');
-const { notifyReviewStatus } = require('../utils/moderation');
+const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { logEventActivity } = require('../services/eventLogService');
 
 function getYouTubeId(url) {
@@ -215,6 +217,127 @@ async function searchYouTubeVideo(query) {
 }
 
 exports.lookupYouTube = asyncHandler(async (req, res) => {
+  const query = (req.body?.query || req.query?.query || [req.body?.artist, req.body?.title].filter(Boolean).join(' ')).trim();
+  const video = await searchYouTubeVideo(query);
+  res.json({ video, query });
+});
+
+
+exports.createPublicByInvitation = asyncHandler(async (req, res) => {
+  const slug = String(req.params.slug || '').toLowerCase().trim();
+  const invitation = await Invitation.findOne({ slug, status: 'published' }).select('_id event owner content');
+  if (!invitation) {
+    const error = new Error('Invitación no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const event = await Event.findById(invitation.event);
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const songSettings = invitation.content?.songRequestSettings || event.externalContent?.songRequestSettings || {};
+  if (songSettings.enabled === false) {
+    const error = new Error('Solicitudes de canciones deshabilitadas');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  let guest = null;
+  const body = req.validated?.body || req.body || {};
+  if (body.guest) {
+    guest = await Guest.findOne({ _id: body.guest, event: event._id });
+  } else if (body.requesterEmail || body.email) {
+    const email = String(body.requesterEmail || body.email).toLowerCase().trim();
+    guest = await Guest.findOne({ email, event: event._id });
+  }
+
+  const maxRequests = Number(songSettings.maxRequestsPerGuest) > 0 ? Number(songSettings.maxRequestsPerGuest) : 3;
+  if (guest) {
+    const count = await SongRequest.countDocuments({ event: event._id, guest: guest._id });
+    if (count >= maxRequests) {
+      const error = new Error(`Has alcanzado el límite máximo de ${maxRequests} canciones permitidas.`);
+      error.statusCode = 400;
+      throw error;
+    }
+  } else if (body.requesterEmail) {
+    const count = await SongRequest.countDocuments({ event: event._id, requesterEmail: String(body.requesterEmail).toLowerCase().trim() });
+    if (count >= maxRequests) {
+      const error = new Error(`Has alcanzado el límite máximo de ${maxRequests} canciones permitidas.`);
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  const songData = normalizeSongLookup(body);
+  const requireApproval = songSettings.requireApproval !== false;
+  const status = initialModerationStatus({
+    guest,
+    settings: invitation.content?.moderationSettings || event.externalContent?.moderationSettings || {},
+    kind: 'song',
+    requireApproval
+  });
+
+  const maxOrderDoc = await SongRequest.findOne({ event: event._id }).sort({ sortOrder: -1 }).select('sortOrder');
+  const sortOrder = (maxOrderDoc?.sortOrder || 0) + 1;
+
+  const songRequest = new SongRequest({
+    owner: event.owner,
+    event: event._id,
+    guest: guest?._id,
+    requesterName: guest?.name || body.requesterName || 'Invitado',
+    requesterEmail: guest?.email || (body.requesterEmail ? String(body.requesterEmail).toLowerCase().trim() : ''),
+    title: songData.title,
+    artist: songData.artist || '',
+    dedication: body.dedication || '',
+    sourceProvider: songData.sourceProvider || 'manual',
+    sourceUrl: songData.sourceUrl || body.sourceUrl || body.url,
+    externalId: songData.externalId,
+    thumbnailUrl: songData.thumbnailUrl,
+    sortOrder,
+    status,
+    reviewedAt: status === 'approved' ? new Date() : undefined
+  });
+
+  const saved = await songRequest.save();
+
+  logEventActivity({
+    eventId: event._id,
+    actor: guest ? { _id: guest._id, name: guest.name, email: guest.email } : undefined,
+    actorType: guest ? 'guest' : 'system',
+    category: 'music',
+    action: 'song_requested',
+    description: `Canción solicitada por ${saved.requesterName}: ${saved.title}${saved.artist ? ' - ' + saved.artist : ''}`,
+    metadata: { songRequestId: saved._id, title: saved.title, artist: saved.artist, status: saved.status }
+  });
+
+  res.status(201).json({ songRequest: saved });
+});
+
+exports.listPublicByInvitation = asyncHandler(async (req, res) => {
+  const slug = String(req.params.slug || '').toLowerCase().trim();
+  const invitation = await Invitation.findOne({ slug, status: 'published' }).select('_id event');
+  if (!invitation) {
+    const error = new Error('Invitación no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const query = { event: invitation.event };
+  if (req.query.guest) {
+    query.guest = req.query.guest;
+  } else if (req.query.email) {
+    query.requesterEmail = String(req.query.email).toLowerCase().trim();
+  } else {
+    query.status = 'approved';
+  }
+  const songRequests = await SongRequest.find(query).sort({ sortOrder: 1, createdAt: -1 });
+  res.json({ songRequests });
+});
+
+exports.lookupYouTubePublic = asyncHandler(async (req, res) => {
   const query = (req.body?.query || req.query?.query || [req.body?.artist, req.body?.title].filter(Boolean).join(' ')).trim();
   const video = await searchYouTubeVideo(query);
   res.json({ video, query });

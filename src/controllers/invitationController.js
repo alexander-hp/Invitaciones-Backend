@@ -49,6 +49,10 @@ function publicTemplate(template) {
 function publicInvitation(invitation) {
   const content = invitation.content?.toObject ? invitation.content.toObject({ flattenMaps: true }) : { ...(invitation.content || {}) };
   delete content.privateAlbum;
+  content.storyTitle = content.storyTitle || content.subheadline || '';
+  content.storyBody = content.storyBody || content.message || '';
+  content.subheadline = content.subheadline || content.storyTitle || '';
+  content.message = content.message || content.storyBody || '';
   if (content.sectionMusic && content.sectionMusic instanceof Map) {
     content.sectionMusic = Object.fromEntries(content.sectionMusic);
   } else {
@@ -57,6 +61,8 @@ function publicInvitation(invitation) {
   content.giftRegistry = (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
   content.giftSettings = content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true };
   content.dedicationSettings = content.dedicationSettings || { enabled: true, requireApproval: true };
+  const eventSongSettings = (invitation.event && typeof invitation.event === 'object') ? invitation.event.externalContent?.songRequestSettings : undefined;
+  content.songRequestSettings = eventSongSettings || content.songRequestSettings || { enabled: true, maxRequestsPerGuest: 3, allowDedications: true, requireApproval: true };
   return {
     id: invitation._id,
     slug: invitation.slug,
