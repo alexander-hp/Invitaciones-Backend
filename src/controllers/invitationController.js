@@ -5,10 +5,15 @@ const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Template = require('../models/Template');
+const AlbumAsset = require('../models/AlbumAsset');
+const Dedication = require('../models/Dedication');
+const Rsvp = require('../models/Rsvp');
 const { getEffectivePlanLimits } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
 const emailService = require('../services/emailService');
+const { logEventActivity } = require('../services/eventLogService');
+const { requireEventAccess } = require('../utils/eventAccess');
 
 async function buildUniqueSlug(source) {
   const base = slugify(source || 'invitacion', { lower: true, strict: true });
@@ -246,9 +251,53 @@ exports.unpublish = asyncHandler(async (req, res) => {
   res.json({ invitation });
 });
 
+exports.remove = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findById(req.params.id);
+  if (!invitation) {
+    const error = new Error('Invitacion no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isOwner = String(invitation.owner) === String(req.user._id) || req.user.role === 'admin';
+  if (!isOwner) {
+    await requireEventAccess({ eventId: invitation.event, user: req.user, permission: 'edit_event' });
+  }
+
+  await Promise.all([
+    CustomTemplateSubmission.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
+    AlbumAsset.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
+    Dedication.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
+    Rsvp.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } })
+  ]);
+
+  await Invitation.deleteOne({ _id: invitation._id });
+
+  try {
+    logEventActivity({
+      eventId: invitation.event,
+      actor: req.user,
+      actorType: 'user',
+      category: 'invitation',
+      action: 'invitation_deleted',
+      description: `Invitación eliminada: ${invitation.content?.headline || invitation.slug}`,
+      metadata: { invitationId: invitation._id, slug: invitation.slug }
+    });
+  } catch (logErr) {
+    console.warn('Failed to log invitation deletion:', logErr.message);
+  }
+
+  res.json({ message: 'Invitación eliminada correctamente' });
+});
+
 exports.publicBySlug = asyncHandler(async (req, res) => {
   const rawSlug = String(req.params.slug || '').toLowerCase().trim();
   let invitation = await Invitation.findOne({ slug: rawSlug }).populate('event template');
+
+  // Fallback 0: Buscar por Event ID si es un ObjectId valido
+  if (!invitation && mongoose.Types.ObjectId.isValid(rawSlug)) {
+    invitation = await Invitation.findOne({ $or: [{ event: rawSlug }, { _id: rawSlug }] }).populate('event template');
+  }
 
   // Fallback 1: Buscar por externalPortalSlug en Event
   if (!invitation) {

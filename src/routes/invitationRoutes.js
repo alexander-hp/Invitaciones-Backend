@@ -196,6 +196,7 @@ router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);
 router.patch('/:id', validate(z.object({ body: invitationUpdateBody })), controller.update);
+router.delete('/:id', controller.remove);
 router.post('/:id/publish', controller.publish);
 router.post('/:id/unpublish', controller.unpublish);
 

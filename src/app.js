@@ -31,7 +31,11 @@ app.use((req, res, next) => {
     }
   })(req, res, next);
 });
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1500,
+  skip: () => env.nodeEnv !== 'production'
+}));
 
 app.post(
   '/webhook',

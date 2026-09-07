@@ -1,6 +1,7 @@
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const AlbumAsset = require('../models/AlbumAsset');
 const Event = require('../models/Event');
+const Invitation = require('../models/Invitation');
 const EventAccessToken = require('../models/EventAccessToken');
 const EventTable = require('../models/EventTable');
 const Guest = require('../models/Guest');
@@ -104,8 +105,9 @@ function getYouTubeId(url) {
 
 exports.session = asyncHandler(async (req, res) => {
   const access = await getActiveAccess(req.params.token);
-  const [event, guests, rsvps, tables, albumAssets, songRequests] = await Promise.all([
+  const [event, invitation, guests, rsvps, tables, albumAssets, songRequests] = await Promise.all([
     Event.findById(access.event).select('title type date venue mode externalSiteUrl externalSiteLabel externalPortalSlug'),
+    Invitation.findOne({ event: access.event }).select('slug status'),
     hasPermission(access, 'check_in') || hasPermission(access, 'client_view') ? Guest.find({ event: access.event }).sort('name') : [],
     hasPermission(access, 'client_view') ? Rsvp.find({ event: access.event }).sort('-createdAt').limit(200) : [],
     hasPermission(access, 'client_view') ? EventTable.find({ event: access.event }).sort('order name') : [],
@@ -115,6 +117,8 @@ exports.session = asyncHandler(async (req, res) => {
   access.lastUsedAt = new Date();
   await access.save();
   res.json({
+    invitationSlug: invitation?.slug || event?.externalPortalSlug || '',
+    invitation: invitation ? { slug: invitation.slug, status: invitation.status } : null,
     role: access.role,
     permissions: ROLE_PERMISSIONS[access.role] || [],
     event,
