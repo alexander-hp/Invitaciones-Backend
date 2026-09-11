@@ -11,9 +11,6 @@ const rsvpSchema = new mongoose.Schema({
   companions: { type: Number, default: 0 },
   companionNames: [{ type: String, trim: true }],
   attendingCount: { type: Number, default: 1 },
-  mealPreference: String,
-  dietaryRestrictions: String,
-  menuSelection: String,
   customAnswers: [{
     key: { type: String, trim: true },
     label: { type: String, trim: true },

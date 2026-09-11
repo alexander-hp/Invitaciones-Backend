@@ -207,14 +207,15 @@ exports.get = asyncHandler(async (req, res) => {
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  const current = await Event.findOne({ _id: req.params.id, owner: req.user._id });
-  if (!current) {
-    const error = new Error('Evento no encontrado');
+  const result = await findOwnedOrMemberEvent(req.params.id, req.user, 'edit_event');
+  if (!result) {
+    const error = new Error('Evento no encontrado o sin permisos');
     error.statusCode = 404;
     throw error;
   }
+  const current = result.event;
   const payload = await ensureExternalPortalPayload(req.validated.body, current);
-  const event = await Event.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, payload, { new: true });
+  const event = await Event.findByIdAndUpdate(req.params.id, payload, { new: true });
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;

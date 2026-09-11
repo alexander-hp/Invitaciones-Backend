@@ -623,7 +623,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
   const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Token link', 'Link generado', 'Abierta en', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Asistentes totales', 'Acompanantes RSVP', 'Nombres acompanantes', 'Comida', 'Menu', 'Restricciones', 'Respuestas personalizadas', 'Mensaje'],
+    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Token link', 'Link generado', 'Abierta en', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Asistentes totales', 'Acompanantes RSVP', 'Nombres acompanantes', 'Respuestas personalizadas', 'Mensaje'],
     ...guests.map((guest) => {
       const rsvp = rsvpByGuest.get(String(guest._id));
       return [
@@ -649,9 +649,6 @@ exports.exportGuests = asyncHandler(async (req, res) => {
         rsvp?.attendingCount || '',
         rsvp?.companions || 0,
         (rsvp?.companionNames || []).join('; '),
-        rsvp?.mealPreference || '',
-        rsvp?.menuSelection || '',
-        rsvp?.dietaryRestrictions || '',
         (rsvp?.customAnswers || []).map((answer) => `${answer.label || answer.key}: ${answer.value ?? ''}`).join('; '),
         rsvp?.message || ''
       ];

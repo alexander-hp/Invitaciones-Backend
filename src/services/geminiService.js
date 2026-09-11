@@ -138,7 +138,7 @@ Eventos soportados:
       Body JSON: { "email": string, "phone": string }
       Respuesta: { "guest": { "id", "name", "email", "group", "roles", "allowedCompanions", "status", "checkInCode", "qrCode", "tableName", "seatLabel", "companions" } }
    c) Confirmación de Asistencia (RSVP):
-      POST /api/rsvp/public/\${EVENT_SLUG}
+      POST /api/rsvps/public/\${EVENT_SLUG}
       Body JSON: {
         "name": string,
         "email": string (opcional),
@@ -146,7 +146,7 @@ Eventos soportados:
         "response": "confirmed" | "declined" | "maybe",
         "companions": number,
         "companionNames": string[],
-        "dietaryRestrictions": string (opcional),
+        "customAnswers": [{ "key": string, "label": string, "value": string | number | boolean }] (opcional, para las preguntas en rsvpSettings.customQuestions si existen),
         "message": string (opcional)
       }
    d) Álbum de Fotos de Invitados:
@@ -547,7 +547,7 @@ ${JSON.stringify(payloadData, null, 2)}
 - Utiliza la constante EVENT_SLUG en todas las peticiones fetch() a los endpoints reales:
   * GET /api/invitations/public/\${EVENT_SLUG} (Datos oficiales del evento)
   * POST /api/invitations/public/\${EVENT_SLUG}/guest-access (Validación VIP con email o teléfono)
-  * POST /api/rsvp/public/\${EVENT_SLUG} (Confirmación de asistencia RSVP)
+  * POST /api/rsvps/public/\${EVENT_SLUG} (Confirmación de asistencia RSVP)
   * GET /api/invitations/public/\${EVENT_SLUG}/album y POST /album-upload (Álbum interactivo de fotos)
   * GET /api/invitations/public/\${EVENT_SLUG}/dedications y POST /dedications (Muro de dedicatorias)
   * POST /api/invitations/public/\${EVENT_SLUG}/song-requests (Petición de canciones al DJ)

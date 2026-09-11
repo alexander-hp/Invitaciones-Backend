@@ -49,9 +49,6 @@ function publicRsvp(rsvp) {
     companions: rsvp.companions,
     companionNames: rsvp.companionNames || [],
     attendingCount: rsvp.attendingCount,
-    mealPreference: rsvp.mealPreference,
-    dietaryRestrictions: rsvp.dietaryRestrictions,
-    menuSelection: rsvp.menuSelection,
     customAnswers: rsvp.customAnswers || [],
     message: rsvp.message,
     createdAt: rsvp.createdAt,
@@ -357,9 +354,6 @@ exports.rsvp = asyncHandler(async (req, res) => {
     companions,
     companionNames,
     attendingCount: req.validated.body.response === 'confirmed' ? 1 + companions : 0,
-    mealPreference: req.validated.body.mealPreference,
-    dietaryRestrictions: req.validated.body.dietaryRestrictions,
-    menuSelection: req.validated.body.menuSelection,
     customAnswers: req.validated.body.customAnswers || [],
     message: req.validated.body.message
   };

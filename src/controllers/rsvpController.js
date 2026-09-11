@@ -80,11 +80,8 @@ function snapshotRsvp(rsvp) {
   return {
     response: rsvp.response,
     companions: rsvp.companions,
-    mealPreference: rsvp.mealPreference,
     companionNames: rsvp.companionNames,
     attendingCount: rsvp.attendingCount,
-    dietaryRestrictions: rsvp.dietaryRestrictions,
-    menuSelection: rsvp.menuSelection,
     customAnswers: rsvp.customAnswers,
     message: rsvp.message,
     email: rsvp.email,
@@ -178,9 +175,6 @@ function buildRsvpData({ invitation, guest, payload, emailNormalized }) {
     companions,
     companionNames,
     attendingCount: isFinalAttendance ? 1 + companions : 0,
-    mealPreference: isFinalAttendance ? payload.mealPreference : undefined,
-    dietaryRestrictions: isFinalAttendance ? payload.dietaryRestrictions : undefined,
-    menuSelection: isFinalAttendance ? payload.menuSelection : undefined,
     customAnswers: Array.isArray(payload.customAnswers) ? payload.customAnswers : [],
     message: payload.message,
     ...normalizePhone(payload)
@@ -495,9 +489,6 @@ exports.submitPublicEvent = asyncHandler(async (req, res) => {
     companions: isFinalAttendance ? Number(payload.companions || companionNames.length || 0) : 0,
     companionNames,
     attendingCount: isFinalAttendance ? 1 + Number(payload.companions || companionNames.length || 0) : 0,
-    mealPreference: isFinalAttendance ? payload.mealPreference : undefined,
-    dietaryRestrictions: isFinalAttendance ? payload.dietaryRestrictions : undefined,
-    menuSelection: isFinalAttendance ? payload.menuSelection : undefined,
     customAnswers: Array.isArray(payload.customAnswers) ? payload.customAnswers : [],
     message: payload.message,
     ...normalizePhone(payload)
@@ -528,7 +519,7 @@ exports.exportByEvent = asyncHandler(async (req, res) => {
 
   const rsvps = await Rsvp.find({ event: event._id }).sort('-createdAt').lean();
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Respuesta', 'Asistentes totales', 'Acompanantes', 'Nombres acompanantes', 'Comida', 'Menu', 'Restricciones', 'Respuestas personalizadas', 'Mensaje', 'Fecha'],
+    ['Nombre', 'Email', 'Telefono', 'Respuesta', 'Asistentes totales', 'Acompanantes', 'Nombres acompanantes', 'Respuestas personalizadas', 'Mensaje', 'Fecha'],
     ...rsvps.map((rsvp) => [
       rsvp.name,
       rsvp.email,
@@ -537,9 +528,6 @@ exports.exportByEvent = asyncHandler(async (req, res) => {
       rsvp.attendingCount || (rsvp.response === 'confirmed' ? 1 + Number(rsvp.companions || 0) : 0),
       rsvp.companions || 0,
       (rsvp.companionNames || []).join('; '),
-      rsvp.mealPreference || '',
-      rsvp.menuSelection || '',
-      rsvp.dietaryRestrictions || '',
       (rsvp.customAnswers || []).map((answer) => `${answer.label || answer.key}: ${answer.value ?? ''}`).join('; '),
       rsvp.message || '',
       rsvp.createdAt ? new Date(rsvp.createdAt).toISOString() : ''

@@ -19,9 +19,6 @@ const rsvpBody = z.object({
   response: z.enum(['confirmed', 'declined', 'maybe']),
   companions: z.number().int().min(0).optional(),
   companionNames: z.array(z.string()).optional(),
-  dietaryRestrictions: z.string().optional(),
-  mealPreference: z.string().optional(),
-  menuSelection: z.string().optional(),
   customAnswers: z.array(z.object({
     key: z.string().min(1),
     label: z.string().optional(),

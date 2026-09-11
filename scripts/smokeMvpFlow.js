@@ -153,9 +153,6 @@ async function main() {
     response: 'confirmed',
     companions: 1,
     companionNames: ['Smoke Plus One'],
-    dietaryRestrictions: 'Sin nuez',
-    mealPreference: 'Pollo',
-    menuSelection: 'Pollo',
     customAnswers: [
       { key: 'song', label: 'Cancion sugerida', value: 'Smoke song' },
       { key: 'menu', label: 'Menu', value: 'Pollo' }
