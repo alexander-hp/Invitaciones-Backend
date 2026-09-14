@@ -165,6 +165,7 @@ function publicExternalEvent(event) {
     title: event.title,
     hosts: event.hosts,
     date: event.date,
+    time: event.time,
     venue: event.venue,
     agenda: event.agenda,
     externalSiteUrl: event.externalSiteUrl,

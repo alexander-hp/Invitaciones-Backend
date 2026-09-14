@@ -115,6 +115,7 @@ const eventSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   hosts: [{ type: String, trim: true }],
   date: { type: Date, required: true },
+  time: { type: String, trim: true },
   venue: {
     name: String,
     address: String,

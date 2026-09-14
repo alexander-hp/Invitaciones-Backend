@@ -34,9 +34,21 @@ function publicEvent(event) {
     title: event.title,
     hosts: event.hosts,
     date: event.date,
+    time: event.time,
     venue: event.venue,
     agenda: event.agenda
   };
+}
+
+function getDefaultItineraryTitle(eventType) {
+  switch (eventType) {
+    case 'boda': return 'Ceremonia / Recepción';
+    case 'xv': return 'Recepción de XV Años';
+    case 'graduacion': return 'Recepción de Graduación';
+    case 'bautizo': return 'Ceremonia / Recepción';
+    case 'cumpleanos': return 'Festejo y Recepción';
+    default: return 'Recepción';
+  }
 }
 
 function publicTemplate(template) {
@@ -197,7 +209,53 @@ exports.create = asyncHandler(async (req, res) => {
   }
   await assertInvitationPlanLimits(req.user, event, payload);
   const slug = await buildUniqueSlug(payload.slug || event.title);
-  const invitation = await Invitation.create({ ...payload, owner: req.user._id, slug });
+
+  const content = { ...(payload.content || {}) };
+  const sectionSettings = { ...(content.sectionSettings || {}) };
+
+  // Extraer ubicación por defecto del evento si no se proveyó
+  if (!Array.isArray(content.locations) || content.locations.length === 0) {
+    if (event.venue && (event.venue.name || event.venue.address || event.venue.mapUrl)) {
+      content.locations = [{
+        type: 'recepción',
+        name: event.venue.name || '',
+        address: event.venue.address || '',
+        mapUrl: event.venue.mapUrl || '',
+        wazeUrl: '',
+        notes: ''
+      }];
+      if (sectionSettings.locations === undefined) {
+        sectionSettings.locations = true;
+      }
+    }
+  }
+
+  // Extraer itinerario por defecto del evento si no se proveyó
+  if (!Array.isArray(content.itinerary) || content.itinerary.length === 0) {
+    if (Array.isArray(event.agenda) && event.agenda.length > 0) {
+      content.itinerary = event.agenda.map((a) => ({
+        time: a.time || '',
+        title: a.title || '',
+        description: a.description || ''
+      }));
+      if (sectionSettings.itinerary === undefined) {
+        sectionSettings.itinerary = true;
+      }
+    } else if (event.time) {
+      content.itinerary = [{
+        time: event.time,
+        title: getDefaultItineraryTitle(event.type),
+        description: event.venue?.name ? `En ${event.venue.name}` : ''
+      }];
+      if (sectionSettings.itinerary === undefined) {
+        sectionSettings.itinerary = true;
+      }
+    }
+  }
+
+  content.sectionSettings = sectionSettings;
+
+  const invitation = await Invitation.create({ ...payload, content, owner: req.user._id, slug });
   res.status(201).json({ invitation, publicUrl: `${env.publicBaseUrl}/i/${invitation.slug}` });
 });
 

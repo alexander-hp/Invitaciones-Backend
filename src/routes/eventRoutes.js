@@ -128,6 +128,7 @@ const eventBody = z.object({
   title: z.string().min(2),
   hosts: z.array(z.string()).optional(),
   date: z.string().or(z.date()),
+  time: z.string().max(30).optional().or(z.literal('')), 
   venue: z.object({ name: z.string().optional(), address: z.string().optional(), mapUrl: z.string().optional() }).optional(),
   agenda: z.array(z.object({ time: z.string(), title: z.string(), description: z.string().optional() })).optional(),
   status: z.enum(['draft', 'published', 'archived']).optional()
