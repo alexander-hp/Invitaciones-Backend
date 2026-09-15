@@ -59,6 +59,16 @@ const invitationSchema = new mongoose.Schema({
       notes: { type: String, trim: true }
     }],
     dressCode: String,
+    dressCodeDescription: String,
+    dressCodeImageUrl: String,
+    dressCodeOptions: [{
+      title: { type: String, trim: true },
+      description: { type: String, trim: true }
+    }],
+    dressCodeWomen: String,
+    dressCodeMen: String,
+    dressCodeOption1: String,
+    dressCodeOption2: String,
     giftRegistry: [{
       store: String,
       title: String,

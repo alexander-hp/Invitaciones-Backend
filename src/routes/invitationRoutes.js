@@ -46,6 +46,16 @@ const invitationContentBody = z.object({
     notes: z.string().optional()
   }).strict()).max(12).optional(),
   dressCode: z.string().optional(),
+  dressCodeDescription: z.string().optional(),
+  dressCodeImageUrl: z.string().optional(),
+  dressCodeOptions: z.array(z.object({
+    title: z.string().optional(),
+    description: z.string().optional()
+  })).optional(),
+  dressCodeWomen: z.string().optional(),
+  dressCodeMen: z.string().optional(),
+  dressCodeOption1: z.string().optional(),
+  dressCodeOption2: z.string().optional(),
   giftRegistry: z.array(z.object({
     store: z.string().optional(),
     title: z.string().optional(),
