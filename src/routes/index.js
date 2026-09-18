@@ -13,6 +13,7 @@ const checkIn = require('./checkInRoutes');
 const eventAccess = require('./eventAccessRoutes');
 const external = require('./externalRoutes');
 const whatsappWebhooks = require('./whatsappWebhookRoutes');
+const integrationTemplates = require('./integrationTemplateRoutes');
 
 const router = express.Router();
 
@@ -29,6 +30,7 @@ router.use('/contact', contact);
 router.use('/check-in', checkIn);
 router.use('/event-access', eventAccess);
 router.use('/external', external);
+router.use('/integration-templates', integrationTemplates);
 router.use('/webhooks/whatsapp', whatsappWebhooks);
 
 module.exports = router;

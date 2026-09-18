@@ -12,6 +12,7 @@ module.exports = {
   nodeEnv,
   clientUrl: process.env.CLIENT_URL || 'http://localhost:4200',
   frontendUrl: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:4200',
+  apiPublicBaseUrl: process.env.API_PUBLIC_BASE_URL || '',
   externalAllowedOrigins: String(process.env.EXTERNAL_ALLOWED_ORIGINS || '')
     .split(',')
     .map((origin) => origin.trim())
