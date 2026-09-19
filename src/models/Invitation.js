@@ -148,6 +148,7 @@ const invitationSchema = new mongoose.Schema({
         layout: { type: String, enum: ['flow', 'canvas'], default: 'canvas' },
         height: { type: Number, min: 240, max: 1600, default: 640 },
         background: {
+          _id: false,
           color: String,
           imageUrl: String,
           overlay: { type: Number, min: 0, max: 1 }
