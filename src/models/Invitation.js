@@ -136,6 +136,41 @@ const invitationSchema = new mongoose.Schema({
     }],
     privateAlbum: [String],
     privateAlbumEnabled: { type: Boolean, default: false },
+    visualDesign: {
+      version: { type: Number, default: 1 },
+      active: { type: Boolean, default: false },
+      mode: { type: String, enum: ['easy', 'advanced'], default: 'easy' },
+      sections: [{
+        id: { type: String, required: true, trim: true },
+        type: { type: String, required: true, trim: true },
+        title: { type: String, trim: true },
+        enabled: { type: Boolean, default: true },
+        layout: { type: String, enum: ['flow', 'canvas'], default: 'canvas' },
+        height: { type: Number, min: 240, max: 1600, default: 640 },
+        background: {
+          color: String,
+          imageUrl: String,
+          overlay: { type: Number, min: 0, max: 1 }
+        },
+        layers: [{
+          _id: false,
+          id: { type: String, required: true, trim: true },
+          type: { type: String, enum: ['text', 'image', 'video', 'audio', 'button', 'shape'], required: true },
+          text: String,
+          url: String,
+          binding: String,
+          x: { type: Number, min: 0, max: 100 },
+          y: { type: Number, min: 0, max: 100 },
+          width: { type: Number, min: 1, max: 100 },
+          height: { type: Number, min: 1, max: 100 },
+          rotation: { type: Number, min: -360, max: 360 },
+          zIndex: { type: Number, min: 0, max: 1000 },
+          locked: { type: Boolean, default: false },
+          style: { type: mongoose.Schema.Types.Mixed, default: {} }
+        }],
+        _id: false
+      }]
+    },
     template: String,
     customHtml: String,
     customCss: String,
