@@ -19,6 +19,7 @@ const optionalHttpUrl = z.string().url().refine((url) => /^https?:\/\//i.test(ur
 const visualLayerBody = z.object({
   id: z.string().min(1).max(100),
   type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape']),
+  name: z.string().max(120).optional(),
   text: z.string().max(5000).optional(),
   url: z.string().max(2000).optional(),
   binding: z.string().max(100).optional(),
@@ -29,6 +30,7 @@ const visualLayerBody = z.object({
   rotation: z.number().min(-360).max(360).optional(),
   zIndex: z.number().int().min(0).max(1000).optional(),
   locked: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   style: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional()
 }).strict();
 const visualDesignBody = z.object({

@@ -156,6 +156,7 @@ const invitationSchema = new mongoose.Schema({
           _id: false,
           id: { type: String, required: true, trim: true },
           type: { type: String, enum: ['text', 'image', 'video', 'audio', 'button', 'shape'], required: true },
+          name: { type: String, trim: true, maxlength: 120 },
           text: String,
           url: String,
           binding: String,
@@ -166,6 +167,7 @@ const invitationSchema = new mongoose.Schema({
           rotation: { type: Number, min: -360, max: 360 },
           zIndex: { type: Number, min: 0, max: 1000 },
           locked: { type: Boolean, default: false },
+          hidden: { type: Boolean, default: false },
           style: { type: mongoose.Schema.Types.Mixed, default: {} }
         }],
         _id: false
