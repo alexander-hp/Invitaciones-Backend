@@ -15,6 +15,11 @@ const visualDesign = z.object({
   active: z.boolean(),
   mode: z.enum(['easy', 'advanced']),
   responsiveMode: z.enum(['shared', 'independent']).optional(),
+  assets: z.array(z.object({
+    id: z.string().min(1).max(100), url: z.string().url().max(2000),
+    type: z.enum(['image', 'video', 'audio']), name: z.string().min(1).max(200),
+    createdAt: z.string().datetime().optional()
+  }).strict()).max(200).optional(),
   sections: z.array(z.object({
     id: z.string().min(1).max(100), type: z.string().min(1).max(80), title: z.string().max(160).optional(),
     enabled: z.boolean(), layout: z.enum(['flow', 'canvas']), height: z.number().int().min(240).max(1600),

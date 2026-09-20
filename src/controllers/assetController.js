@@ -38,28 +38,38 @@ function whatsappMediaTypeForContentType(contentType) {
 }
 
 function assertMediaAllowed({ folder, contentType, size }) {
-  const isImageFolder = ['covers', 'gallery', 'assets'].includes(folder);
+  const isImageFolder = ['covers', 'gallery'].includes(folder);
+  const isGeneralFolder = folder === 'assets';
   const isMusicFolder = folder === 'music';
   const isWhatsAppFolder = folder === 'whatsapp-media';
-  const whatsappMediaType = whatsappMediaTypeForContentType(contentType);
-  const allowedTypes = isMusicFolder ? AUDIO_TYPES : isWhatsAppFolder ? null : IMAGE_TYPES;
+  const mediaType = whatsappMediaTypeForContentType(contentType);
+  const allowedTypes = isMusicFolder ? AUDIO_TYPES : isWhatsAppFolder || isGeneralFolder ? null : IMAGE_TYPES;
   const maxSize = isMusicFolder
     ? MAX_AUDIO_SIZE
-    : isWhatsAppFolder && whatsappMediaType === 'video'
+    : isGeneralFolder && mediaType === 'video'
       ? MAX_VIDEO_SIZE
-      : isWhatsAppFolder && whatsappMediaType === 'audio'
+      : isGeneralFolder && mediaType === 'audio'
         ? MAX_AUDIO_SIZE
-        : isWhatsAppFolder && whatsappMediaType === 'document'
+    : isWhatsAppFolder && mediaType === 'video'
+      ? MAX_VIDEO_SIZE
+      : isWhatsAppFolder && mediaType === 'audio'
+        ? MAX_AUDIO_SIZE
+        : isWhatsAppFolder && mediaType === 'document'
           ? MAX_DOCUMENT_SIZE
           : MAX_IMAGE_SIZE;
 
-  if (!isImageFolder && !isMusicFolder && !isWhatsAppFolder) {
+  if (!isImageFolder && !isGeneralFolder && !isMusicFolder && !isWhatsAppFolder) {
     const error = new Error('Carpeta de asset no soportada');
     error.statusCode = 400;
     throw error;
   }
-  if (isWhatsAppFolder ? !whatsappMediaType : !allowedTypes.has(contentType)) {
-    const error = new Error(isMusicFolder ? 'Tipo de audio no soportado' : isWhatsAppFolder ? 'Tipo de media WhatsApp no soportado' : 'Tipo de imagen no soportado');
+  const invalidType = isGeneralFolder
+    ? !mediaType || mediaType === 'document'
+    : isWhatsAppFolder
+      ? !mediaType
+      : !allowedTypes.has(contentType);
+  if (invalidType) {
+    const error = new Error(isMusicFolder ? 'Tipo de audio no soportado' : isWhatsAppFolder ? 'Tipo de media WhatsApp no soportado' : isGeneralFolder ? 'Tipo de archivo visual no soportado' : 'Tipo de imagen no soportado');
     error.statusCode = 400;
     throw error;
   }
@@ -67,6 +77,10 @@ function assertMediaAllowed({ folder, contentType, size }) {
     const error = new Error(
       isMusicFolder
         ? 'El audio excede 10MB'
+        : isGeneralFolder && mediaType === 'video'
+          ? 'El video excede 25MB'
+          : isGeneralFolder && mediaType === 'audio'
+            ? 'El audio excede 10MB'
         : isWhatsAppFolder && whatsappMediaType === 'video'
           ? 'El video excede 25MB'
           : isWhatsAppFolder && whatsappMediaType === 'audio'

@@ -141,6 +141,14 @@ const invitationSchema = new mongoose.Schema({
       active: { type: Boolean, default: false },
       mode: { type: String, enum: ['easy', 'advanced'], default: 'easy' },
       responsiveMode: { type: String, enum: ['shared', 'independent'], default: 'shared' },
+      assets: [{
+        _id: false,
+        id: { type: String, required: true, trim: true },
+        url: { type: String, required: true },
+        type: { type: String, enum: ['image', 'video', 'audio'], required: true },
+        name: { type: String, required: true, trim: true, maxlength: 200 },
+        createdAt: String
+      }],
       sections: [{
         id: { type: String, required: true, trim: true },
         type: { type: String, required: true, trim: true },
