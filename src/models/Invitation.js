@@ -141,6 +141,18 @@ const invitationSchema = new mongoose.Schema({
       active: { type: Boolean, default: false },
       mode: { type: String, enum: ['easy', 'advanced'], default: 'easy' },
       responsiveMode: { type: String, enum: ['shared', 'independent'], default: 'shared' },
+      theme: {
+        _id: false,
+        backgroundColor: String,
+        textColor: String,
+        accentColor: String,
+        headingFont: String,
+        bodyFont: String,
+        buttonBackgroundColor: String,
+        buttonTextColor: String,
+        buttonStyle: { type: String, enum: ['solid', 'outline', 'soft'] },
+        buttonRadius: { type: Number, min: 0, max: 100 }
+      },
       assets: [{
         _id: false,
         id: { type: String, required: true, trim: true },

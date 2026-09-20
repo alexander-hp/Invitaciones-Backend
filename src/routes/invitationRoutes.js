@@ -58,6 +58,17 @@ const visualDesignBody = z.object({
   active: z.boolean(),
   mode: z.enum(['easy', 'advanced']),
   responsiveMode: z.enum(['shared', 'independent']).optional(),
+  theme: z.object({
+    backgroundColor: z.string().max(40),
+    textColor: z.string().max(40),
+    accentColor: z.string().max(40),
+    headingFont: z.string().max(120),
+    bodyFont: z.string().max(120),
+    buttonBackgroundColor: z.string().max(40),
+    buttonTextColor: z.string().max(40),
+    buttonStyle: z.enum(['solid', 'outline', 'soft']),
+    buttonRadius: z.number().min(0).max(100)
+  }).strict().optional(),
   assets: z.array(z.object({
     id: z.string().min(1).max(100),
     url: z.string().url().max(2000),
