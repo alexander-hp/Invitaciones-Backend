@@ -29,6 +29,7 @@ module.exports = {
   awsRegion: process.env.AWS_REGION || 'us-east-1',
   s3Bucket: process.env.AWS_S3_BUCKET || '',
   mediaPublicBaseUrl: process.env.MEDIA_PUBLIC_BASE_URL || '',
+  unsplashAccessKey: process.env.UNSPLASH_ACCESS_KEY || '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   stripePriceEvent12m: process.env.STRIPE_PRICE_EVENT_12M || '',

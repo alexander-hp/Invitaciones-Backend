@@ -28,8 +28,16 @@ const whatsappMediaBody = z.object({
   caption: z.string().max(1024).optional()
 }).strict();
 
+const imageSearchQuery = z.object({
+  q: z.string().trim().min(2).max(100),
+  page: z.coerce.number().int().min(1).max(100).optional(),
+  orientation: z.enum(['landscape', 'portrait', 'squarish']).optional()
+}).strict();
+
 router.post('/inspect-url', protect, validate(z.object({ body: inspectUrlBody })), controller.inspectUrl);
 router.post('/upload-url', protect, validate(z.object({ body: uploadUrlBody })), controller.createUploadUrl);
+router.get('/search-images', protect, validate(z.object({ query: imageSearchQuery })), controller.searchImages);
+router.post('/track-web-image', protect, validate(z.object({ body: z.object({ downloadLocation: z.string().url() }).strict() })), controller.trackWebImage);
 router.get('/events/:eventId/whatsapp-media', protect, validate(z.object({ params: z.object({ eventId: z.string().min(12) }) })), controller.listWhatsAppMedia);
 router.post('/events/:eventId/whatsapp-media', protect, validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: whatsappMediaBody })), controller.createWhatsAppMedia);
 router.delete('/events/:eventId/whatsapp-media/:assetId', protect, validate(z.object({ params: z.object({ eventId: z.string().min(12), assetId: z.string().min(12) }) })), controller.deleteWhatsAppMedia);

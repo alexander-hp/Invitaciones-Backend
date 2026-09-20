@@ -40,6 +40,12 @@ const visualLayerBody = z.object({
   zIndex: z.number().int().min(0).max(1000).optional(),
   locked: z.boolean().optional(),
   hidden: z.boolean().optional(),
+  animation: z.object({
+    type: z.enum(['none', 'fade', 'slide-up', 'slide-left', 'zoom', 'float']),
+    duration: z.number().min(0.2).max(10).optional(),
+    delay: z.number().min(0).max(10).optional(),
+    repeat: z.boolean().optional()
+  }).strict().optional(),
   layouts: z.object({
     mobile: visualLayoutBody.optional(),
     tablet: visualLayoutBody.optional(),
@@ -57,6 +63,9 @@ const visualDesignBody = z.object({
     url: z.string().url().max(2000),
     type: z.enum(['image', 'video', 'audio']),
     name: z.string().min(1).max(200),
+    attribution: z.string().max(200).optional(),
+    attributionUrl: z.string().url().max(2000).optional(),
+    sourceUrl: z.string().url().max(2000).optional(),
     createdAt: z.string().datetime().optional()
   }).strict()).max(200).optional(),
   sections: z.array(z.object({

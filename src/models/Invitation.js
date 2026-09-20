@@ -147,6 +147,9 @@ const invitationSchema = new mongoose.Schema({
         url: { type: String, required: true },
         type: { type: String, enum: ['image', 'video', 'audio'], required: true },
         name: { type: String, required: true, trim: true, maxlength: 200 },
+        attribution: { type: String, maxlength: 200 },
+        attributionUrl: String,
+        sourceUrl: String,
         createdAt: String
       }],
       sections: [{
@@ -179,6 +182,13 @@ const invitationSchema = new mongoose.Schema({
           zIndex: { type: Number, min: 0, max: 1000 },
           locked: { type: Boolean, default: false },
           hidden: { type: Boolean, default: false },
+          animation: {
+            _id: false,
+            type: { type: String, enum: ['none', 'fade', 'slide-up', 'slide-left', 'zoom', 'float'], default: 'none' },
+            duration: { type: Number, min: 0.2, max: 10 },
+            delay: { type: Number, min: 0, max: 10 },
+            repeat: Boolean
+          },
           layouts: {
             _id: false,
             mobile: { type: mongoose.Schema.Types.Mixed },

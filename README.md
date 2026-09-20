@@ -18,6 +18,7 @@ Health: `http://localhost:4000/health`
 - `CLIENT_URL`
 - `PUBLIC_BASE_URL`
 - `AWS_S3_BUCKET`, `AWS_REGION`
+- `UNSPLASH_ACCESS_KEY` (opcional, habilita la búsqueda de fotos web en el editor visual)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 - Stripe Price IDs: `STRIPE_PRICE_EVENT_12M`, `STRIPE_PRICE_EXTERNAL_DASHBOARD_12M`, `STRIPE_PRICE_PLANNER_PRO_MONTHLY`, `STRIPE_PRICE_PLANNER_PRO_YEARLY`
 - WhatsApp:

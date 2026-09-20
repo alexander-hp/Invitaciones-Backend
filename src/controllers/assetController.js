@@ -100,6 +100,21 @@ function buildPublicUrl(key) {
   return `https://${env.s3Bucket}.s3.${env.awsRegion}.amazonaws.com/${key}`;
 }
 
+function requireUnsplashKey() {
+  if (env.unsplashAccessKey) return env.unsplashAccessKey;
+  const error = new Error('Búsqueda web no configurada. Agrega UNSPLASH_ACCESS_KEY en el backend.');
+  error.statusCode = 501;
+  throw error;
+}
+
+function unsplashLink(url) {
+  if (!url) return '';
+  const parsed = new URL(url);
+  parsed.searchParams.set('utm_source', 'kyndrasoft_invitaciones');
+  parsed.searchParams.set('utm_medium', 'referral');
+  return parsed.toString();
+}
+
 function filenameFromUrl(url) {
   try {
     const parsed = new URL(url);
@@ -224,6 +239,59 @@ exports.createUploadUrl = asyncHandler(async (req, res) => {
   }
 
   res.json({ key, uploadUrl, publicUrl: buildPublicUrl(key) });
+});
+
+exports.searchImages = asyncHandler(async (req, res) => {
+  const accessKey = requireUnsplashKey();
+  const params = new URLSearchParams({
+    query: req.validated.query.q,
+    page: String(req.validated.query.page || 1),
+    per_page: '18',
+    content_filter: 'high'
+  });
+  if (req.validated.query.orientation) params.set('orientation', req.validated.query.orientation);
+  const response = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
+    headers: { Authorization: `Client-ID ${accessKey}`, 'Accept-Version': 'v1' }
+  });
+  if (!response.ok) {
+    const error = new Error(response.status === 403 || response.status === 429 ? 'Límite de búsqueda de imágenes alcanzado.' : 'No fue posible buscar imágenes.');
+    error.statusCode = response.status === 429 ? 429 : 502;
+    throw error;
+  }
+  const data = await response.json();
+  const images = (data.results || []).map((photo) => ({
+    id: photo.id,
+    thumbUrl: photo.urls?.small,
+    url: photo.urls?.regular,
+    width: photo.width,
+    height: photo.height,
+    color: photo.color,
+    alt: photo.alt_description || photo.description || '',
+    photographer: photo.user?.name || photo.user?.username || 'Unsplash',
+    photographerUrl: unsplashLink(photo.user?.links?.html),
+    sourceUrl: unsplashLink(photo.links?.html),
+    downloadLocation: photo.links?.download_location
+  })).filter((photo) => photo.url && photo.downloadLocation);
+  res.json({ images, total: data.total || images.length, totalPages: data.total_pages || 1 });
+});
+
+exports.trackWebImage = asyncHandler(async (req, res) => {
+  const accessKey = requireUnsplashKey();
+  const downloadUrl = new URL(req.validated.body.downloadLocation);
+  if (downloadUrl.protocol !== 'https:' || downloadUrl.hostname !== 'api.unsplash.com' || !/^\/photos\/[^/]+\/download$/.test(downloadUrl.pathname)) {
+    const error = new Error('Referencia de imagen web inválida');
+    error.statusCode = 400;
+    throw error;
+  }
+  const response = await fetch(downloadUrl, {
+    headers: { Authorization: `Client-ID ${accessKey}`, 'Accept-Version': 'v1' }
+  });
+  if (!response.ok) {
+    const error = new Error('No fue posible registrar el uso de la imagen.');
+    error.statusCode = 502;
+    throw error;
+  }
+  res.json({ tracked: true });
 });
 
 exports.createWhatsAppMedia = asyncHandler(async (req, res) => {
