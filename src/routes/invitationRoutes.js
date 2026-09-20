@@ -25,6 +25,7 @@ const visualLayoutBody = z.object({
 }).strict();
 const visualLayerBody = z.object({
   id: z.string().min(1).max(100),
+  groupId: z.string().min(1).max(100).optional(),
   type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape']),
   name: z.string().max(120).optional(),
   text: z.string().max(5000).optional(),

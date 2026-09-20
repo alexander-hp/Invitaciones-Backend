@@ -157,6 +157,7 @@ const invitationSchema = new mongoose.Schema({
         layers: [{
           _id: false,
           id: { type: String, required: true, trim: true },
+          groupId: { type: String, trim: true },
           type: { type: String, enum: ['text', 'image', 'video', 'audio', 'button', 'shape'], required: true },
           name: { type: String, trim: true, maxlength: 120 },
           text: String,
