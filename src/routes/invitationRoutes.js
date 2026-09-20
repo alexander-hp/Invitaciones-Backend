@@ -16,6 +16,13 @@ const publicInvitationLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 600, 
 const guestAccessLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 2000, standardHeaders: true, legacyHeaders: false, skip: () => env.nodeEnv !== 'production' });
 const albumUploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false, skip: () => env.nodeEnv !== 'production' });
 const optionalHttpUrl = z.string().url().refine((url) => /^https?:\/\//i.test(url), 'URL debe iniciar con http o https').or(z.literal('')).optional();
+const visualLayoutBody = z.object({
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  width: z.number().min(1).max(100),
+  height: z.number().min(1).max(100),
+  rotation: z.number().min(-360).max(360).optional()
+}).strict();
 const visualLayerBody = z.object({
   id: z.string().min(1).max(100),
   type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape']),
@@ -31,12 +38,18 @@ const visualLayerBody = z.object({
   zIndex: z.number().int().min(0).max(1000).optional(),
   locked: z.boolean().optional(),
   hidden: z.boolean().optional(),
+  layouts: z.object({
+    mobile: visualLayoutBody.optional(),
+    tablet: visualLayoutBody.optional(),
+    desktop: visualLayoutBody.optional()
+  }).strict().optional(),
   style: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional()
 }).strict();
 const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
   mode: z.enum(['easy', 'advanced']),
+  responsiveMode: z.enum(['shared', 'independent']).optional(),
   sections: z.array(z.object({
     id: z.string().min(1).max(100),
     type: z.string().min(1).max(80),

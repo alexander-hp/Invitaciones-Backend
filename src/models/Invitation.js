@@ -140,6 +140,7 @@ const invitationSchema = new mongoose.Schema({
       version: { type: Number, default: 1 },
       active: { type: Boolean, default: false },
       mode: { type: String, enum: ['easy', 'advanced'], default: 'easy' },
+      responsiveMode: { type: String, enum: ['shared', 'independent'], default: 'shared' },
       sections: [{
         id: { type: String, required: true, trim: true },
         type: { type: String, required: true, trim: true },
@@ -169,6 +170,12 @@ const invitationSchema = new mongoose.Schema({
           zIndex: { type: Number, min: 0, max: 1000 },
           locked: { type: Boolean, default: false },
           hidden: { type: Boolean, default: false },
+          layouts: {
+            _id: false,
+            mobile: { type: mongoose.Schema.Types.Mixed },
+            tablet: { type: mongoose.Schema.Types.Mixed },
+            desktop: { type: mongoose.Schema.Types.Mixed }
+          },
           style: { type: mongoose.Schema.Types.Mixed, default: {} }
         }],
         _id: false
