@@ -5,6 +5,7 @@ const albumController = require('../controllers/albumController');
 const controller = require('../controllers/invitationController');
 const dedicationController = require('../controllers/dedicationController');
 const songRequestController = require('../controllers/songRequestController');
+const visualDesignRevisionController = require('../controllers/visualDesignRevisionController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
@@ -263,6 +264,13 @@ router.post('/public/:slug/song-lookup', publicInvitationLimiter, songRequestCon
 router.use(protect);
 router.get('/', controller.list);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);
+router.get('/:id/visual-revisions', visualDesignRevisionController.list);
+router.post('/:id/visual-revisions', validate(z.object({ body: z.object({
+  label: z.string().trim().min(1).max(120),
+  design: visualDesignBody
+}).strict() })), visualDesignRevisionController.create);
+router.post('/:id/visual-revisions/:revisionId/restore', visualDesignRevisionController.restore);
+router.delete('/:id/visual-revisions/:revisionId', visualDesignRevisionController.remove);
 router.patch('/:id', validate(z.object({ body: invitationUpdateBody })), controller.update);
 router.delete('/:id', controller.remove);
 router.post('/:id/publish', controller.publish);

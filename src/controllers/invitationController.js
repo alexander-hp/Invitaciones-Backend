@@ -14,6 +14,7 @@ const env = require('../config/env');
 const emailService = require('../services/emailService');
 const { logEventActivity } = require('../services/eventLogService');
 const { requireEventAccess } = require('../utils/eventAccess');
+const VisualDesignRevision = require('../models/VisualDesignRevision');
 
 async function buildUniqueSlug(source) {
   const base = slugify(source || 'invitacion', { lower: true, strict: true });
@@ -326,7 +327,8 @@ exports.remove = asyncHandler(async (req, res) => {
     CustomTemplateSubmission.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
     AlbumAsset.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
     Dedication.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
-    Rsvp.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } })
+    Rsvp.updateMany({ invitation: invitation._id }, { $unset: { invitation: '' } }),
+    VisualDesignRevision.deleteMany({ invitation: invitation._id })
   ]);
 
   await Invitation.deleteOne({ _id: invitation._id });
