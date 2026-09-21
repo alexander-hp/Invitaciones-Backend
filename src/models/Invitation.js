@@ -45,6 +45,24 @@ const invitationSchema = new mongoose.Schema({
     },
     coverImageUrl: String,
     gallery: [String],
+    galleryItems: [{
+      _id: false,
+      id: { type: String, trim: true },
+      url: { type: String, required: true, trim: true },
+      title: { type: String, trim: true },
+      description: String,
+      dedication: String,
+      alt: { type: String, trim: true },
+      fit: { type: String, enum: ['cover', 'contain'], default: 'cover' },
+      focalX: { type: Number, min: 0, max: 100, default: 50 },
+      focalY: { type: Number, min: 0, max: 100, default: 50 }
+    }],
+    gallerySettings: {
+      displayMode: { type: String, enum: ['grid', 'list', 'carousel'], default: 'grid' },
+      showCaptions: { type: Boolean, default: true },
+      autoplay: { type: Boolean, default: false },
+      intervalSeconds: { type: Number, min: 2, max: 30, default: 5 }
+    },
     itinerary: [{
       time: String,
       title: String,

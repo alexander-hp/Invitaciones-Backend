@@ -76,6 +76,30 @@ function publicInvitation(invitation) {
   } else {
     content.sectionMusic = content.sectionMusic || {};
   }
+  const storedGalleryItems = Array.isArray(content.galleryItems) ? content.galleryItems : [];
+  const galleryUrls = (Array.isArray(content.gallery) && content.gallery.length
+    ? content.gallery
+    : storedGalleryItems.map((item) => item?.url))
+    .filter(Boolean);
+  content.galleryItems = galleryUrls.map((url, index) => {
+    const saved = storedGalleryItems.find((item) => item?.url === url) || {};
+    return {
+      id: saved.id || `gallery-${index + 1}`,
+      url,
+      title: saved.title || '',
+      description: saved.description || '',
+      dedication: saved.dedication || '',
+      alt: saved.alt || saved.title || 'Fotografía del evento',
+      fit: saved.fit || 'cover',
+      focalX: Number.isFinite(saved.focalX) ? saved.focalX : 50,
+      focalY: Number.isFinite(saved.focalY) ? saved.focalY : 50
+    };
+  });
+  content.gallery = galleryUrls;
+  content.gallerySettings = {
+    displayMode: 'grid', showCaptions: true, autoplay: false, intervalSeconds: 5,
+    ...(content.gallerySettings || {})
+  };
   content.giftRegistry = (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
   content.giftSettings = content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true };
   content.dedicationSettings = content.dedicationSettings || { enabled: true, requireApproval: true };

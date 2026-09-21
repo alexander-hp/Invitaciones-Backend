@@ -120,6 +120,23 @@ const invitationContentBody = z.object({
   sectionMusic: z.record(z.string(), z.string()).optional(),
   coverImageUrl: z.string().optional(),
   gallery: z.array(z.string()).optional(),
+  galleryItems: z.array(z.object({
+    id: z.string().max(100).optional(),
+    url: z.string().url().or(z.literal('')),
+    title: z.string().max(160).optional(),
+    description: z.string().max(1000).optional(),
+    dedication: z.string().max(1000).optional(),
+    alt: z.string().max(240).optional(),
+    fit: z.enum(['cover', 'contain']).optional(),
+    focalX: z.number().min(0).max(100).optional(),
+    focalY: z.number().min(0).max(100).optional()
+  }).strict()).max(100).optional(),
+  gallerySettings: z.object({
+    displayMode: z.enum(['grid', 'list', 'carousel']).optional(),
+    showCaptions: z.boolean().optional(),
+    autoplay: z.boolean().optional(),
+    intervalSeconds: z.number().int().min(2).max(30).optional()
+  }).strict().optional(),
   itinerary: z.array(z.object({
     time: z.string().optional(),
     title: z.string().optional(),
