@@ -148,7 +148,16 @@ const invitationContentBody = z.object({
     address: z.string().optional(),
     mapUrl: optionalHttpUrl,
     wazeUrl: optionalHttpUrl,
-    notes: z.string().optional()
+    notes: z.string().max(1000).optional(),
+    lat: z.number().min(-90).max(90).optional(),
+    lon: z.number().min(-180).max(180).optional(),
+    phone: z.string().max(40).optional(),
+    websiteUrl: optionalHttpUrl,
+    schedule: z.array(z.string().max(160)).max(14).optional(),
+    parking: z.string().max(500).optional(),
+    transport: z.string().max(500).optional(),
+    accessibility: z.string().max(500).optional(),
+    priority: z.number().int().min(0).max(1000).optional()
   }).strict()).max(12).optional(),
   dressCode: z.string().optional(),
   dressCodeDescription: z.string().optional(),

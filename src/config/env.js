@@ -21,6 +21,7 @@ module.exports = {
   jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || '',
   facebookAppId: process.env.FACEBOOK_APP_ID || '',
   facebookAppSecret: process.env.FACEBOOK_APP_SECRET || '',
   appleClientId: process.env.APPLE_CLIENT_ID || '',

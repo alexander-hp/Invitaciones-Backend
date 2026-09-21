@@ -100,6 +100,7 @@ function publicInvitation(invitation) {
     displayMode: 'grid', showCaptions: true, autoplay: false, intervalSeconds: 5,
     ...(content.gallerySettings || {})
   };
+  content.locations = (content.locations || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
   content.lodging = (content.lodging || [])
     .sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0))
     .map((item) => ({ ...item, services: (item.services || []).filter(Boolean) }));

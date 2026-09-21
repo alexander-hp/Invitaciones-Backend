@@ -40,7 +40,16 @@ const eventSchema = new mongoose.Schema({
       mapUrl: { type: String, trim: true },
       wazeUrl: { type: String, trim: true },
       notes: { type: String, trim: true },
-      time: { type: String, trim: true }
+      time: { type: String, trim: true },
+      lat: { type: Number, min: -90, max: 90 },
+      lon: { type: Number, min: -180, max: 180 },
+      phone: { type: String, trim: true },
+      websiteUrl: { type: String, trim: true },
+      schedule: [{ type: String, trim: true }],
+      parking: String,
+      transport: String,
+      accessibility: String,
+      priority: { type: Number, default: 0 }
     }],
     sections: [{
       key: { type: String, trim: true },

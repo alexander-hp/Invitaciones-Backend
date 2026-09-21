@@ -53,7 +53,16 @@ const eventBody = z.object({
       mapUrl: z.string().url().optional().or(z.literal('')),
       wazeUrl: z.string().url().optional().or(z.literal('')),
       notes: z.string().optional(),
-      time: z.string().optional()
+      time: z.string().optional(),
+      lat: z.number().min(-90).max(90).optional(),
+      lon: z.number().min(-180).max(180).optional(),
+      phone: z.string().max(40).optional(),
+      websiteUrl: z.string().url().optional().or(z.literal('')),
+      schedule: z.array(z.string().max(160)).max(14).optional(),
+      parking: z.string().max(500).optional(),
+      transport: z.string().max(500).optional(),
+      accessibility: z.string().max(500).optional(),
+      priority: z.number().int().min(0).max(1000).optional()
     }).strict()).max(20).optional(),
     sections: z.array(z.object({
       key: z.string().optional(),
