@@ -10,6 +10,12 @@ const visualLayout = z.object({
   width: z.number().min(1).max(100), height: z.number().min(1).max(100),
   rotation: z.number().min(-360).max(360).optional()
 }).strict();
+const visualModuleStyle = z.object({
+  layout: z.enum(['list', 'grid']).optional(), columns: z.number().int().min(1).max(3).optional(),
+  alignment: z.enum(['left', 'center']).optional(), surface: z.enum(['transparent', 'solid', 'soft']).optional(),
+  cardStyle: z.enum(['none', 'bordered', 'elevated']).optional(), gap: z.number().int().min(4).max(32).optional(),
+  showTitle: z.boolean().optional()
+}).strict();
 const visualDesign = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -31,6 +37,7 @@ const visualDesign = z.object({
     id: z.string().min(1).max(100), type: z.string().min(1).max(80), title: z.string().max(160).optional(),
     enabled: z.boolean(), layout: z.enum(['flow', 'canvas']), height: z.number().int().min(240).max(1600),
     background: z.object({ color: z.string().max(40).optional(), imageUrl: z.string().max(2000).optional(), overlay: z.number().min(0).max(1).optional() }).strict().optional(),
+    moduleStyle: visualModuleStyle.optional(),
     layers: z.array(z.object({
       id: z.string().min(1).max(100), type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape']),
       groupId: z.string().min(1).max(100).optional(),

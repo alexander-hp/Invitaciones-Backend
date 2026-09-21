@@ -177,6 +177,16 @@ const invitationSchema = new mongoose.Schema({
           imageUrl: String,
           overlay: { type: Number, min: 0, max: 1 }
         },
+        moduleStyle: {
+          _id: false,
+          layout: { type: String, enum: ['list', 'grid'] },
+          columns: { type: Number, min: 1, max: 3 },
+          alignment: { type: String, enum: ['left', 'center'] },
+          surface: { type: String, enum: ['transparent', 'solid', 'soft'] },
+          cardStyle: { type: String, enum: ['none', 'bordered', 'elevated'] },
+          gap: { type: Number, min: 4, max: 32 },
+          showTitle: Boolean
+        },
         layers: [{
           _id: false,
           id: { type: String, required: true, trim: true },

@@ -53,6 +53,15 @@ const visualLayerBody = z.object({
   }).strict().optional(),
   style: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional()
 }).strict();
+const visualModuleStyleBody = z.object({
+  layout: z.enum(['list', 'grid']).optional(),
+  columns: z.number().int().min(1).max(3).optional(),
+  alignment: z.enum(['left', 'center']).optional(),
+  surface: z.enum(['transparent', 'solid', 'soft']).optional(),
+  cardStyle: z.enum(['none', 'bordered', 'elevated']).optional(),
+  gap: z.number().int().min(4).max(32).optional(),
+  showTitle: z.boolean().optional()
+}).strict();
 const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -91,6 +100,7 @@ const visualDesignBody = z.object({
       imageUrl: z.string().max(2000).optional(),
       overlay: z.number().min(0).max(1).optional()
     }).strict().optional(),
+    moduleStyle: visualModuleStyleBody.optional(),
     layers: z.array(visualLayerBody).max(100)
   }).strict()).max(50)
 }).strict();
