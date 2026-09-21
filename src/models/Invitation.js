@@ -110,6 +110,7 @@ const invitationSchema = new mongoose.Schema({
       autoApproveEmails: [{ type: String, lowercase: true, trim: true }],
       autoApprovePhones: [{ type: String, trim: true }],
       autoApproveAlbum: { type: Boolean, default: false },
+      autoApproveSongs: { type: Boolean, default: false },
       autoApproveDedications: { type: Boolean, default: false }
     },
     brandLogoUrl: String,

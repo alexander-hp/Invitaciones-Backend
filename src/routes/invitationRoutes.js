@@ -185,6 +185,7 @@ const invitationContentBody = z.object({
     autoApproveEmails: z.array(z.string().email()).max(1000).optional(),
     autoApprovePhones: z.array(z.string().min(6).max(30)).max(1000).optional(),
     autoApproveAlbum: z.boolean().optional(),
+    autoApproveSongs: z.boolean().optional(),
     autoApproveDedications: z.boolean().optional()
   }).strict().optional(),
   brandLogoUrl: z.string().url().or(z.literal('')).optional(),
