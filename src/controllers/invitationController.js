@@ -100,6 +100,9 @@ function publicInvitation(invitation) {
     displayMode: 'grid', showCaptions: true, autoplay: false, intervalSeconds: 5,
     ...(content.gallerySettings || {})
   };
+  content.lodging = (content.lodging || [])
+    .sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0))
+    .map((item) => ({ ...item, services: (item.services || []).filter(Boolean) }));
   content.giftRegistry = (content.giftRegistry || []).sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0));
   content.giftSettings = content.giftSettings || { enabled: true, showRegistry: true, showEnvelope: true };
   content.dedicationSettings = content.dedicationSettings || { enabled: true, requireApproval: true };

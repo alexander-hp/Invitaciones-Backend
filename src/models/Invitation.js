@@ -151,7 +151,18 @@ const invitationSchema = new mongoose.Schema({
     lodging: [{
       name: String,
       description: String,
-      url: String
+      url: String,
+      imageUrl: String,
+      address: String,
+      phone: String,
+      mapUrl: String,
+      agreementLabel: String,
+      discountCode: String,
+      discountDescription: String,
+      priceLabel: String,
+      services: [{ type: String, trim: true }],
+      notes: String,
+      priority: { type: Number, default: 0 }
     }],
     privateAlbum: [String],
     privateAlbumEnabled: { type: Boolean, default: false },

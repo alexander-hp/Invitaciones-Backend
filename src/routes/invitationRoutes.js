@@ -223,10 +223,21 @@ const invitationContentBody = z.object({
     songRequests: z.boolean().optional()
   }).strict().optional(),
   lodging: z.array(z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    url: z.string().url().or(z.literal('')).optional()
-  }).strict()).optional(),
+    name: z.string().max(160).optional(),
+    description: z.string().max(1200).optional(),
+    url: z.string().url().or(z.literal('')).optional(),
+    imageUrl: z.string().url().or(z.literal('')).optional(),
+    address: z.string().max(500).optional(),
+    phone: z.string().max(40).optional(),
+    mapUrl: z.string().url().or(z.literal('')).optional(),
+    agreementLabel: z.string().max(200).optional(),
+    discountCode: z.string().max(100).optional(),
+    discountDescription: z.string().max(500).optional(),
+    priceLabel: z.string().max(200).optional(),
+    services: z.array(z.string().max(120)).max(30).optional(),
+    notes: z.string().max(1000).optional(),
+    priority: z.number().int().min(0).max(1000).optional()
+  }).strict()).max(30).optional(),
   privateAlbum: z.array(z.string()).optional(),
   privateAlbumEnabled: z.boolean().optional(),
   visualDesign: visualDesignBody.optional(),
