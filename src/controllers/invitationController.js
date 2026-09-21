@@ -76,6 +76,15 @@ function publicInvitation(invitation) {
   } else {
     content.sectionMusic = content.sectionMusic || {};
   }
+  if (content.sectionMusicCues && content.sectionMusicCues instanceof Map) {
+    content.sectionMusicCues = Object.fromEntries(content.sectionMusicCues);
+  } else {
+    content.sectionMusicCues = content.sectionMusicCues || {};
+  }
+  content.musicSettings = {
+    playbackMode: 'first_interaction', sectionChangeMode: 'automatic', loop: true,
+    volume: 0.7, startSeconds: 0, ...(content.musicSettings || {})
+  };
   const storedGalleryItems = Array.isArray(content.galleryItems) ? content.galleryItems : [];
   const galleryUrls = (Array.isArray(content.gallery) && content.gallery.length
     ? content.gallery

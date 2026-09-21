@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 
+const musicCueSchema = new mongoose.Schema({
+  startSeconds: { type: Number, min: 0, default: 0 },
+  endSeconds: { type: Number, min: 0 },
+  volume: { type: Number, min: 0, max: 1 },
+  loop: Boolean
+}, { _id: false });
+
 const invitationSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true, index: true },
@@ -38,9 +45,22 @@ const invitationSchema = new mongoose.Schema({
     storyBody: String,
     palette: { primary: String, secondary: String, accent: String },
     musicUrl: String,
+    musicSettings: {
+      playbackMode: { type: String, enum: ['manual', 'first_interaction', 'after_access'], default: 'first_interaction' },
+      sectionChangeMode: { type: String, enum: ['automatic', 'manual'], default: 'automatic' },
+      loop: { type: Boolean, default: true },
+      volume: { type: Number, min: 0, max: 1, default: 0.7 },
+      startSeconds: { type: Number, min: 0, default: 0 },
+      endSeconds: { type: Number, min: 0 }
+    },
     sectionMusic: {
       type: Map,
       of: String,
+      default: {}
+    },
+    sectionMusicCues: {
+      type: Map,
+      of: musicCueSchema,
       default: {}
     },
     coverImageUrl: String,

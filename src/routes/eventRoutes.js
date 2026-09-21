@@ -12,6 +12,20 @@ const { validate, z } = require('../utils/validate');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
+const musicCueBody = z.object({
+  startSeconds: z.number().min(0).max(86400).optional(),
+  endSeconds: z.number().min(0).max(86400).optional(),
+  volume: z.number().min(0).max(1).optional(),
+  loop: z.boolean().optional()
+}).strict().refine((cue) => cue.endSeconds === undefined || cue.startSeconds === undefined || cue.endSeconds > cue.startSeconds, 'El final debe ser mayor al inicio');
+const musicSettingsBody = z.object({
+  playbackMode: z.enum(['manual', 'first_interaction', 'after_access']).optional(),
+  sectionChangeMode: z.enum(['automatic', 'manual']).optional(),
+  loop: z.boolean().optional(),
+  volume: z.number().min(0).max(1).optional(),
+  startSeconds: z.number().min(0).max(86400).optional(),
+  endSeconds: z.number().min(0).max(86400).optional()
+}).strict().refine((settings) => settings.endSeconds === undefined || settings.startSeconds === undefined || settings.endSeconds > settings.startSeconds, 'El final debe ser mayor al inicio');
 const messageTypeBody = z.object({
   confirm: z.boolean().optional(),
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional(),
@@ -40,12 +54,14 @@ const eventBody = z.object({
     carousel: z.array(z.string().url()).max(30).optional(),
     spectacularImages: z.array(z.string().url()).max(30).optional(),
     musicUrl: z.string().url().optional().or(z.literal('')),
+    musicSettings: musicSettingsBody.optional(),
     audioSections: z.array(z.object({
       title: z.string().optional(),
       url: z.string().url(),
       description: z.string().optional()
     }).strict()).max(20).optional(),
     sectionMusic: z.record(z.string(), z.string()).optional(),
+    sectionMusicCues: z.record(z.string(), musicCueBody).optional(),
     locations: z.array(z.object({
       type: z.string().optional(),
       name: z.string().optional(),

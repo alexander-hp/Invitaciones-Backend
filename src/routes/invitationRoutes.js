@@ -17,6 +17,20 @@ const publicInvitationLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 600, 
 const guestAccessLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 2000, standardHeaders: true, legacyHeaders: false, skip: () => env.nodeEnv !== 'production' });
 const albumUploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false, skip: () => env.nodeEnv !== 'production' });
 const optionalHttpUrl = z.string().url().refine((url) => /^https?:\/\//i.test(url), 'URL debe iniciar con http o https').or(z.literal('')).optional();
+const musicCueBody = z.object({
+  startSeconds: z.number().min(0).max(86400).optional(),
+  endSeconds: z.number().min(0).max(86400).optional(),
+  volume: z.number().min(0).max(1).optional(),
+  loop: z.boolean().optional()
+}).strict().refine((cue) => cue.endSeconds === undefined || cue.startSeconds === undefined || cue.endSeconds > cue.startSeconds, 'El final debe ser mayor al inicio');
+const musicSettingsBody = z.object({
+  playbackMode: z.enum(['manual', 'first_interaction', 'after_access']).optional(),
+  sectionChangeMode: z.enum(['automatic', 'manual']).optional(),
+  loop: z.boolean().optional(),
+  volume: z.number().min(0).max(1).optional(),
+  startSeconds: z.number().min(0).max(86400).optional(),
+  endSeconds: z.number().min(0).max(86400).optional()
+}).strict().refine((settings) => settings.endSeconds === undefined || settings.startSeconds === undefined || settings.endSeconds > settings.startSeconds, 'El final debe ser mayor al inicio');
 const visualLayoutBody = z.object({
   x: z.number().min(0).max(100),
   y: z.number().min(0).max(100),
@@ -117,7 +131,9 @@ const invitationContentBody = z.object({
     accent: z.string().optional()
   }).optional(),
   musicUrl: z.string().optional(),
+  musicSettings: musicSettingsBody.optional(),
   sectionMusic: z.record(z.string(), z.string()).optional(),
+  sectionMusicCues: z.record(z.string(), musicCueBody).optional(),
   coverImageUrl: z.string().optional(),
   gallery: z.array(z.string()).optional(),
   galleryItems: z.array(z.object({

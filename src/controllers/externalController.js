@@ -160,8 +160,13 @@ function safeContent(event) {
     carousel: content.carousel || [],
     spectacularImages: content.spectacularImages || [],
     musicUrl: content.musicUrl,
+    musicSettings: {
+      playbackMode: 'first_interaction', sectionChangeMode: 'automatic', loop: true,
+      volume: 0.7, startSeconds: 0, ...(content.musicSettings?.toObject?.() || content.musicSettings || {})
+    },
     audioSections: content.audioSections || [],
     sectionMusic: content.sectionMusic?.toObject ? content.sectionMusic.toObject({ flattenMaps: true }) : (content.sectionMusic || {}),
+    sectionMusicCues: content.sectionMusicCues?.toObject ? content.sectionMusicCues.toObject({ flattenMaps: true }) : (content.sectionMusicCues || {}),
     locations: content.locations?.length ? content.locations : [{
       type: 'principal',
       name: event.venue?.name,
@@ -257,7 +262,7 @@ function assetPayload(event, type) {
   if (type === 'cover') return { coverImageUrl: content.coverImageUrl, heroImageUrl: content.heroImageUrl };
   if (type === 'carousel') return { carousel: content.carousel };
   if (type === 'gallery') return { gallery: content.gallery, spectacularImages: content.spectacularImages };
-  if (type === 'audio') return { musicUrl: content.musicUrl, audioSections: content.audioSections, sectionMusic: content.sectionMusic };
+  if (type === 'audio') return { musicUrl: content.musicUrl, musicSettings: content.musicSettings, audioSections: content.audioSections, sectionMusic: content.sectionMusic, sectionMusicCues: content.sectionMusicCues };
   if (type === 'map') return { locations: content.locations };
   if (type === 'gifts') return { giftRegistry: content.giftRegistry, digitalEnvelope: content.digitalEnvelope, giftSettings: content.giftSettings };
   return content;

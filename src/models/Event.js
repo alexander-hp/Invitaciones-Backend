@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 
+const musicCueSchema = new mongoose.Schema({
+  startSeconds: { type: Number, min: 0, default: 0 },
+  endSeconds: { type: Number, min: 0 },
+  volume: { type: Number, min: 0, max: 1 },
+  loop: Boolean
+}, { _id: false });
+
 const eventSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   mode: { type: String, enum: ['invitation', 'external_dashboard'], default: 'invitation', index: true },
@@ -23,6 +30,14 @@ const eventSchema = new mongoose.Schema({
     carousel: [{ type: String, trim: true }],
     spectacularImages: [{ type: String, trim: true }],
     musicUrl: { type: String, trim: true },
+    musicSettings: {
+      playbackMode: { type: String, enum: ['manual', 'first_interaction', 'after_access'], default: 'first_interaction' },
+      sectionChangeMode: { type: String, enum: ['automatic', 'manual'], default: 'automatic' },
+      loop: { type: Boolean, default: true },
+      volume: { type: Number, min: 0, max: 1, default: 0.7 },
+      startSeconds: { type: Number, min: 0, default: 0 },
+      endSeconds: { type: Number, min: 0 }
+    },
     audioSections: [{
       title: { type: String, trim: true },
       url: { type: String, trim: true },
@@ -31,6 +46,11 @@ const eventSchema = new mongoose.Schema({
     sectionMusic: {
       type: Map,
       of: String,
+      default: {}
+    },
+    sectionMusicCues: {
+      type: Map,
+      of: musicCueSchema,
       default: {}
     },
     locations: [{
