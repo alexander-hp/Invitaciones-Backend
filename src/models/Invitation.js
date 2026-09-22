@@ -246,6 +246,7 @@ const invitationSchema = new mongoose.Schema({
           gap: { type: Number, min: 4, max: 32 },
           showTitle: Boolean
         },
+        pluginSettings: { type: mongoose.Schema.Types.Mixed, default: {} },
         layers: [{
           _id: false,
           id: { type: String, required: true, trim: true },

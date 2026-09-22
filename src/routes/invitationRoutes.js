@@ -76,6 +76,10 @@ const visualModuleStyleBody = z.object({
   gap: z.number().int().min(4).max(32).optional(),
   showTitle: z.boolean().optional()
 }).strict();
+const visualPluginSettingsBody = z.record(
+  z.string().max(80),
+  z.union([z.string().max(1000), z.number(), z.boolean()])
+);
 const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -115,6 +119,7 @@ const visualDesignBody = z.object({
       overlay: z.number().min(0).max(1).optional()
     }).strict().optional(),
     moduleStyle: visualModuleStyleBody.optional(),
+    pluginSettings: visualPluginSettingsBody.optional(),
     layers: z.array(visualLayerBody).max(100)
   }).strict()).max(50)
 }).strict();

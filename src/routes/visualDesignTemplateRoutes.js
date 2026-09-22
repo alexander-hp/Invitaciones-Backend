@@ -16,6 +16,10 @@ const visualModuleStyle = z.object({
   cardStyle: z.enum(['none', 'bordered', 'elevated']).optional(), gap: z.number().int().min(4).max(32).optional(),
   showTitle: z.boolean().optional()
 }).strict();
+const visualPluginSettings = z.record(
+  z.string().max(80),
+  z.union([z.string().max(1000), z.number(), z.boolean()])
+);
 const visualDesign = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -38,6 +42,7 @@ const visualDesign = z.object({
     enabled: z.boolean(), layout: z.enum(['flow', 'canvas']), height: z.number().int().min(240).max(1600),
     background: z.object({ color: z.string().max(40).optional(), imageUrl: z.string().max(2000).optional(), overlay: z.number().min(0).max(1).optional() }).strict().optional(),
     moduleStyle: visualModuleStyle.optional(),
+    pluginSettings: visualPluginSettings.optional(),
     layers: z.array(z.object({
       id: z.string().min(1).max(100), type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape']),
       groupId: z.string().min(1).max(100).optional(),
