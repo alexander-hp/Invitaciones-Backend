@@ -18,7 +18,11 @@ const songRequestSchema = new mongoose.Schema({
   sortOrder: { type: Number, default: 0, index: true },
   status: { type: String, enum: ['pending', 'approved', 'rejected', 'played'], default: 'pending', index: true },
   reviewedAt: Date,
-  playedAt: Date
+  playedAt: Date,
+  promotedAt: Date,
+  promotedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  promotedInvitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation' },
+  promotedTarget: { type: String, trim: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('SongRequest', songRequestSchema);

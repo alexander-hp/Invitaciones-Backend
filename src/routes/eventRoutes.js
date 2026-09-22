@@ -187,6 +187,17 @@ const tableBatchBody = z.object({
 }).passthrough();
 const albumUpdateBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']).optional(), tags: z.array(z.string().trim().min(1).max(50)).optional() }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo');
 const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
+const songPromotionBody = z.object({
+  invitationId: z.string().min(12),
+  target: z.enum(['global', 'hero', 'story', 'locations', 'itinerary', 'dressCode', 'rsvp', 'giftRegistry', 'digitalEnvelope', 'lodging', 'gallery', 'guestAlbum', 'dedications', 'songRequests']),
+  startSeconds: z.number().min(0).max(86400).optional(),
+  endSeconds: z.number().min(0).max(86400).optional(),
+  volume: z.number().min(0).max(1).optional(),
+  loop: z.boolean().optional()
+}).strict().refine((body) => body.endSeconds === undefined || body.endSeconds > (body.startSeconds || 0), {
+  message: 'El final debe ser mayor que el inicio',
+  path: ['endSeconds']
+});
 const songRequestBody = z.object({
   guest: z.string().min(12).optional(),
   requesterName: z.string().min(2).optional(),
@@ -256,8 +267,10 @@ router.delete('/:eventId/tables/:tableId', tableController.remove);
 router.get('/:eventId/album', albumController.list);
 router.patch('/:eventId/album/:assetId', validate(z.object({ body: albumUpdateBody })), albumController.update);
 router.get('/:eventId/song-requests', songRequestController.list);
+router.get('/:eventId/song-requests/promotion-options', songRequestController.promotionOptions);
 router.post('/:eventId/song-requests', validate(z.object({ body: songRequestBody })), songRequestController.create);
 router.post('/:eventId/song-requests/lookup-youtube', songRequestController.lookupYouTube);
+router.post('/:eventId/song-requests/:songRequestId/promote', validate(z.object({ body: songPromotionBody })), songRequestController.promoteToInvitation);
 router.patch('/:eventId/song-requests/:songRequestId', validate(z.object({ body: songRequestStatusBody })), songRequestController.update);
 router.get('/:eventId/dedications', dedicationController.listAdmin);
 router.patch('/:eventId/dedications/:dedicationId', validate(z.object({ body: dedicationStatusBody })), dedicationController.updateAdmin);

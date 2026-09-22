@@ -3,6 +3,7 @@ const Guest = require('../models/Guest');
 const Invitation = require('../models/Invitation');
 const SongRequest = require('../models/SongRequest');
 const asyncHandler = require('../utils/asyncHandler');
+const { requireEventAccess } = require('../utils/eventAccess');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { logEventActivity } = require('../services/eventLogService');
 
@@ -69,20 +70,19 @@ function normalizeSongLookup({ query, url, sourceUrl, title, artist }) {
   };
 }
 
-async function findOwnedEvent(eventId, ownerId) {
-  const event = await Event.findOne({ _id: eventId, owner: ownerId });
-  if (!event) {
-    console.warn(`[SongRequestController] Evento no encontrado o sin permisos: eventId=${eventId}, userId=${ownerId}`);
-    const error = new Error('Evento no encontrado');
-    error.statusCode = 404;
-    throw error;
-  }
+async function findEventWithSongAccess(eventId, user) {
+  const { event } = await requireEventAccess({
+    eventId,
+    user,
+    permission: 'manage_songs',
+    select: '_id owner title externalContent'
+  });
   return event;
 }
 
 exports.list = asyncHandler(async (req, res) => {
   console.log(`[SongRequestController:list] Obteniendo canciones para eventId=${req.params.eventId}`);
-  await findOwnedEvent(req.params.eventId, req.user.id);
+  await findEventWithSongAccess(req.params.eventId, req.user);
   const songRequests = await SongRequest.find({ event: req.params.eventId })
     .populate('guest', 'name group roles relationshipLabel visibilityGroup tableName')
     .sort({ sortOrder: 1, createdAt: -1 });
@@ -90,9 +90,22 @@ exports.list = asyncHandler(async (req, res) => {
   res.json({ songRequests });
 });
 
+exports.promotionOptions = asyncHandler(async (req, res) => {
+  const { event } = await requireEventAccess({
+    eventId: req.params.eventId,
+    user: req.user,
+    permission: 'edit_event',
+    select: '_id'
+  });
+  const invitations = await Invitation.find({ event: event._id })
+    .select('_id slug status content.headline')
+    .sort({ createdAt: 1 });
+  res.json({ invitations });
+});
+
 exports.create = asyncHandler(async (req, res) => {
   console.log(`[SongRequestController:create] Recibiendo petición de canción para eventId=${req.params.eventId}`, req.body);
-  const event = await findOwnedEvent(req.params.eventId, req.user.id);
+  const event = await findEventWithSongAccess(req.params.eventId, req.user);
 
   const songData = normalizeSongLookup(req.validated?.body || req.body);
   const status = req.body.status || 'approved';
@@ -138,7 +151,7 @@ exports.create = asyncHandler(async (req, res) => {
 
 exports.update = asyncHandler(async (req, res) => {
   console.log(`[SongRequestController:update] Actualizando canción requestId=${req.params.songRequestId} en eventId=${req.params.eventId}`, req.body);
-  const event = await findOwnedEvent(req.params.eventId, req.user.id);
+  const event = await findEventWithSongAccess(req.params.eventId, req.user);
   const update = {};
   if (req.validated.body.status) {
     update.status = req.validated.body.status;
@@ -184,6 +197,123 @@ exports.update = asyncHandler(async (req, res) => {
   res.json({ songRequest });
 });
 
+function mapValueToObject(value) {
+  if (value instanceof Map) return Object.fromEntries(value);
+  if (value?.toObject) return value.toObject({ flattenMaps: true });
+  return { ...(value || {}) };
+}
+
+function playableInvitationSource(songRequest) {
+  const sourceUrl = String(songRequest.sourceUrl || '').trim();
+  if (!sourceUrl) {
+    const error = new Error('La canción necesita un enlace de YouTube o un archivo de audio antes de usarla en la invitación');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (songRequest.sourceProvider === 'spotify' || /spotify\.com/i.test(sourceUrl)) {
+    const error = new Error('Spotify sirve como referencia para el DJ, pero no permite reproducir esta canción como fondo. Usa YouTube o sube un archivo de audio.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (/youtube\.com\/results/i.test(sourceUrl) || /[?&]search_query=/i.test(sourceUrl)) {
+    const error = new Error('Selecciona un video concreto de YouTube antes de usar la canción en la invitación');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (/youtu(?:\.be|be\.com)/i.test(sourceUrl) && !getYouTubeId(sourceUrl)) {
+    const error = new Error('El enlace de YouTube no identifica un video reproducible');
+    error.statusCode = 400;
+    throw error;
+  }
+  return sourceUrl;
+}
+
+exports.promoteToInvitation = asyncHandler(async (req, res) => {
+  const { event } = await requireEventAccess({
+    eventId: req.params.eventId,
+    user: req.user,
+    permission: 'edit_event',
+    select: '_id title'
+  });
+  const body = req.validated.body;
+  const [songRequest, invitation] = await Promise.all([
+    SongRequest.findOne({ _id: req.params.songRequestId, event: event._id }),
+    Invitation.findOne({ _id: body.invitationId, event: event._id })
+  ]);
+  if (!songRequest) {
+    const error = new Error('Solicitud de canción no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (!invitation) {
+    const error = new Error('La invitación seleccionada no pertenece a este evento');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const sourceUrl = playableInvitationSource(songRequest);
+  const cue = {
+    startSeconds: body.startSeconds || 0,
+    ...(body.endSeconds !== undefined ? { endSeconds: body.endSeconds } : {}),
+    ...(body.volume !== undefined ? { volume: body.volume } : {}),
+    ...(body.loop !== undefined ? { loop: body.loop } : {})
+  };
+  invitation.content = invitation.content || {};
+  if (body.target === 'global') {
+    invitation.content.musicUrl = sourceUrl;
+    invitation.content.musicSettings = {
+      ...(invitation.content.musicSettings?.toObject?.() || invitation.content.musicSettings || {}),
+      ...cue
+    };
+  } else {
+    invitation.content.sectionMusic = {
+      ...mapValueToObject(invitation.content.sectionMusic),
+      [body.target]: sourceUrl
+    };
+    invitation.content.sectionMusicCues = {
+      ...mapValueToObject(invitation.content.sectionMusicCues),
+      [body.target]: cue
+    };
+  }
+  invitation.markModified('content');
+
+  songRequest.status = 'approved';
+  songRequest.reviewedAt = new Date();
+  songRequest.promotedAt = new Date();
+  songRequest.promotedBy = req.user._id;
+  songRequest.promotedInvitation = invitation._id;
+  songRequest.promotedTarget = body.target;
+
+  await Promise.all([invitation.save(), songRequest.save()]);
+  logEventActivity({
+    eventId: event._id,
+    actor: req.user,
+    actorType: 'user',
+    category: 'music',
+    action: 'song_promoted_to_invitation',
+    description: `Canción usada en la invitación: ${songRequest.title}`,
+    metadata: {
+      songRequestId: songRequest._id,
+      invitationId: invitation._id,
+      target: body.target,
+      sourceProvider: songRequest.sourceProvider,
+      cue
+    }
+  });
+
+  res.json({
+    songRequest,
+    invitation: {
+      id: invitation._id,
+      slug: invitation.slug,
+      status: invitation.status,
+      musicUrl: invitation.content.musicUrl,
+      sectionMusic: mapValueToObject(invitation.content.sectionMusic),
+      sectionMusicCues: mapValueToObject(invitation.content.sectionMusicCues)
+    }
+  });
+});
+
 async function searchYouTubeVideo(query) {
   if (!query) return null;
   try {
@@ -217,6 +347,7 @@ async function searchYouTubeVideo(query) {
 }
 
 exports.lookupYouTube = asyncHandler(async (req, res) => {
+  await findEventWithSongAccess(req.params.eventId, req.user);
   const query = (req.body?.query || req.query?.query || [req.body?.artist, req.body?.title].filter(Boolean).join(' ')).trim();
   const video = await searchYouTubeVideo(query);
   res.json({ video, query });
