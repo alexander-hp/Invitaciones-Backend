@@ -8,6 +8,7 @@ const Template = require('../models/Template');
 const AlbumAsset = require('../models/AlbumAsset');
 const Dedication = require('../models/Dedication');
 const Rsvp = require('../models/Rsvp');
+const SongRequest = require('../models/SongRequest');
 const { getEffectivePlanLimits } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
@@ -15,6 +16,7 @@ const emailService = require('../services/emailService');
 const { logEventActivity } = require('../services/eventLogService');
 const { requireEventAccess } = require('../utils/eventAccess');
 const VisualDesignRevision = require('../models/VisualDesignRevision');
+const { signGuestSession, verifyGuestSessionForEvent } = require('../utils/guestSession');
 
 async function buildUniqueSlug(source) {
   const base = slugify(source || 'invitacion', { lower: true, strict: true });
@@ -148,6 +150,35 @@ function publicGuest(guest) {
     tableName: guest.tableName,
     seatLabel: guest.seatLabel,
     companions: guest.companions || []
+  };
+}
+
+function publicGuestActivity({ guest, rsvp, albumUploads, songRequests, dedications }) {
+  return {
+    guest: publicGuest(guest),
+    rsvp: rsvp ? {
+      id: rsvp._id, response: rsvp.response, companions: rsvp.companions,
+      companionNames: rsvp.companionNames || [], attendingCount: rsvp.attendingCount,
+      customAnswers: rsvp.customAnswers || [], message: rsvp.message,
+      createdAt: rsvp.createdAt, updatedAt: rsvp.updatedAt
+    } : null,
+    albumUploads: albumUploads.map((asset) => ({
+      id: asset._id, url: asset.url, uploaderName: asset.uploaderName,
+      status: asset.status, reviewedAt: asset.reviewedAt,
+      createdAt: asset.createdAt, updatedAt: asset.updatedAt
+    })),
+    songRequests: songRequests.map((song) => ({
+      id: song._id, title: song.title, artist: song.artist, dedication: song.dedication,
+      status: song.status, sourceProvider: song.sourceProvider, sourceUrl: song.sourceUrl,
+      thumbnailUrl: song.thumbnailUrl, previewUrl: song.previewUrl,
+      reviewedAt: song.reviewedAt, playedAt: song.playedAt,
+      createdAt: song.createdAt, updatedAt: song.updatedAt
+    })),
+    dedications: dedications.map((item) => ({
+      id: item._id, publicName: item.publicName, message: item.message,
+      type: item.type, status: item.status, visibility: item.visibility,
+      reviewedAt: item.reviewedAt, createdAt: item.createdAt
+    }))
   };
 }
 
@@ -525,7 +556,8 @@ exports.guestAccess = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  res.json({ guest: publicGuest(guest) });
+  const event = await Event.findById(invitation.event).select('_id');
+  res.json({ guest: publicGuest(guest), guestSessionToken: signGuestSession(event, guest, invitation.slug) });
 });
 
 exports.guestByToken = asyncHandler(async (req, res) => {
@@ -551,5 +583,29 @@ exports.guestByToken = asyncHandler(async (req, res) => {
   if (guest.communicationStatus === 'sent') guest.communicationStatus = 'opened';
   await guest.save();
 
-  res.json({ guest: publicGuest(guest) });
+  const event = await Event.findById(invitation.event).select('_id');
+  res.json({ guest: publicGuest(guest), guestSessionToken: signGuestSession(event, guest, invitation.slug) });
+});
+
+exports.guestActivity = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event slug');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const event = await Event.findById(invitation.event).select('_id');
+  if (!event) {
+    const error = new Error('Evento no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const { guest } = await verifyGuestSessionForEvent(req, event, invitation.slug);
+  const [rsvp, albumUploads, songRequests, dedications] = await Promise.all([
+    Rsvp.findOne({ event: event._id, invitation: invitation._id, guest: guest._id }),
+    AlbumAsset.find({ event: event._id, invitation: invitation._id, guest: guest._id }).sort('-createdAt').limit(100),
+    SongRequest.find({ event: event._id, guest: guest._id, $or: [{ invitation: invitation._id }, { invitation: { $exists: false } }] }).sort('-createdAt').limit(100),
+    Dedication.find({ event: event._id, invitation: invitation._id, guest: guest._id }).sort('-createdAt').limit(100)
+  ]);
+  res.json(publicGuestActivity({ guest, rsvp, albumUploads, songRequests, dedications }));
 });

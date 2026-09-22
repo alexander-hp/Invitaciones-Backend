@@ -25,6 +25,20 @@ function getBearerToken(req) {
 }
 
 async function verifyGuestSession(req, portalSlug) {
+  const event = await Event.findOne({
+    externalPortalSlug: portalSlug,
+    mode: 'external_dashboard',
+    externalPortalEnabled: { $ne: false }
+  });
+  if (!event) {
+    const error = new Error('Portal externo no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  return verifyGuestSessionForEvent(req, event, portalSlug);
+}
+
+async function verifyGuestSessionForEvent(req, event, scope) {
   const token = getBearerToken(req);
   if (!token) {
     const error = new Error('Sesion de invitado requerida');
@@ -41,21 +55,9 @@ async function verifyGuestSession(req, portalSlug) {
     throw error;
   }
 
-  if (payload.portalSlug !== portalSlug) {
+  if (payload.portalSlug !== scope || String(payload.event) !== String(event._id || event)) {
     const error = new Error('Sesion no pertenece a este portal');
     error.statusCode = 403;
-    throw error;
-  }
-
-  const event = await Event.findOne({
-    _id: payload.event,
-    externalPortalSlug: portalSlug,
-    mode: 'external_dashboard',
-    externalPortalEnabled: { $ne: false }
-  });
-  if (!event) {
-    const error = new Error('Portal externo no disponible');
-    error.statusCode = 404;
     throw error;
   }
 
@@ -69,4 +71,4 @@ async function verifyGuestSession(req, portalSlug) {
   return { event, guest };
 }
 
-module.exports = { signGuestSession, verifyGuestSession };
+module.exports = { signGuestSession, verifyGuestSession, verifyGuestSessionForEvent };

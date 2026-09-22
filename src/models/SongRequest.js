@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const songRequestSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true, index: true },
+  invitation: { type: mongoose.Schema.Types.ObjectId, ref: 'Invitation', index: true },
   guest: { type: mongoose.Schema.Types.ObjectId, ref: 'Guest', index: true },
   requesterName: { type: String, trim: true },
   requesterEmail: { type: String, lowercase: true, trim: true },

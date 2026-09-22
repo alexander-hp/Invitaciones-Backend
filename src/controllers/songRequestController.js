@@ -396,7 +396,7 @@ exports.createPublicByInvitation = asyncHandler(async (req, res) => {
 
   const maxRequests = Number(songSettings.maxRequestsPerGuest) > 0 ? Number(songSettings.maxRequestsPerGuest) : 3;
   if (guest) {
-    const count = await SongRequest.countDocuments({ event: event._id, guest: guest._id });
+    const count = await SongRequest.countDocuments({ event: event._id, invitation: invitation._id, guest: guest._id });
     if (count >= maxRequests) {
       const error = new Error(`Has alcanzado el límite máximo de ${maxRequests} canciones permitidas.`);
       error.statusCode = 400;
@@ -427,6 +427,7 @@ exports.createPublicByInvitation = asyncHandler(async (req, res) => {
   const songRequest = new SongRequest({
     owner: event.owner,
     event: event._id,
+    invitation: invitation._id,
     guest: guest?._id,
     requesterName: guest?.name || body.requesterName || 'Invitado',
     requesterEmail: guest?.email || (body.requesterEmail ? String(body.requesterEmail).toLowerCase().trim() : ''),

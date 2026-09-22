@@ -344,6 +344,7 @@ router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object(
   email: z.string().email().optional(),
   phone: z.string().min(6).max(30).optional()
 }).strict().refine((body) => body.email || body.phone, 'Email o telefono requerido') })), controller.guestAccess);
+router.get('/public/:slug/my-status', guestAccessLimiter, controller.guestActivity);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
 router.post('/public/:slug/dedications', publicInvitationLimiter, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
 router.get('/public/:slug/song-requests', publicInvitationLimiter, songRequestController.listPublicByInvitation);
