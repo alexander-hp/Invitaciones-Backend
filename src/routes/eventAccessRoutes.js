@@ -19,8 +19,9 @@ router.patch('/:token/album/:assetId', validate(z.object({ body: z.object({ stat
 router.patch('/:token/song-requests/:songRequestId', validate(z.object({
   body: z.object({
     status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(),
-    sortOrder: z.number().int().optional()
-  }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder')
+    sortOrder: z.number().int().optional(),
+    priority: z.enum(['high', 'normal']).optional()
+  }).strict().refine((body) => body.status || body.sortOrder !== undefined || body.priority, 'Se requiere status, prioridad u orden')
 })), controller.updateSong);
 router.post('/:token/song-requests', validate(z.object({
   body: z.object({

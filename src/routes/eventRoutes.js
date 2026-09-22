@@ -186,7 +186,7 @@ const tableBatchBody = z.object({
   tables: z.array(tableBody).min(1).max(100)
 }).passthrough();
 const albumUpdateBody = z.object({ status: z.enum(['pending', 'approved', 'rejected']).optional(), tags: z.array(z.string().trim().min(1).max(50)).optional() }).strict().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo');
-const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined, 'Se requiere status o sortOrder');
+const songRequestStatusBody = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'played']).optional(), sortOrder: z.number().int().optional(), priority: z.enum(['high', 'normal']).optional() }).strict().refine((body) => body.status || body.sortOrder !== undefined || body.priority, 'Se requiere status, prioridad u orden');
 const songPromotionBody = z.object({
   invitationId: z.string().min(12),
   target: z.enum(['global', 'hero', 'story', 'locations', 'itinerary', 'dressCode', 'rsvp', 'giftRegistry', 'digitalEnvelope', 'lodging', 'gallery', 'guestAlbum', 'dedications', 'songRequests']),

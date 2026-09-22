@@ -5,6 +5,7 @@ const SongRequest = require('../models/SongRequest');
 const asyncHandler = require('../utils/asyncHandler');
 const { requireEventAccess } = require('../utils/eventAccess');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
+const { deriveSongPriority, decorateSongRequest, orderSongRequests } = require('../utils/songQueue');
 const { logEventActivity } = require('../services/eventLogService');
 
 function getYouTubeId(url) {
@@ -87,7 +88,7 @@ exports.list = asyncHandler(async (req, res) => {
     .populate('guest', 'name group roles relationshipLabel visibilityGroup tableName')
     .sort({ sortOrder: 1, createdAt: -1 });
   console.log(`[SongRequestController:list] Encontradas ${songRequests.length} peticiones de canciones`);
-  res.json({ songRequests });
+  res.json({ songRequests: orderSongRequests(songRequests) });
 });
 
 exports.promotionOptions = asyncHandler(async (req, res) => {
@@ -112,6 +113,7 @@ exports.create = asyncHandler(async (req, res) => {
   const requesterName = req.body.requesterName || req.user.name || 'Organizador';
   const requesterEmail = req.body.requesterEmail || req.user.email || '';
   const dedication = req.body.dedication || '';
+  const priority = deriveSongPriority({ requesterName });
 
   const maxOrderDoc = await SongRequest.findOne({ event: event._id }).sort({ sortOrder: -1 }).select('sortOrder');
   const sortOrder = (maxOrderDoc?.sortOrder || 0) + 1;
@@ -129,6 +131,7 @@ exports.create = asyncHandler(async (req, res) => {
     externalId: songData.externalId,
     thumbnailUrl: songData.thumbnailUrl,
     sortOrder,
+    ...priority,
     status,
     reviewedAt: new Date()
   });
@@ -159,6 +162,11 @@ exports.update = asyncHandler(async (req, res) => {
     if (req.validated.body.status === 'played') update.playedAt = new Date();
   }
   if (req.validated.body.sortOrder !== undefined) update.sortOrder = req.validated.body.sortOrder;
+  if (req.validated.body.priority) {
+    update.priority = req.validated.body.priority;
+    update.prioritySource = 'manual';
+    update.priorityReason = 'Definida manualmente';
+  }
   const songRequest = await SongRequest.findOneAndUpdate(
     { _id: req.params.songRequestId, event: req.params.eventId },
     update,
@@ -194,7 +202,7 @@ exports.update = asyncHandler(async (req, res) => {
     metadata: { songRequestId: songRequest._id, title: songRequest.title, artist: songRequest.artist, status: songRequest.status }
   });
 
-  res.json({ songRequest });
+  res.json({ songRequest: decorateSongRequest(songRequest) });
 });
 
 function mapValueToObject(value) {
@@ -404,6 +412,7 @@ exports.createPublicByInvitation = asyncHandler(async (req, res) => {
   }
 
   const songData = normalizeSongLookup(body);
+  const priority = deriveSongPriority({ guest, requesterName: guest?.name || body.requesterName });
   const requireApproval = songSettings.requireApproval !== false;
   const status = initialModerationStatus({
     guest,
@@ -429,6 +438,7 @@ exports.createPublicByInvitation = asyncHandler(async (req, res) => {
     externalId: songData.externalId,
     thumbnailUrl: songData.thumbnailUrl,
     sortOrder,
+    ...priority,
     status,
     reviewedAt: status === 'approved' ? new Date() : undefined
   });
@@ -465,7 +475,7 @@ exports.listPublicByInvitation = asyncHandler(async (req, res) => {
     query.status = 'approved';
   }
   const songRequests = await SongRequest.find(query).sort({ sortOrder: 1, createdAt: -1 });
-  res.json({ songRequests });
+  res.json({ songRequests: orderSongRequests(songRequests) });
 });
 
 exports.lookupYouTubePublic = asyncHandler(async (req, res) => {

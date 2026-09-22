@@ -10,6 +10,7 @@ const SongRequest = require('../models/SongRequest');
 const env = require('../config/env');
 const asyncHandler = require('../utils/asyncHandler');
 const { notifyReviewStatus } = require('../utils/moderation');
+const { deriveSongPriority, decorateSongRequest, orderSongRequests } = require('../utils/songQueue');
 const { logEventActivity } = require('../services/eventLogService');
 
 const s3 = new S3Client({ region: env.awsRegion });
@@ -126,7 +127,7 @@ exports.session = asyncHandler(async (req, res) => {
     rsvps,
     tables,
     albumAssets,
-    songRequests,
+    songRequests: orderSongRequests(songRequests),
     expiresAt: access.expiresAt
   });
 });
@@ -256,6 +257,11 @@ exports.updateSong = asyncHandler(async (req, res) => {
     if (req.validated.body.status === 'played') update.playedAt = new Date();
   }
   if (req.validated.body.sortOrder !== undefined) update.sortOrder = req.validated.body.sortOrder;
+  if (req.validated.body.priority) {
+    update.priority = req.validated.body.priority;
+    update.prioritySource = 'manual';
+    update.priorityReason = 'Definida manualmente';
+  }
   const songRequest = await SongRequest.findOneAndUpdate(
     { _id: req.params.songRequestId, event: access.event },
     update,
@@ -292,7 +298,7 @@ exports.updateSong = asyncHandler(async (req, res) => {
     metadata: { songRequestId: songRequest._id, title: songRequest.title, status: songRequest.status }
   });
 
-  res.json({ songRequest });
+  res.json({ songRequest: decorateSongRequest(songRequest) });
 });
 
 exports.addSong = asyncHandler(async (req, res) => {
@@ -313,7 +319,7 @@ exports.addSong = asyncHandler(async (req, res) => {
   const cleanArtist = (req.validated.body.artist || '').trim();
   const ytId = getYouTubeId(rawUrl);
 
-  let sourceProvider = 'custom';
+  let sourceProvider = /^https?:\/\//i.test(rawUrl) ? 'url' : 'manual';
   let sourceUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl : '';
   let externalId = '';
   let thumbnailUrl = '';
@@ -324,6 +330,9 @@ exports.addSong = asyncHandler(async (req, res) => {
     externalId = ytId;
     thumbnailUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
   }
+
+  const maxOrderDoc = await SongRequest.findOne({ event: event._id }).sort({ sortOrder: -1 }).select('sortOrder');
+  const sortOrder = (maxOrderDoc?.sortOrder || 0) + 1;
 
   const songRequest = await SongRequest.create({
     owner: event.owner,
@@ -336,6 +345,8 @@ exports.addSong = asyncHandler(async (req, res) => {
     sourceUrl,
     externalId,
     thumbnailUrl,
+    sortOrder,
+    ...deriveSongPriority({ requesterName: req.validated.body.requesterName || 'DJ (Cabina)' }),
     status: 'approved',
     reviewedAt: new Date()
   });

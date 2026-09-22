@@ -11,6 +11,7 @@ const dedicationController = require('./dedicationController');
 const env = require('../config/env');
 const { signGuestSession, verifyGuestSession } = require('../utils/guestSession');
 const { initialModerationStatus } = require('../utils/moderation');
+const { deriveSongPriority } = require('../utils/songQueue');
 const { logEventActivity } = require('../services/eventLogService');
 
 function normalizeEmail(email) {
@@ -403,6 +404,9 @@ exports.songRequest = asyncHandler(async (req, res) => {
     kind: 'song',
     requireApproval: event.externalContent?.songRequestSettings?.requireApproval !== false
   });
+  const priority = deriveSongPriority({ guest, requesterName: guest?.name || req.validated.body.requesterName });
+  const maxOrderDoc = await SongRequest.findOne({ event: event._id }).sort({ sortOrder: -1 }).select('sortOrder');
+  const sortOrder = (maxOrderDoc?.sortOrder || 0) + 1;
   const songRequest = await SongRequest.create({
     owner: event.owner,
     event: event._id,
@@ -418,6 +422,8 @@ exports.songRequest = asyncHandler(async (req, res) => {
     thumbnailUrl: lookup.thumbnailUrl,
     previewUrl: lookup.previewUrl,
     durationMs: lookup.durationMs,
+    sortOrder,
+    ...priority,
     status,
     reviewedAt: status === 'approved' ? new Date() : undefined
   });
