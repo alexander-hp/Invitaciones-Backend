@@ -113,7 +113,8 @@ const invitationSchema = new mongoose.Schema({
     dressCodeImageUrl: String,
     dressCodeOptions: [{
       title: { type: String, trim: true },
-      description: { type: String, trim: true }
+      description: { type: String, trim: true },
+      color: { type: String, trim: true }
     }],
     dressCodeWomen: String,
     dressCodeMen: String,

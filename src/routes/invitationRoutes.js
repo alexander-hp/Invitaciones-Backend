@@ -219,7 +219,8 @@ const invitationContentBody = z.object({
   dressCodeImageUrl: z.string().optional(),
   dressCodeOptions: z.array(z.object({
     title: z.string().optional(),
-    description: z.string().optional()
+    description: z.string().optional(),
+    color: z.string().regex(/^#[0-9a-f]{6}$/i).or(z.literal('')).optional()
   })).optional(),
   dressCodeWomen: z.string().optional(),
   dressCodeMen: z.string().optional(),
