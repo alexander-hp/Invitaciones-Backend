@@ -86,7 +86,10 @@ const invitationSchema = new mongoose.Schema({
     itinerary: [{
       time: String,
       title: String,
-      description: String
+      description: String,
+      icon: { type: String, trim: true },
+      locationLabel: { type: String, trim: true },
+      locationUrl: { type: String, trim: true }
     }],
     locations: [{
       type: { type: String, trim: true },

@@ -192,7 +192,10 @@ const invitationContentBody = z.object({
   itinerary: z.array(z.object({
     time: z.string().optional(),
     title: z.string().optional(),
-    description: z.string().optional()
+    description: z.string().optional(),
+    icon: z.string().max(80).optional(),
+    locationLabel: z.string().max(160).optional(),
+    locationUrl: optionalHttpUrl
   }).strict()).optional(),
   locations: z.array(z.object({
     type: z.string().optional(),
