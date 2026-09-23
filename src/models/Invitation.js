@@ -247,6 +247,7 @@ const invitationSchema = new mongoose.Schema({
           showTitle: Boolean
         },
         pluginSettings: { type: mongoose.Schema.Types.Mixed, default: {} },
+        pluginDesign: { type: mongoose.Schema.Types.Mixed, default: {} },
         layers: [{
           _id: false,
           id: { type: String, required: true, trim: true },

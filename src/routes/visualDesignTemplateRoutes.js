@@ -20,6 +20,24 @@ const visualPluginSettings = z.record(
   z.string().max(80),
   z.union([z.string().max(1000), z.number(), z.boolean()])
 );
+const visualPluginPartDesign = z.object({
+  label: z.string().max(160).optional(), placeholder: z.string().max(240).optional(),
+  x: z.number().min(0).max(100).optional(), y: z.number().min(0).max(100).optional(),
+  width: z.number().min(1).max(100).optional(), height: z.number().min(1).max(100).optional(),
+  fontFamily: z.string().max(120).optional(), fontSize: z.number().min(8).max(120).optional(),
+  fontWeight: z.number().int().min(100).max(900).optional(), color: z.string().max(80).optional(),
+  backgroundColor: z.string().max(80).optional(), backgroundImageUrl: z.string().max(2000).optional(),
+  borderColor: z.string().max(80).optional(), borderWidth: z.number().min(0).max(20).optional(),
+  borderRadius: z.number().min(0).max(200).optional(), padding: z.number().min(0).max(80).optional(),
+  textAlign: z.enum(['left', 'center', 'right']).optional(), boxShadow: z.string().max(240).optional(),
+  shape: z.enum(['rectangle', 'pill', 'cloud', 'notebook']).optional(),
+  variant: z.enum(['default', 'cards']).optional(), hidden: z.boolean().optional()
+}).strict();
+const visualPluginDesign = z.object({
+  layout: z.enum(['flow', 'free']).optional(),
+  minHeight: z.number().int().min(240).max(1600).optional(),
+  parts: z.record(z.string().max(80), visualPluginPartDesign).optional()
+}).strict();
 const visualDesign = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -43,6 +61,7 @@ const visualDesign = z.object({
     background: z.object({ color: z.string().max(40).optional(), imageUrl: z.string().max(2000).optional(), overlay: z.number().min(0).max(1).optional() }).strict().optional(),
     moduleStyle: visualModuleStyle.optional(),
     pluginSettings: visualPluginSettings.optional(),
+    pluginDesign: visualPluginDesign.optional(),
     layers: z.array(z.object({
       id: z.string().min(1).max(100), type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape']),
       groupId: z.string().min(1).max(100).optional(),

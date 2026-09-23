@@ -81,6 +81,34 @@ const visualPluginSettingsBody = z.record(
   z.string().max(80),
   z.union([z.string().max(1000), z.number(), z.boolean()])
 );
+const visualPluginPartDesignBody = z.object({
+  label: z.string().max(160).optional(),
+  placeholder: z.string().max(240).optional(),
+  x: z.number().min(0).max(100).optional(),
+  y: z.number().min(0).max(100).optional(),
+  width: z.number().min(1).max(100).optional(),
+  height: z.number().min(1).max(100).optional(),
+  fontFamily: z.string().max(120).optional(),
+  fontSize: z.number().min(8).max(120).optional(),
+  fontWeight: z.number().int().min(100).max(900).optional(),
+  color: z.string().max(80).optional(),
+  backgroundColor: z.string().max(80).optional(),
+  backgroundImageUrl: z.string().max(2000).optional(),
+  borderColor: z.string().max(80).optional(),
+  borderWidth: z.number().min(0).max(20).optional(),
+  borderRadius: z.number().min(0).max(200).optional(),
+  padding: z.number().min(0).max(80).optional(),
+  textAlign: z.enum(['left', 'center', 'right']).optional(),
+  boxShadow: z.string().max(240).optional(),
+  shape: z.enum(['rectangle', 'pill', 'cloud', 'notebook']).optional(),
+  variant: z.enum(['default', 'cards']).optional(),
+  hidden: z.boolean().optional()
+}).strict();
+const visualPluginDesignBody = z.object({
+  layout: z.enum(['flow', 'free']).optional(),
+  minHeight: z.number().int().min(240).max(1600).optional(),
+  parts: z.record(z.string().max(80), visualPluginPartDesignBody).optional()
+}).strict();
 const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -121,6 +149,7 @@ const visualDesignBody = z.object({
     }).strict().optional(),
     moduleStyle: visualModuleStyleBody.optional(),
     pluginSettings: visualPluginSettingsBody.optional(),
+    pluginDesign: visualPluginDesignBody.optional(),
     layers: z.array(visualLayerBody).max(100)
   }).strict()).max(50)
 }).strict();
