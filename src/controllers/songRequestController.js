@@ -7,6 +7,7 @@ const { requireEventAccess } = require('../utils/eventAccess');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { deriveSongPriority, decorateSongRequest, orderSongRequests } = require('../utils/songQueue');
 const { logEventActivity } = require('../services/eventLogService');
+const { verifyGuestSessionForEvent } = require('../utils/guestSession');
 
 function getYouTubeId(url) {
   try {
@@ -477,6 +478,20 @@ exports.listPublicByInvitation = asyncHandler(async (req, res) => {
   }
   const songRequests = await SongRequest.find(query).sort({ sortOrder: 1, createdAt: -1 });
   res.json({ songRequests: orderSongRequests(songRequests) });
+});
+
+exports.removeOwnPendingInvitation = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event slug');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible'); error.statusCode = 404; throw error;
+  }
+  const event = await Event.findById(invitation.event).select('_id');
+  const { guest } = await verifyGuestSessionForEvent(req, event, invitation.slug);
+  const removed = await SongRequest.findOneAndDelete({ _id: req.params.songRequestId, invitation: invitation._id, guest: guest._id, status: 'pending' });
+  if (!removed) {
+    const error = new Error('Solo puedes cancelar canciones pendientes'); error.statusCode = 409; throw error;
+  }
+  res.json({ message: 'Solicitud de cancion cancelada' });
 });
 
 exports.lookupYouTubePublic = asyncHandler(async (req, res) => {

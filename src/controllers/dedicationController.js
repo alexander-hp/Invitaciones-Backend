@@ -3,7 +3,7 @@ const Event = require('../models/Event');
 const Guest = require('../models/Guest');
 const Invitation = require('../models/Invitation');
 const asyncHandler = require('../utils/asyncHandler');
-const { verifyGuestSession } = require('../utils/guestSession');
+const { verifyGuestSession, verifyGuestSessionForEvent } = require('../utils/guestSession');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { requireEventAccess } = require('../utils/eventAccess');
 const { logEventActivity } = require('../services/eventLogService');
@@ -167,6 +167,41 @@ exports.createInvitationPublic = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json({ dedication: publicDedication(dedication) });
+});
+
+exports.updateOwnPendingInvitation = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event slug');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible'); error.statusCode = 404; throw error;
+  }
+  const event = await Event.findById(invitation.event).select('_id');
+  const { guest } = await verifyGuestSessionForEvent(req, event, invitation.slug);
+  const dedication = await Dedication.findOne({ _id: req.params.dedicationId, invitation: invitation._id, guest: guest._id });
+  if (!dedication) {
+    const error = new Error('Dedicatoria no encontrada'); error.statusCode = 404; throw error;
+  }
+  if (dedication.status !== 'pending') {
+    const error = new Error('Solo puedes editar dedicatorias pendientes'); error.statusCode = 409; throw error;
+  }
+  dedication.message = req.validated.body.message;
+  if (req.validated.body.publicName !== undefined) dedication.publicName = req.validated.body.publicName;
+  if (req.validated.body.visibility !== undefined) dedication.visibility = req.validated.body.visibility;
+  await dedication.save();
+  res.json({ dedication: publicDedication(dedication) });
+});
+
+exports.removeOwnPendingInvitation = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event slug');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible'); error.statusCode = 404; throw error;
+  }
+  const event = await Event.findById(invitation.event).select('_id');
+  const { guest } = await verifyGuestSessionForEvent(req, event, invitation.slug);
+  const removed = await Dedication.findOneAndDelete({ _id: req.params.dedicationId, invitation: invitation._id, guest: guest._id, status: 'pending' });
+  if (!removed) {
+    const error = new Error('Solo puedes retirar dedicatorias pendientes'); error.statusCode = 409; throw error;
+  }
+  res.json({ message: 'Dedicatoria retirada' });
 });
 
 exports.listAdmin = asyncHandler(async (req, res) => {

@@ -8,6 +8,7 @@ const emailService = require('../services/emailService');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const { requireEventAccess } = require('../utils/eventAccess');
+const { verifyGuestSessionForEvent } = require('../utils/guestSession');
 
 function normalizeEmail(email) {
   return email ? email.toLowerCase().trim() : '';
@@ -505,6 +506,49 @@ exports.submitPublicEvent = asyncHandler(async (req, res) => {
   });
   await updateGuestStatus(guest, payload.response);
   res.status(statusCode).json({ rsvp, updated: statusCode === 200 });
+});
+
+exports.updateOwnInvitation = asyncHandler(async (req, res) => {
+  const payload = req.validated.body;
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' });
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible'); error.statusCode = 404; throw error;
+  }
+  const event = await Event.findById(invitation.event).select('_id');
+  const { guest } = await verifyGuestSessionForEvent(req, event, invitation.slug);
+  const settings = getRsvpSettings(invitation);
+  if (settings.deadline && new Date(settings.deadline) < new Date()) {
+    const error = new Error('La fecha limite para responder esta vencida'); error.statusCode = 409; throw error;
+  }
+  assertResponseAllowed(payload, settings);
+  const requestedCompanions = Number(payload.companions || (payload.companionNames || []).filter(Boolean).length || 0);
+  const allowedCompanions = allowedCompanionsFor(guest, settings);
+  if (payload.response === 'confirmed' && requestedCompanions > allowedCompanions) {
+    const error = new Error('El numero de acompanantes excede lo permitido'); error.statusCode = 400; throw error;
+  }
+  const existing = await Rsvp.findOne({ invitation: invitation._id, guest: guest._id });
+  if (existing && !settings.allowChangesUntilDeadline) {
+    const error = new Error('Esta invitacion no permite cambiar la respuesta'); error.statusCode = 409; throw error;
+  }
+  const rsvpData = buildRsvpData({ invitation, guest, payload, emailNormalized: normalizeEmail(guest.email) });
+  if (existing && payload.customAnswers === undefined) rsvpData.customAnswers = existing.customAnswers || [];
+  await assertInvitationCapacity(invitation, existing, rsvpData.attendingCount, settings);
+  const rsvp = await Rsvp.findOneAndUpdate(
+    { invitation: invitation._id, guest: guest._id },
+    rsvpData,
+    { new: true, upsert: true, setDefaultsOnInsert: true }
+  );
+  await createRsvpActivity({
+    invitation,
+    guest,
+    rsvp,
+    action: existing ? 'updated' : payload.response,
+    previous: snapshotRsvp(existing),
+    next: snapshotRsvp(rsvp),
+    metadata: { source: 'guest_activity_center' }
+  });
+  await updateGuestStatus(guest, payload.response);
+  res.json({ rsvp, updated: Boolean(existing) });
 });
 
 exports.listByEvent = asyncHandler(async (req, res) => {

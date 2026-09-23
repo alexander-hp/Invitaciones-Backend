@@ -5,6 +5,7 @@ const albumController = require('../controllers/albumController');
 const controller = require('../controllers/invitationController');
 const dedicationController = require('../controllers/dedicationController');
 const songRequestController = require('../controllers/songRequestController');
+const rsvpController = require('../controllers/rsvpController');
 const visualDesignRevisionController = require('../controllers/visualDesignRevisionController');
 const { protect } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
@@ -345,6 +346,21 @@ router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object(
   phone: z.string().min(6).max(30).optional()
 }).strict().refine((body) => body.email || body.phone, 'Email o telefono requerido') })), controller.guestAccess);
 router.get('/public/:slug/my-status', guestAccessLimiter, controller.guestActivity);
+router.patch('/public/:slug/my-status/rsvp', guestAccessLimiter, validate(z.object({ body: z.object({
+  response: z.enum(['confirmed', 'declined', 'maybe']),
+  companions: z.number().int().min(0).max(50).optional(),
+  companionNames: z.array(z.string().trim().min(1).max(120)).max(50).optional(),
+  message: z.string().max(1000).optional(),
+  declineConfirmed: z.boolean().optional()
+}).strict() })), rsvpController.updateOwnInvitation);
+router.delete('/public/:slug/my-status/album/:assetId', guestAccessLimiter, albumController.removeOwnPendingInvitationAsset);
+router.delete('/public/:slug/my-status/song/:songRequestId', guestAccessLimiter, songRequestController.removeOwnPendingInvitation);
+router.patch('/public/:slug/my-status/dedication/:dedicationId', guestAccessLimiter, validate(z.object({ body: z.object({
+  publicName: z.string().trim().min(2).max(120).optional(),
+  message: z.string().trim().min(2).max(1000),
+  visibility: z.enum(['public', 'hosts_only']).optional()
+}).strict() })), dedicationController.updateOwnPendingInvitation);
+router.delete('/public/:slug/my-status/dedication/:dedicationId', guestAccessLimiter, dedicationController.removeOwnPendingInvitation);
 router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
 router.post('/public/:slug/dedications', publicInvitationLimiter, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
 router.get('/public/:slug/song-requests', publicInvitationLimiter, songRequestController.listPublicByInvitation);

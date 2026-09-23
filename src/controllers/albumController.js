@@ -1,4 +1,4 @@
-const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
+const { DeleteObjectCommand, PutObjectCommand, S3Client } = require('@aws-sdk/client-s3');
 const AlbumAsset = require('../models/AlbumAsset');
 const Event = require('../models/Event');
 const Guest = require('../models/Guest');
@@ -7,7 +7,7 @@ const User = require('../models/User');
 const env = require('../config/env');
 const { assertEffectivePlanFeature } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
-const { verifyGuestSession } = require('../utils/guestSession');
+const { verifyGuestSession, verifyGuestSessionForEvent } = require('../utils/guestSession');
 const { initialModerationStatus, notifyReviewStatus } = require('../utils/moderation');
 const { requireEventAccess } = require('../utils/eventAccess');
 const { logEventActivity } = require('../services/eventLogService');
@@ -63,7 +63,10 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
 
   let guest = null;
   const email = req.body.email ? String(req.body.email).toLowerCase().trim() : '';
-  if (req.body.guest) {
+  if (req.get('authorization')) {
+    const session = await verifyGuestSessionForEvent(req, event, invitation.slug);
+    guest = session.guest;
+  } else if (req.body.guest) {
     guest = await Guest.findOne({ _id: req.body.guest, event: invitation.event }).select('_id name email phone group roles visibilityGroup');
   } else if (email) {
     guest = await Guest.findOne({ email, event: invitation.event }).select('_id name email phone group roles visibilityGroup');
@@ -82,7 +85,7 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
     invitation: invitation._id,
     guest: guest?._id,
     uploaderName: req.body.name || guest?.name,
-    uploaderEmail: email || guest?.email,
+    uploaderEmail: guest?.email || email,
     key: upload.key,
     url: upload.url,
     status,
@@ -100,6 +103,27 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json({ asset: { id: asset._id, status: asset.status } });
+});
+
+exports.removeOwnPendingInvitationAsset = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('_id event slug');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible'); error.statusCode = 404; throw error;
+  }
+  const event = await Event.findById(invitation.event).select('_id');
+  const { guest } = await verifyGuestSessionForEvent(req, event, invitation.slug);
+  const asset = await AlbumAsset.findOne({ _id: req.params.assetId, invitation: invitation._id, guest: guest._id });
+  if (!asset) {
+    const error = new Error('Foto no encontrada'); error.statusCode = 404; throw error;
+  }
+  if (asset.status !== 'pending') {
+    const error = new Error('Solo puedes retirar fotografias pendientes'); error.statusCode = 409; throw error;
+  }
+  if (env.s3Bucket && asset.key) {
+    try { await s3.send(new DeleteObjectCommand({ Bucket: env.s3Bucket, Key: asset.key })); } catch (error) { console.warn('Pending album asset cleanup failed:', error.message); }
+  }
+  await AlbumAsset.deleteOne({ _id: asset._id });
+  res.json({ message: 'Fotografia retirada' });
 });
 
 exports.uploadPublicEvent = asyncHandler(async (req, res) => {
