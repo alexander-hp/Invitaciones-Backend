@@ -69,6 +69,7 @@ const invitationSchema = new mongoose.Schema({
       _id: false,
       id: { type: String, trim: true },
       url: { type: String, required: true, trim: true },
+      featured: { type: Boolean, default: false },
       title: { type: String, trim: true },
       description: String,
       dedication: String,

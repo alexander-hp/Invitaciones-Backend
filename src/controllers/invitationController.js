@@ -97,6 +97,7 @@ function publicInvitation(invitation) {
     return {
       id: saved.id || `gallery-${index + 1}`,
       url,
+      featured: Boolean(saved.featured),
       title: saved.title || '',
       description: saved.description || '',
       dedication: saved.dedication || '',

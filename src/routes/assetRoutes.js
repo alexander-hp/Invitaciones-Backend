@@ -35,6 +35,7 @@ const imageSearchQuery = z.object({
 }).strict();
 
 router.post('/inspect-url', protect, validate(z.object({ body: inspectUrlBody })), controller.inspectUrl);
+router.get('/export-image', protect, validate(z.object({ query: z.object({ url: z.string().url() }).strict() })), controller.exportImage);
 router.post('/upload-url', protect, validate(z.object({ body: uploadUrlBody })), controller.createUploadUrl);
 router.get('/search-images', protect, validate(z.object({ query: imageSearchQuery })), controller.searchImages);
 router.post('/track-web-image', protect, validate(z.object({ body: z.object({ downloadLocation: z.string().url() }).strict() })), controller.trackWebImage);

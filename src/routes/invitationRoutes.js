@@ -175,6 +175,7 @@ const invitationContentBody = z.object({
   galleryItems: z.array(z.object({
     id: z.string().max(100).optional(),
     url: z.string().url().or(z.literal('')),
+    featured: z.boolean().optional(),
     title: z.string().max(160).optional(),
     description: z.string().max(1000).optional(),
     dedication: z.string().max(1000).optional(),

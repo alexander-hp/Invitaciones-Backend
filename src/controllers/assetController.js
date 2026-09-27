@@ -147,6 +147,45 @@ async function fetchUrlMetadata(url) {
   return response;
 }
 
+function isTrustedExportImageUrl(value) {
+  const parsed = new URL(value);
+  if (parsed.protocol !== 'https:') return false;
+  const allowedHosts = new Set();
+  if (env.mediaPublicBaseUrl) {
+    try { allowedHosts.add(new URL(env.mediaPublicBaseUrl).hostname.toLowerCase()); } catch (_error) { /* Invalid optional base URL. */ }
+  }
+  if (env.s3Bucket) {
+    allowedHosts.add(`${env.s3Bucket}.s3.amazonaws.com`.toLowerCase());
+    allowedHosts.add(`${env.s3Bucket}.s3.${env.awsRegion}.amazonaws.com`.toLowerCase());
+  }
+  return allowedHosts.has(parsed.hostname.toLowerCase());
+}
+
+exports.exportImage = asyncHandler(async (req, res) => {
+  const url = String(req.validated.query.url || '').trim();
+  if (!isTrustedExportImageUrl(url)) {
+    const error = new Error('La imagen no pertenece al almacenamiento configurado');
+    error.statusCode = 400;
+    throw error;
+  }
+  const response = await fetch(url, { redirect: 'error', headers: { 'User-Agent': 'KyndraSoft-Export/1.0' } });
+  const contentType = normalizeContentType(response.headers.get('content-type'));
+  const contentLength = Number(response.headers.get('content-length') || 0);
+  if (!response.ok || !IMAGE_TYPES.has(contentType) || contentLength > MAX_IMAGE_SIZE) {
+    const error = new Error('No fue posible preparar la imagen para exportación');
+    error.statusCode = 400;
+    throw error;
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+  if (buffer.length > MAX_IMAGE_SIZE) {
+    const error = new Error('La imagen supera el límite permitido');
+    error.statusCode = 413;
+    throw error;
+  }
+  res.set('Cache-Control', 'private, max-age=300');
+  res.type(contentType).send(buffer);
+});
+
 exports.inspectUrl = asyncHandler(async (req, res) => {
   const url = String(req.validated.body.url || '').trim();
   const parsed = new URL(url);
