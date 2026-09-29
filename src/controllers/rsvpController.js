@@ -331,7 +331,7 @@ function guestMatchesSpecificRules(guest, settings) {
   const groups = [guest.group, guest.visibilityGroup].map((value) => String(value || '').trim()).filter(Boolean);
   return (
     (email && settings.allowedEmails.includes(email)) ||
-    (phone && settings.allowedPhones.some((allowed) => phone.endsWith(allowed) || allowed.endsWith(phone))) ||
+    (phone.length >= 10 && settings.allowedPhones.some((allowed) => allowed.length >= 10 && phone.slice(-10) === allowed.slice(-10))) ||
     roles.some((role) => settings.allowedRoles.includes(role)) ||
     groups.some((group) => settings.allowedGroups.includes(group))
   );
@@ -392,6 +392,14 @@ exports.submitPublic = asyncHandler(async (req, res) => {
     const error = new Error('Esta invitacion esta disponible solo para usuarios especificos');
     error.statusCode = 403;
     throw error;
+  }
+  if (privateAccess) {
+    const session = await verifyGuestSessionForEvent(req, invitation.event, invitation.slug);
+    if (String(session.guest._id) !== String(guest._id)) {
+      const error = new Error('El pase no corresponde a este invitado');
+      error.statusCode = 403;
+      throw error;
+    }
   }
 
   const requestedCompanions = Number(payload.companions || (payload.companionNames || []).filter(Boolean).length || 0);

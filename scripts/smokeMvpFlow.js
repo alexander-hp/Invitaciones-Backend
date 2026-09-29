@@ -110,6 +110,8 @@ async function main() {
   const invitationId = idOf(invitation);
   if (!invitationId || !invitation.slug) throw new Error('Create invitation did not return id/slug');
   console.log('[smoke:mvp] invitation created');
+  await request(`/invitations/public/${invitation.slug}`, { expected: [404] });
+  await request(`/invitations/public/${eventId}`, { expected: [404] });
 
   const guestEmail = `guest.${runId}@example.com`;
   const guestResult = await request('/guests', {
@@ -131,25 +133,29 @@ async function main() {
   await request(`/invitations/${invitationId}/publish`, { method: 'POST', token });
   console.log('[smoke:mvp] invitation published');
 
-  const publicInvitation = await request(`/invitations/public/${invitation.slug}`);
-  assertPublicInvitationPayload(publicInvitation.invitation);
-  console.log('[smoke:mvp] public invitation loads with safe payload');
+  await request(`/invitations/public/${invitation.slug}`, { expected: [401] });
+  await request(`/invitations/public/${invitation.slug}/album`, { expected: [401] });
+  await request(`/invitations/public/${invitation.slug}/dedications`, { expected: [401] });
+  await request(`/invitations/public/${invitation.slug}/song-requests`, { expected: [401] });
+  console.log('[smoke:mvp] restricted invitation requires a personal session');
 
   const access = await request(`/invitations/public/${invitation.slug}/guest-access`, {
     method: 'POST',
-    body: { email: guestEmail }
+    body: { email: `unknown.${runId}@example.com` }
   });
-  if (!access.guest?.id) throw new Error('Guest access did not return guest id');
-  console.log('[smoke:mvp] guest access ok');
+  if (!access.message || access.guest || access.guestSessionToken) throw new Error('Contact lookup exposed guest data');
+  console.log('[smoke:mvp] contact lookup does not expose guest data');
 
   const tokenAccess = await request(`/invitations/public/${invitation.slug}/guest-token/${guestResult.guest.invitationToken}`);
-  if (tokenAccess.guest?.id !== access.guest.id) throw new Error('Guest token access did not resolve the expected guest');
+  if (tokenAccess.guest?.id !== guestId || !tokenAccess.guestSessionToken) throw new Error('Guest token access did not resolve the expected guest');
+  const publicInvitation = await request(`/invitations/public/${invitation.slug}`, { token: tokenAccess.guestSessionToken });
+  assertPublicInvitationPayload(publicInvitation.invitation);
   console.log('[smoke:mvp] personalized guest token ok');
 
   const rsvpPayload = {
-    guest: access.guest.id,
-    name: access.guest.name,
-    email: access.guest.email,
+    guest: tokenAccess.guest.id,
+    name: tokenAccess.guest.name,
+    email: tokenAccess.guest.email,
     response: 'confirmed',
     companions: 1,
     companionNames: ['Smoke Plus One'],
@@ -159,9 +165,17 @@ async function main() {
     ],
     message: 'Smoke RSVP confirmed'
   };
+  await request(`/rsvps/public/${invitation.slug}`, { method: 'POST', body: rsvpPayload, expected: [401] });
+  await request(`/invitations/public/${invitation.slug}/dedications`, {
+    method: 'POST', body: { publicName: 'Smoke Guest', message: 'Private message' }, expected: [401]
+  });
+  await request(`/invitations/public/${invitation.slug}/song-requests`, {
+    method: 'POST', body: { title: 'Private song' }, expected: [401]
+  });
   const rsvpResult = await request(`/rsvps/public/${invitation.slug}`, {
     method: 'POST',
     expected: [201, 200],
+    token: tokenAccess.guestSessionToken,
     body: rsvpPayload
   });
   if (!idOf(rsvpResult.rsvp)) throw new Error('RSVP did not return id');
@@ -170,6 +184,7 @@ async function main() {
   const updatedRsvp = await request(`/rsvps/public/${invitation.slug}`, {
     method: 'POST',
     expected: [200],
+    token: tokenAccess.guestSessionToken,
     body: { ...rsvpPayload, message: 'Smoke RSVP updated' }
   });
   if (!updatedRsvp.updated) throw new Error('Duplicate RSVP did not update existing RSVP');
@@ -184,6 +199,17 @@ async function main() {
   const dashboard = await request('/dashboard/summary', { token });
   if (!dashboard.metrics || dashboard.metrics.events < 1) throw new Error('Dashboard metrics missing or invalid');
   console.log('[smoke:mvp] dashboard metrics ok');
+
+  const otherGuest = await request('/guests', {
+    method: 'POST', token, expected: [201],
+    body: { event: eventId, name: 'Other Guest', email: `other.${runId}@example.com` }
+  });
+  await request(`/invitations/${invitationId}`, {
+    method: 'PATCH', token, body: { accessMode: 'specific_users', rsvpSettings: { allowedGuestIds: [guestId] } }
+  });
+  await request(`/invitations/public/${invitation.slug}`, { token: tokenAccess.guestSessionToken });
+  await request(`/invitations/public/${invitation.slug}/guest-token/${otherGuest.guest.invitationToken}`, { expected: [403] });
+  console.log('[smoke:mvp] specific-user access enforced');
   console.log('[smoke:mvp] PASS');
 }
 

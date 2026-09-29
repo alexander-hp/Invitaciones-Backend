@@ -33,8 +33,8 @@ const musicSettingsBody = z.object({
   endSeconds: z.number().min(0).max(86400).optional()
 }).strict().refine((settings) => settings.endSeconds === undefined || settings.startSeconds === undefined || settings.endSeconds > settings.startSeconds, 'El final debe ser mayor al inicio');
 const visualLayoutBody = z.object({
-  x: z.number().min(0).max(100),
-  y: z.number().min(0).max(100),
+  x: z.number().min(-100).max(200),
+  y: z.number().min(-10000).max(10000),
   width: z.number().min(1).max(100),
   height: z.number().min(1).max(100),
   rotation: z.number().min(-360).max(360).optional()
@@ -48,8 +48,8 @@ const visualLayerBody = z.object({
   placeholder: z.string().max(240).optional(),
   url: z.string().max(2000).optional(),
   binding: z.string().max(100).optional(),
-  x: z.number().min(0).max(100),
-  y: z.number().min(0).max(100),
+  x: z.number().min(-100).max(200),
+  y: z.number().min(-10000).max(10000),
   width: z.number().min(1).max(100),
   height: z.number().min(1).max(100),
   rotation: z.number().min(-360).max(360).optional(),
@@ -57,7 +57,7 @@ const visualLayerBody = z.object({
   locked: z.boolean().optional(),
   hidden: z.boolean().optional(),
   animation: z.object({
-    type: z.enum(['none', 'fade', 'slide-up', 'slide-left', 'zoom', 'float']),
+    type: z.enum(['none', 'fade', 'slide-up', 'slide-left', 'slide-right', 'zoom', 'float', 'pulse', 'bounce']),
     duration: z.number().min(0.2).max(10).optional(),
     delay: z.number().min(0).max(10).optional(),
     repeat: z.boolean().optional()
@@ -114,6 +114,7 @@ const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
   mode: z.enum(['easy', 'advanced']),
+  presentationMode: z.enum(['continuous', 'chapters']).optional(),
   responsiveMode: z.enum(['shared', 'independent']).optional(),
   theme: z.object({
     backgroundColor: z.string().max(40),
@@ -326,7 +327,7 @@ const rsvpSettingsBody = z.object({
   allowedRoles: z.array(z.string().min(1)).max(50).optional(),
   allowedGroups: z.array(z.string().min(1)).max(100).optional(),
   allowedEmails: z.array(z.string().email()).max(1000).optional(),
-  allowedPhones: z.array(z.string().min(6).max(30)).max(1000).optional(),
+  allowedPhones: z.array(z.string().min(10).max(30)).max(1000).optional(),
   customQuestions: z.array(z.object({
     key: z.string().min(1).optional(),
     label: z.string().min(1),
@@ -373,10 +374,10 @@ const dedicationBody = z.object({
 }).strict();
 
 router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
-router.get('/public/:slug/album', publicInvitationLimiter, albumController.publicApproved);
-router.get('/public/:slug/dedications', publicInvitationLimiter, dedicationController.listInvitationPublic);
+router.get('/public/:slug/album', publicInvitationLimiter, controller.requirePublicAccess, albumController.publicApproved);
+router.get('/public/:slug/dedications', publicInvitationLimiter, controller.requirePublicAccess, dedicationController.listInvitationPublic);
 router.get('/public/:slug/guest-token/:token', guestAccessLimiter, controller.guestByToken);
-router.post('/public/:slug/guest-access', guestAccessLimiter, validate(z.object({ body: z.object({
+router.post('/public/:slug/guest-access', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false }), validate(z.object({ body: z.object({
   email: z.string().email().optional(),
   phone: z.string().min(6).max(30).optional()
 }).strict().refine((body) => body.email || body.phone, 'Email o telefono requerido') })), controller.guestAccess);
@@ -396,11 +397,11 @@ router.patch('/public/:slug/my-status/dedication/:dedicationId', guestAccessLimi
   visibility: z.enum(['public', 'hosts_only']).optional()
 }).strict() })), dedicationController.updateOwnPendingInvitation);
 router.delete('/public/:slug/my-status/dedication/:dedicationId', guestAccessLimiter, dedicationController.removeOwnPendingInvitation);
-router.post('/public/:slug/album-upload', albumUploadLimiter, upload.single('file'), albumController.uploadPublic);
-router.post('/public/:slug/dedications', publicInvitationLimiter, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
-router.get('/public/:slug/song-requests', publicInvitationLimiter, songRequestController.listPublicByInvitation);
-router.post('/public/:slug/song-requests', publicInvitationLimiter, validate(z.object({ body: publicSongRequestBody })), songRequestController.createPublicByInvitation);
-router.post('/public/:slug/song-lookup', publicInvitationLimiter, songRequestController.lookupYouTubePublic);
+router.post('/public/:slug/album-upload', albumUploadLimiter, controller.requirePublicAccess, upload.single('file'), albumController.uploadPublic);
+router.post('/public/:slug/dedications', publicInvitationLimiter, controller.requirePublicAccess, validate(z.object({ body: dedicationBody })), dedicationController.createInvitationPublic);
+router.get('/public/:slug/song-requests', publicInvitationLimiter, controller.requirePublicAccess, songRequestController.listPublicByInvitation);
+router.post('/public/:slug/song-requests', publicInvitationLimiter, controller.requirePublicAccess, validate(z.object({ body: publicSongRequestBody })), songRequestController.createPublicByInvitation);
+router.post('/public/:slug/song-lookup', publicInvitationLimiter, controller.requirePublicAccess, songRequestController.lookupYouTubePublic);
 
 router.use(protect);
 router.get('/', controller.list);

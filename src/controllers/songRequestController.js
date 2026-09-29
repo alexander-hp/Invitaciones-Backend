@@ -386,14 +386,8 @@ exports.createPublicByInvitation = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  let guest = null;
+  const guest = req.publicGuest || null;
   const body = req.validated?.body || req.body || {};
-  if (body.guest) {
-    guest = await Guest.findOne({ _id: body.guest, event: event._id });
-  } else if (body.requesterEmail || body.email) {
-    const email = String(body.requesterEmail || body.email).toLowerCase().trim();
-    guest = await Guest.findOne({ email, event: event._id });
-  }
 
   const maxRequests = Number(songSettings.maxRequestsPerGuest) > 0 ? Number(songSettings.maxRequestsPerGuest) : 3;
   if (guest) {
@@ -468,14 +462,7 @@ exports.listPublicByInvitation = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const query = { event: invitation.event };
-  if (req.query.guest) {
-    query.guest = req.query.guest;
-  } else if (req.query.email) {
-    query.requesterEmail = String(req.query.email).toLowerCase().trim();
-  } else {
-    query.status = 'approved';
-  }
+  const query = { event: invitation.event, status: 'approved' };
   const songRequests = await SongRequest.find(query).sort({ sortOrder: 1, createdAt: -1 });
   res.json({ songRequests: orderSongRequests(songRequests) });
 });

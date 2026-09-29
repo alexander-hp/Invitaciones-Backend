@@ -204,6 +204,7 @@ const invitationSchema = new mongoose.Schema({
       version: { type: Number, default: 1 },
       active: { type: Boolean, default: false },
       mode: { type: String, enum: ['easy', 'advanced'], default: 'easy' },
+      presentationMode: { type: String, enum: ['continuous', 'chapters'], default: 'continuous' },
       responsiveMode: { type: String, enum: ['shared', 'independent'], default: 'shared' },
       theme: {
         _id: false,
@@ -263,8 +264,8 @@ const invitationSchema = new mongoose.Schema({
           placeholder: String,
           url: String,
           binding: String,
-          x: { type: Number, min: 0, max: 100 },
-          y: { type: Number, min: 0, max: 100 },
+          x: { type: Number, min: -100, max: 200 },
+          y: { type: Number, min: -10000, max: 10000 },
           width: { type: Number, min: 1, max: 100 },
           height: { type: Number, min: 1, max: 100 },
           rotation: { type: Number, min: -360, max: 360 },
@@ -273,7 +274,7 @@ const invitationSchema = new mongoose.Schema({
           hidden: { type: Boolean, default: false },
           animation: {
             _id: false,
-            type: { type: String, enum: ['none', 'fade', 'slide-up', 'slide-left', 'zoom', 'float'], default: 'none' },
+            type: { type: String, enum: ['none', 'fade', 'slide-up', 'slide-left', 'slide-right', 'zoom', 'float', 'pulse', 'bounce'], default: 'none' },
             duration: { type: Number, min: 0.2, max: 10 },
             delay: { type: Number, min: 0, max: 10 },
             repeat: Boolean

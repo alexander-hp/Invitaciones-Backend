@@ -51,7 +51,7 @@ async function uploadAlbumFile(file, ownerId, eventId) {
 }
 
 exports.uploadPublic = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('owner event content');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('owner event slug content');
   if (!invitation || !invitation.content?.privateAlbumEnabled) {
     const error = new Error('Album no disponible');
     error.statusCode = 404;
@@ -61,16 +61,8 @@ exports.uploadPublic = asyncHandler(async (req, res) => {
   const event = await Event.findById(invitation.event).select('_id plan planExpiresAt');
   assertEffectivePlanFeature(owner, event, 'guestAlbum', 'El album colaborativo requiere Evento Individual o Pro');
 
-  let guest = null;
+  const guest = req.publicGuest || null;
   const email = req.body.email ? String(req.body.email).toLowerCase().trim() : '';
-  if (req.get('authorization')) {
-    const session = await verifyGuestSessionForEvent(req, event, invitation.slug);
-    guest = session.guest;
-  } else if (req.body.guest) {
-    guest = await Guest.findOne({ _id: req.body.guest, event: invitation.event }).select('_id name email phone group roles visibilityGroup');
-  } else if (email) {
-    guest = await Guest.findOne({ email, event: invitation.event }).select('_id name email phone group roles visibilityGroup');
-  }
 
   const upload = await uploadAlbumFile(req.file, invitation.owner, invitation.event);
   const status = initialModerationStatus({

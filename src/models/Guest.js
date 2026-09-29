@@ -26,6 +26,7 @@ const guestSchema = new mongoose.Schema({
   personalizedLinkGeneratedAt: Date,
   invitationOpenedAt: Date,
   lastLinkCopiedAt: Date,
+  lastAccessLinkSentAt: Date,
   qrCode: String,
   checkInCode: { type: String, unique: true, sparse: true, index: true },
   checkedIn: { type: Boolean, default: false },

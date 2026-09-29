@@ -6,7 +6,10 @@ function validate(schema) {
     if (!result.success) {
       const error = new Error('Datos invalidos');
       error.statusCode = 400;
-      error.details = result.error.flatten();
+      error.details = {
+        ...result.error.flatten(),
+        issues: result.error.issues.map((issue) => ({ path: issue.path, message: issue.message }))
+      };
       return next(error);
     }
     req.validated = result.data;

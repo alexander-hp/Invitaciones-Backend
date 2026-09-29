@@ -1,5 +1,5 @@
 const CustomTemplateSubmission = require('../models/CustomTemplateSubmission');
-const mongoose = require('mongoose');
+const crypto = require('crypto');
 const slugify = require('slugify');
 const Invitation = require('../models/Invitation');
 const Event = require('../models/Event');
@@ -13,6 +13,7 @@ const { getEffectivePlanLimits } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
 const env = require('../config/env');
 const emailService = require('../services/emailService');
+const whatsappService = require('../services/whatsappService');
 const { logEventActivity } = require('../services/eventLogService');
 const { requireEventAccess } = require('../utils/eventAccess');
 const VisualDesignRevision = require('../models/VisualDesignRevision');
@@ -190,15 +191,16 @@ function normalizePhoneDigits(value) {
 async function findGuestByPublicIdentity(eventId, { email, phone }) {
   const emailNormalized = email ? email.toLowerCase().trim() : '';
   if (emailNormalized) {
-    const guest = await Guest.findOne({ event: eventId, email: emailNormalized }).select('name email phone group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+    const guest = await Guest.findOne({ event: eventId, email: emailNormalized }).select('name email phone invitationToken lastAccessLinkSentAt group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
     if (guest) return guest;
   }
   const phoneDigits = normalizePhoneDigits(phone);
   if (!phoneDigits) return null;
-  const candidates = await Guest.find({ event: eventId, phone: { $exists: true, $ne: '' } }).select('name email phone group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+  if (phoneDigits.length < 10) return null;
+  const candidates = await Guest.find({ event: eventId, phone: { $exists: true, $ne: '' } }).select('name email phone invitationToken lastAccessLinkSentAt group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
   return candidates.find((guest) => {
     const stored = normalizePhoneDigits(guest.phone);
-    return stored && (stored.endsWith(phoneDigits) || phoneDigits.endsWith(stored));
+    return stored && stored.slice(-10) === phoneDigits.slice(-10);
   }) || null;
 }
 
@@ -216,7 +218,7 @@ function guestMatchesSpecificRules(guest, rsvpSettings = {}) {
   const groups = [guest.group, guest.visibilityGroup].map((value) => String(value || '').trim()).filter(Boolean);
   return (
     (email && allowedEmails.includes(email)) ||
-    (phone && allowedPhones.some((allowed) => phone.endsWith(allowed) || allowed.endsWith(phone))) ||
+    (phone.length >= 10 && allowedPhones.some((allowed) => allowed.length >= 10 && phone.slice(-10) === allowed.slice(-10))) ||
     roles.some((role) => allowedRoles.includes(role)) ||
     groups.some((group) => allowedGroups.includes(group))
   );
@@ -421,104 +423,7 @@ exports.remove = asyncHandler(async (req, res) => {
 
 exports.publicBySlug = asyncHandler(async (req, res) => {
   const rawSlug = String(req.params.slug || '').toLowerCase().trim();
-  let invitation = await Invitation.findOne({ slug: rawSlug }).populate('event template');
-
-  // Fallback 0: Buscar por Event ID si es un ObjectId valido
-  if (!invitation && mongoose.Types.ObjectId.isValid(rawSlug)) {
-    invitation = await Invitation.findOne({ $or: [{ event: rawSlug }, { _id: rawSlug }] }).populate('event template');
-  }
-
-  // Fallback 1: Buscar por externalPortalSlug en Event
-  if (!invitation) {
-    const event = await Event.findOne({ externalPortalSlug: rawSlug });
-    if (event) {
-      invitation = await Invitation.findOne({ event: event._id });
-      const customSub = await CustomTemplateSubmission.findOne({
-        $or: [{ event: event._id }, { eventId: String(event._id) }, { eventSlug: rawSlug }],
-        status: 'approved'
-      });
-
-      if (!invitation) {
-        invitation = await Invitation.create({
-          owner: event.owner,
-          event: event._id,
-          slug: rawSlug,
-          status: 'published',
-          publishedAt: new Date(),
-          content: {
-            headline: event.title,
-            template: customSub ? 'custom-html' : 'envelope-cards',
-            customHtml: customSub ? customSub.htmlCode : '',
-            customCss: customSub ? (customSub.cssCode || '') : '',
-            customPageApproved: !!customSub
-          }
-        });
-        await invitation.populate('event template');
-      } else {
-        if (customSub) {
-          invitation.content = invitation.content || {};
-          invitation.content.template = 'custom-html';
-          invitation.content.customHtml = customSub.htmlCode;
-          invitation.content.customCss = customSub.cssCode || '';
-          invitation.content.customPageApproved = true;
-        }
-        if (invitation.status !== 'published') {
-          invitation.status = 'published';
-          invitation.publishedAt = new Date();
-        }
-        await invitation.save();
-        await invitation.populate('event template');
-      }
-    }
-  }
-
-  // Fallback 2: Buscar por CustomTemplateSubmission aprobada
-  if (!invitation) {
-    const customSub = await CustomTemplateSubmission.findOne({
-      $or: [{ eventSlug: rawSlug }, { slug: rawSlug }],
-      status: 'approved'
-    });
-    if (customSub) {
-      let event = null;
-      if (customSub.eventId) {
-        event = await Event.findById(customSub.eventId);
-      } else if (customSub.event) {
-        event = await Event.findById(customSub.event);
-      }
-      if (customSub.invitation) {
-        invitation = await Invitation.findById(customSub.invitation).populate('event template');
-      }
-      if (!invitation && event) {
-        invitation = await Invitation.findOne({ event: event._id }).populate('event template');
-      }
-      if (!invitation) {
-        invitation = await Invitation.create({
-          owner: event ? event.owner : customSub.owner,
-          event: event ? event._id : undefined,
-          slug: rawSlug,
-          status: 'published',
-          publishedAt: new Date(),
-          content: {
-            headline: customSub.eventTitle || customSub.name,
-            template: 'custom-html',
-            customHtml: customSub.htmlCode,
-            customCss: customSub.cssCode || '',
-            customPageApproved: true
-          }
-        });
-        if (event) await invitation.populate('event template');
-      } else {
-        invitation.status = 'published';
-        invitation.publishedAt = new Date();
-        invitation.content = invitation.content || {};
-        invitation.content.template = 'custom-html';
-        invitation.content.customHtml = customSub.htmlCode;
-        invitation.content.customCss = customSub.cssCode || '';
-        invitation.content.customPageApproved = true;
-        await invitation.save();
-      }
-    }
-  }
+  const invitation = await Invitation.findOne({ slug: rawSlug, status: 'published' }).populate('event template');
 
   if (!invitation) {
     const error = new Error('Invitacion no encontrada');
@@ -526,43 +431,92 @@ exports.publicBySlug = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  if (invitation.status !== 'published') {
-    const error = new Error('Invitación no publicada');
-    error.statusCode = 403;
-    throw error;
+  if (invitation.accessMode === 'guest_list' || invitation.accessMode === 'specific_users') {
+    const { guest } = await verifyGuestSessionForEvent(req, invitation.event, invitation.slug);
+    if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
+      const error = new Error('Esta invitacion no esta disponible para tu acceso');
+      error.statusCode = 403;
+      throw error;
+    }
   }
-
-  // Permitir devolver los datos para renderizar la página pública si está publicada
   res.json({ invitation: publicInvitation(invitation) });
 });
 
+exports.requirePublicAccess = asyncHandler(async (req, _res, next) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings');
+  if (!invitation) {
+    const error = new Error('Invitacion no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (invitation.accessMode === 'guest_list' || invitation.accessMode === 'specific_users' || req.get('authorization')) {
+    const { guest } = await verifyGuestSessionForEvent(req, invitation.event, invitation.slug);
+    if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
+      const error = new Error('Esta invitacion no esta disponible para tu acceso');
+      error.statusCode = 403;
+      throw error;
+    }
+    req.publicGuest = guest;
+  }
+  next();
+});
+
 exports.guestAccess = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event accessMode rsvpSettings');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
     throw error;
   }
 
+  if ((req.validated.body.email && !emailService.isEmailConfigured()) ||
+      (req.validated.body.phone && !req.validated.body.email && !whatsappService.isEnabled())) {
+    const error = new Error('El envío automático no está disponible. Usa tu enlace original o contacta al anfitrión.');
+    error.statusCode = 503;
+    throw error;
+  }
+
   const guest = await findGuestByPublicIdentity(invitation.event, req.validated.body);
-
-  if (!guest) {
-    const error = new Error('Este invitado no esta en la lista registrada');
-    error.statusCode = 403;
-    throw error;
-  }
-  if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
-    const error = new Error('Esta invitacion esta disponible solo para usuarios especificos');
-    error.statusCode = 403;
-    throw error;
+  const message = 'Si el contacto esta invitado, recibira un enlace personal para entrar. Revisa tambien la invitacion original.';
+  if (!guest || (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings))) {
+    return res.json({ message });
   }
 
-  const event = await Event.findById(invitation.event).select('_id');
-  res.json({ guest: publicGuest(guest), guestSessionToken: signGuestSession(event, guest, invitation.slug) });
+  if (!guest.invitationToken) {
+    const invitationToken = crypto.randomBytes(16).toString('hex');
+    await Guest.updateOne({ _id: guest._id, invitationToken: { $exists: false } }, { $set: { invitationToken } });
+    guest.invitationToken = (await Guest.findById(guest._id).select('invitationToken'))?.invitationToken;
+  }
+
+  const now = new Date();
+  const eligibleBefore = new Date(now.getTime() - 5 * 60 * 1000);
+  const claimed = await Guest.findOneAndUpdate({
+    _id: guest._id,
+    $or: [{ lastAccessLinkSentAt: { $exists: false } }, { lastAccessLinkSentAt: { $lt: eligibleBefore } }]
+  }, { $set: { lastAccessLinkSentAt: now } });
+  if (!claimed) return res.json({ message });
+
+  const event = await Event.findById(invitation.event);
+  const link = whatsappService.publicInvitationUrl(invitation, guest, event);
+  try {
+    if (req.validated.body.email && guest.email) {
+      await emailService.sendMail({
+        to: guest.email,
+        subject: `Tu acceso a ${event?.title || 'la invitacion'}`,
+        text: `Hola ${guest.name}, abre tu invitacion personal: ${link}\nNo compartas este enlace; da acceso a tus datos del evento.`
+      });
+    } else if (req.validated.body.phone && guest.phone) {
+      await whatsappService.sendMessage({ owner: event.owner, guest, event, invitation, type: 'invitation' });
+    }
+  } catch (error) {
+    await Guest.updateOne({ _id: guest._id, lastAccessLinkSentAt: now }, { $unset: { lastAccessLinkSentAt: '' } });
+    console.warn('No se pudo enviar enlace de acceso a invitacion:', error.message);
+  }
+  res.json({ message });
 });
 
 exports.guestByToken = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
@@ -572,11 +526,16 @@ exports.guestByToken = asyncHandler(async (req, res) => {
   const guest = await Guest.findOne({
     event: invitation.event,
     invitationToken: String(req.params.token || '').trim()
-  }).select('name email allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt');
+  }).select('name email group roles tags relationshipLabel visibilityGroup allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt');
 
   if (!guest) {
     const error = new Error('Link personalizado invalido');
     error.statusCode = 404;
+    throw error;
+  }
+  if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
+    const error = new Error('Esta invitacion no esta disponible para tu acceso');
+    error.statusCode = 403;
     throw error;
   }
 

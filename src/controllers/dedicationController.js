@@ -135,7 +135,7 @@ exports.createInvitationPublic = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const guest = await findGuest(invitation.event, req.validated.body);
+  const guest = req.publicGuest || null;
   const status = initialModerationStatus({
     guest,
     settings: invitation.content?.moderationSettings || {},
@@ -148,7 +148,7 @@ exports.createInvitationPublic = asyncHandler(async (req, res) => {
     invitation: invitation._id,
     guest: guest?._id,
     publicName: req.validated.body.publicName || guest?.name,
-    email: normalizeEmail(req.validated.body.email) || guest?.email,
+    email: guest?.email || normalizeEmail(req.validated.body.email),
     message: req.validated.body.message,
     type: req.validated.body.type || 'dedication',
     status,
