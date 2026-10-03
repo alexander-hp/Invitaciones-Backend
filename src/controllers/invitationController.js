@@ -67,9 +67,24 @@ function publicTemplate(template) {
   };
 }
 
-function publicInvitation(invitation) {
-  const content = invitation.content?.toObject ? invitation.content.toObject({ flattenMaps: true }) : { ...(invitation.content || {}) };
+function plainInvitationContent(value) {
+  if (!value) return {};
+  const plain = value?.toObject ? value.toObject({ flattenMaps: true }) : value;
+  return JSON.parse(JSON.stringify(plain));
+}
+
+function publicInvitation(invitation, { allowWhiteLabel = false, useDraft = false } = {}) {
+  const sourceContent = !useDraft && invitation.status === 'published' && invitation.publishedContent
+    ? invitation.publishedContent
+    : invitation.content;
+  const content = plainInvitationContent(sourceContent);
+  if (useDraft && content.visualDesignDraft?.sections?.length) {
+    content.visualDesign = content.visualDesignDraft;
+    content.template = 'visual-builder';
+  }
+  delete content.visualDesignDraft;
   delete content.privateAlbum;
+  content.hideBranding = allowWhiteLabel && Boolean(content.hideBranding);
   content.storyTitle = content.storyTitle || content.subheadline || '';
   content.storyBody = content.storyBody || content.message || '';
   content.subheadline = content.subheadline || content.storyTitle || '';
@@ -224,7 +239,41 @@ function guestMatchesSpecificRules(guest, rsvpSettings = {}) {
   );
 }
 
+function eventStartsAt(event) {
+  if (!event?.date) return null;
+  const rawDate = event.date instanceof Date ? event.date.toISOString().slice(0, 10) : String(event.date).slice(0, 10);
+  const time = /^\d{2}:\d{2}/.test(String(event.time || '')) ? String(event.time).slice(0, 5) : '23:59';
+  const parsed = new Date(`${rawDate}T${time}:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function assertInvitationRsvpDeadline(event, rawDeadline) {
+  if (!rawDeadline) return;
+  const deadline = rawDeadline instanceof Date ? rawDeadline : new Date(rawDeadline);
+  if (Number.isNaN(deadline.getTime())) {
+    const error = new Error('Selecciona una fecha limite de respuesta valida');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const currentMinute = new Date();
+  currentMinute.setSeconds(0, 0);
+  if (deadline.getTime() < currentMinute.getTime()) {
+    const error = new Error('La fecha limite de respuesta no puede estar en el pasado');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const eventDate = eventStartsAt(event);
+  if (eventDate && deadline.getTime() > eventDate.getTime()) {
+    const error = new Error('La fecha limite de respuesta no puede ser posterior al inicio del evento');
+    error.statusCode = 400;
+    throw error;
+  }
+}
+
 async function assertInvitationPlanLimits(user, event, payload) {
+  assertInvitationRsvpDeadline(event, payload.rsvpSettings?.deadline);
   const limits = getEffectivePlanLimits(user, event);
   const galleryCount = payload.content?.gallery?.length || 0;
   if (galleryCount > limits.galleryImages) {
@@ -269,6 +318,27 @@ async function assertInvitationPlanLimits(user, event, payload) {
 exports.list = asyncHandler(async (req, res) => {
   const invitations = await Invitation.find({ owner: req.user._id }).populate('event template').sort('-createdAt');
   res.json({ invitations });
+});
+
+exports.previewBySlug = asyncHandler(async (req, res) => {
+  const rawSlug = String(req.params.slug || '').toLowerCase().trim();
+  const invitation = await Invitation.findOne({ slug: rawSlug })
+    .populate('event template')
+    .populate('owner', 'plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
+
+  if (!invitation) {
+    const error = new Error('Invitacion no encontrada');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isOwner = String(invitation.owner?._id || invitation.owner) === String(req.user._id);
+  if (!isOwner) {
+    await requireEventAccess({ eventId: invitation.event?._id || invitation.event, user: req.user, permission: 'edit_event' });
+  }
+
+  const limits = getEffectivePlanLimits(invitation.owner, invitation.event);
+  res.json({ invitation: publicInvitation(invitation, { allowWhiteLabel: Boolean(limits.whiteLabel), useDraft: true }) });
 });
 
 exports.create = asyncHandler(async (req, res) => {
@@ -332,14 +402,20 @@ exports.create = asyncHandler(async (req, res) => {
 });
 
 exports.update = asyncHandler(async (req, res) => {
-  const currentInvitation = await Invitation.findOne({ _id: req.params.id, owner: req.user._id }).select('_id event');
+  const currentInvitation = await Invitation.findOne({ _id: req.params.id, owner: req.user._id })
+    .select('_id event status content publishedContent');
   if (!currentInvitation) {
     const error = new Error('Invitacion no encontrada');
     error.statusCode = 404;
     throw error;
   }
-  const event = await Event.findOne({ _id: currentInvitation.event, owner: req.user._id }).select('_id plan');
+  const event = await Event.findOne({ _id: currentInvitation.event, owner: req.user._id }).select('_id plan date time createdAt');
   await assertInvitationPlanLimits(req.user, event, req.validated.body);
+  if (currentInvitation.status === 'published' && req.validated.body.content && !currentInvitation.publishedContent) {
+    currentInvitation.publishedContent = plainInvitationContent(currentInvitation.content);
+    currentInvitation.markModified('publishedContent');
+    await currentInvitation.save();
+  }
   const invitation = await Invitation.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, req.validated.body, { new: true });
   if (!invitation) {
     const error = new Error('Invitacion no encontrada');
@@ -350,16 +426,37 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.publish = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOneAndUpdate(
-    { _id: req.params.id, owner: req.user._id },
-    { status: 'published', publishedAt: new Date() },
-    { new: true }
-  );
+  const invitation = await Invitation.findOne({ _id: req.params.id, owner: req.user._id });
   if (!invitation) {
     const error = new Error('Invitacion no encontrada');
     error.statusCode = 404;
     throw error;
   }
+  const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id date time createdAt');
+  if (!event) {
+    const error = new Error('Evento no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  assertInvitationRsvpDeadline(event, invitation.rsvpSettings?.deadline);
+  if (req.validated?.body?.source === 'visual') {
+    const draft = invitation.content?.visualDesignDraft;
+    if (!draft?.sections?.length) {
+      const error = new Error('Guarda un diseño visual antes de publicarlo');
+      error.statusCode = 400;
+      throw error;
+    }
+    invitation.content.visualDesign = plainInvitationContent(draft);
+    invitation.content.template = 'visual-builder';
+    invitation.markModified('content');
+  }
+  const publishedContent = plainInvitationContent(invitation.content);
+  delete publishedContent.visualDesignDraft;
+  invitation.publishedContent = publishedContent;
+  invitation.markModified('publishedContent');
+  invitation.status = 'published';
+  invitation.publishedAt = new Date();
+  await invitation.save();
   const publicUrl = `${env.publicBaseUrl}/i/${invitation.slug}`;
   if (req.user.email) {
     try {
@@ -423,7 +520,9 @@ exports.remove = asyncHandler(async (req, res) => {
 
 exports.publicBySlug = asyncHandler(async (req, res) => {
   const rawSlug = String(req.params.slug || '').toLowerCase().trim();
-  const invitation = await Invitation.findOne({ slug: rawSlug, status: 'published' }).populate('event template');
+  const invitation = await Invitation.findOne({ slug: rawSlug, status: 'published' })
+    .populate('event template')
+    .populate('owner', 'plan subscriptionPlan subscriptionStatus subscriptionCurrentPeriodEnd');
 
   if (!invitation) {
     const error = new Error('Invitacion no encontrada');
@@ -439,7 +538,8 @@ exports.publicBySlug = asyncHandler(async (req, res) => {
       throw error;
     }
   }
-  res.json({ invitation: publicInvitation(invitation) });
+  const limits = getEffectivePlanLimits(invitation.owner, invitation.event);
+  res.json({ invitation: publicInvitation(invitation, { allowWhiteLabel: limits.whiteLabel }) });
 });
 
 exports.requirePublicAccess = asyncHandler(async (req, _res, next) => {

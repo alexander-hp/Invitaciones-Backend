@@ -160,11 +160,30 @@ exports.inspectMapUrl = asyncHandler(async (req, res) => {
   const resolvedUrl = await resolveGoogleRedirect(req.body.url);
   const parsed = parseGoogleMapsUrl(resolvedUrl);
   const details = Number.isFinite(parsed.lat) && Number.isFinite(parsed.lon) ? await reverseGeocode(parsed.lat, parsed.lon) : {};
+  let placeDetails;
+  const lookupName = parsed.name || details.name;
+  if (env.googleMapsApiKey && lookupName) {
+    try {
+      const matches = await searchGooglePlaces([lookupName, details.address].filter(Boolean).join(' '));
+      placeDetails = matches[0];
+    } catch {
+      placeDetails = undefined;
+    }
+  }
+  const lat = Number.isFinite(parsed.lat) ? parsed.lat : placeDetails?.lat;
+  const lon = Number.isFinite(parsed.lon) ? parsed.lon : placeDetails?.lon;
   res.json({
     location: {
-      name: parsed.name || details.name || '', address: details.address || '',
-      lat: parsed.lat, lon: parsed.lon, mapUrl: resolvedUrl,
-      wazeUrl: Number.isFinite(parsed.lat) && Number.isFinite(parsed.lon) ? navigationLinks(parsed.lat, parsed.lon).wazeUrl : ''
+      name: placeDetails?.name || parsed.name || details.name || '',
+      address: placeDetails?.address || details.address || '',
+      type: placeDetails?.type || '',
+      lat,
+      lon,
+      mapUrl: placeDetails?.mapUrl || resolvedUrl,
+      wazeUrl: Number.isFinite(lat) && Number.isFinite(lon) ? navigationLinks(lat, lon).wazeUrl : '',
+      phone: placeDetails?.phone || '',
+      websiteUrl: placeDetails?.websiteUrl || '',
+      schedule: placeDetails?.schedule || []
     }
   });
 });

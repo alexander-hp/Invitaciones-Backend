@@ -132,8 +132,8 @@ const invitationSchema = new mongoose.Schema({
     }],
     digitalEnvelope: {
       bank: String,
-      account: String,
-      clabe: String,
+      account: { type: String, trim: true, maxlength: 20, match: /^\d*$/ },
+      clabe: { type: String, trim: true, maxlength: 18, match: /^(?:\d{18})?$/ },
       holder: String,
       note: String,
       qrImageUrl: String
@@ -166,6 +166,8 @@ const invitationSchema = new mongoose.Schema({
       autoApproveDedications: { type: Boolean, default: false }
     },
     brandLogoUrl: String,
+    brandMonogramUrl: String,
+    passLogoUrl: String,
     hideBranding: { type: Boolean, default: false },
     sectionSettings: {
       story: { type: Boolean, default: true },
@@ -190,6 +192,11 @@ const invitationSchema = new mongoose.Schema({
       address: String,
       phone: String,
       mapUrl: String,
+      wazeUrl: String,
+      websiteUrl: String,
+      schedule: [{ type: String, trim: true }],
+      lat: Number,
+      lon: Number,
       agreementLabel: String,
       discountCode: String,
       discountDescription: String,
@@ -290,11 +297,13 @@ const invitationSchema = new mongoose.Schema({
         _id: false
       }]
     },
+    visualDesignDraft: { type: mongoose.Schema.Types.Mixed },
     template: String,
     customHtml: String,
     customCss: String,
     customPageApproved: { type: Boolean, default: false }
   },
+  publishedContent: { type: mongoose.Schema.Types.Mixed },
   premiumLocked: { type: Boolean, default: false },
   publishedAt: Date
 }, { timestamps: true });

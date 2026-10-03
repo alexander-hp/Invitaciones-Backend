@@ -55,6 +55,7 @@ module.exports = {
   whatsappWebhookVerifyToken: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || '',
   whatsappAppSecret: process.env.WHATSAPP_APP_SECRET || '',
   openWaBaseUrl: process.env.OPENWA_BASE_URL || '',
+  openWaMediaBaseUrl: process.env.OPENWA_MEDIA_BASE_URL || '',
   openWaApiKey: process.env.OPENWA_API_KEY || '',
   openWaSessionId: process.env.OPENWA_SESSION_ID || '',
   geminiApiKey: process.env.GEMINI_API_KEY || '',

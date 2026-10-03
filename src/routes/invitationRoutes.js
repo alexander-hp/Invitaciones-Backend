@@ -239,8 +239,8 @@ const invitationContentBody = z.object({
   }).strict()).optional(),
   digitalEnvelope: z.object({
     bank: z.string().optional(),
-    account: z.string().optional(),
-    clabe: z.string().optional(),
+    account: z.string().regex(/^\d{1,20}$/, 'La cuenta debe contener solo números y un máximo de 20 dígitos').or(z.literal('')).optional(),
+    clabe: z.string().regex(/^\d{18}$/, 'La CLABE debe contener exactamente 18 dígitos').or(z.literal('')).optional(),
     holder: z.string().optional(),
     note: z.string().optional(),
     qrImageUrl: z.string().url().or(z.literal('')).optional()
@@ -273,6 +273,8 @@ const invitationContentBody = z.object({
     autoApproveDedications: z.boolean().optional()
   }).strict().optional(),
   brandLogoUrl: z.string().url().or(z.literal('')).optional(),
+  brandMonogramUrl: z.string().url().or(z.literal('')).optional(),
+  passLogoUrl: z.string().url().or(z.literal('')).optional(),
   hideBranding: z.boolean().optional(),
   sectionSettings: z.object({
     story: z.boolean().optional(),
@@ -297,6 +299,11 @@ const invitationContentBody = z.object({
     address: z.string().max(500).optional(),
     phone: z.string().max(40).optional(),
     mapUrl: z.string().url().or(z.literal('')).optional(),
+    wazeUrl: z.string().url().or(z.literal('')).optional(),
+    websiteUrl: z.string().url().or(z.literal('')).optional(),
+    schedule: z.array(z.string().max(200)).max(30).optional(),
+    lat: z.number().min(-90).max(90).optional(),
+    lon: z.number().min(-180).max(180).optional(),
     agreementLabel: z.string().max(200).optional(),
     discountCode: z.string().max(100).optional(),
     discountDescription: z.string().max(500).optional(),
@@ -308,6 +315,7 @@ const invitationContentBody = z.object({
   privateAlbum: z.array(z.string()).optional(),
   privateAlbumEnabled: z.boolean().optional(),
   visualDesign: visualDesignBody.optional(),
+  visualDesignDraft: visualDesignBody.optional(),
   template: z.string().optional(),
   customHtml: z.string().optional(),
   customCss: z.string().optional(),
@@ -405,6 +413,7 @@ router.post('/public/:slug/song-lookup', publicInvitationLimiter, controller.req
 
 router.use(protect);
 router.get('/', controller.list);
+router.get('/preview/:slug', controller.previewBySlug);
 router.post('/', validate(z.object({ body: invitationCreateBody })), controller.create);
 router.get('/:id/visual-revisions', visualDesignRevisionController.list);
 router.post('/:id/visual-revisions', validate(z.object({ body: z.object({
@@ -415,7 +424,9 @@ router.post('/:id/visual-revisions/:revisionId/restore', visualDesignRevisionCon
 router.delete('/:id/visual-revisions/:revisionId', visualDesignRevisionController.remove);
 router.patch('/:id', validate(z.object({ body: invitationUpdateBody })), controller.update);
 router.delete('/:id', controller.remove);
-router.post('/:id/publish', controller.publish);
+router.post('/:id/publish', validate(z.object({ body: z.object({
+  source: z.enum(['standard', 'visual']).optional()
+}).strict() })), controller.publish);
 router.post('/:id/unpublish', controller.unpublish);
 
 module.exports = router;

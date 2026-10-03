@@ -572,6 +572,7 @@ exports.sendEmailBulk = asyncHandler(async (req, res) => {
   if (req.validated.body.guestIds?.length) query._id = { $in: req.validated.body.guestIds };
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType || 'invitation';
+  const messageBody = req.validated.body.messageBody;
   const attachPass = req.validated.body.attachPass;
   const results = [];
 
@@ -596,6 +597,7 @@ exports.sendEmailBulk = asyncHandler(async (req, res) => {
         invitation,
         publicUrl: personalizedPublicUrl(invitation, guest),
         type,
+        messageBody,
         attachments
       });
       markEmailResult(guest, { type, status: 'sent' });

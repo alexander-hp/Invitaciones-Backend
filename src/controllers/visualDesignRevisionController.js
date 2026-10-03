@@ -51,8 +51,8 @@ exports.restore = asyncHandler(async (req, res) => {
     throw error;
   }
   invitation.content = invitation.content || {};
-  invitation.content.visualDesign = revision.design;
-  invitation.markModified('content.visualDesign');
+  invitation.content.visualDesignDraft = revision.design;
+  invitation.markModified('content.visualDesignDraft');
   await invitation.save();
   res.json({ invitation, revision });
 });

@@ -139,7 +139,7 @@ function generatePassDataForGuest({ guest, event, invitation }) {
     eventDateFormatted,
     locationAddress,
     dressCode: event?.dressCode || styles.dressCode || '',
-    brandLogoUrl: styles.brandLogoUrl || '',
+    brandLogoUrl: styles.passLogoUrl || styles.brandLogoUrl || '',
     coverImageUrl: styles.coverImageUrl || '',
     primaryColor: palette.primary || '#0b1426',
     accentColor: palette.accent || '#c9a87c'

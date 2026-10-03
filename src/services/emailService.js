@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const env = require('../config/env');
+const { customMessageRows } = require('./guestMessageBody');
 
 function isEmailConfigured() {
   return Boolean((env.smtpHost || env.smtpService) && env.emailFrom);
@@ -360,7 +361,9 @@ function messageSubject(type, event) {
   return `✨ Estás invitado a ${title}`;
 }
 
-function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invitation' }) {
+function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invitation', messageBody }) {
+  const customRows = customMessageRows({ guest, messageBody, links: [publicUrl] });
+  if (customRows) return customRows;
   const eventTitle = event?.title || invitation?.content?.headline || 'nuestro evento';
   const date = eventDateText(event);
   const location = eventLocationText(event);
@@ -402,7 +405,7 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
   return rowsByType[type] || rowsByType.invitation;
 }
 
-function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invitation' }) {
+function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invitation', messageBody: customBody }) {
   const eventTitle = escapeHtml(event?.title || invitation?.content?.headline || 'Nuestro Evento Especial');
   const guestName = escapeHtml(guest?.name || 'Invitado');
   const dateStr = escapeHtml(eventDateText(event));
@@ -430,6 +433,10 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
     badgeText = '❤️ GRACIAS POR CONFIRMAR';
     ctaText = '💖 Ver Detalles del Evento';
     messageBody = `¡Muchas gracias por confirmar tu asistencia a <strong>${eventTitle}</strong>! Estamos muy emocionados de compartir este momento contigo.`;
+  }
+
+  if (customBody?.trim()) {
+    messageBody = escapeHtml(customBody.trim()).replace(/\r?\n/g, '<br>');
   }
 
   const detailsHtml = (dateStr || locationStr || tableStr) ? `
@@ -546,11 +553,11 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
   `.trim();
 }
 
-async function sendGuestInvitationEmail({ to, guest, event, invitation, publicUrl, type = 'invitation', attachments }) {
+async function sendGuestInvitationEmail({ to, guest, event, invitation, publicUrl, type = 'invitation', messageBody, attachments }) {
   const subject = messageSubject(type, event);
-  const rows = buildGuestMessage({ guest, event, invitation, publicUrl, type }).filter(Boolean);
+  const rows = buildGuestMessage({ guest, event, invitation, publicUrl, type, messageBody }).filter(Boolean);
   const text = rows.join('\n\n');
-  const html = buildGuestEmailHtml({ guest, event, invitation, publicUrl, type });
+  const html = buildGuestEmailHtml({ guest, event, invitation, publicUrl, type, messageBody });
 
   return sendMail({ to, subject, text, html, attachments });
 }
@@ -860,6 +867,8 @@ module.exports = {
   sendRsvpNotification,
   sendInvitationPublishedEmail,
   sendRsvpReminderEmail,
+  buildGuestMessage,
+  buildGuestEmailHtml,
   sendGuestInvitationEmail,
   sendGuestReviewStatusEmail,
   sendEventMemberInviteEmail

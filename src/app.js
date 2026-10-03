@@ -50,7 +50,9 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
+app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev', {
+  skip: (req) => req.originalUrl.startsWith('/api/guests/whatsapp-pass/')
+}));
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'invitaciones-api' }));
 app.use('/api', routes);

@@ -1,6 +1,7 @@
 const readXlsxFile = require('read-excel-file/node');
 const { parse } = require('csv-parse/sync');
 const Guest = require('../models/Guest');
+const Event = require('../models/Event');
 const Invitation = require('../models/Invitation');
 const Rsvp = require('../models/Rsvp');
 const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
@@ -11,6 +12,8 @@ const emailService = require('../services/emailService');
 const env = require('../config/env');
 const { requireEventAccess } = require('../utils/eventAccess');
 const { logEventActivity } = require('../services/eventLogService');
+const { buildGuestPassWhatsAppMedia, verifyGuestPassToken } = require('../services/guestPassWhatsAppMedia');
+const passImageService = require('../services/passImageService');
 
 const WHATSAPP_BULK_MEDIA_LIMIT = 30;
 
@@ -153,6 +156,20 @@ async function assertWhatsAppProviderReady(media) {
     const error = new Error(`WhatsApp conectado pero no listo (${session.status}). Revisa OpenWA antes de enviar${media ? ' media' : ''}.`);
     error.statusCode = 503;
     error.details = { provider: 'openwa', session };
+    throw error;
+  }
+}
+
+function validatePassAttachment({ attachPass, media }) {
+  if (!attachPass) return;
+  if (media) {
+    const error = new Error('El pase y otra imagen no pueden adjuntarse en el mismo mensaje. Elige solo uno.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (whatsappService.activeProvider() !== 'openwa') {
+    const error = new Error('Los pases con imagen requieren OpenWA activo. Meta no admite este adjunto con la plantilla actual.');
+    error.statusCode = 400;
     throw error;
   }
 }
@@ -338,6 +355,41 @@ exports.whatsappStatus = asyncHandler(async (_req, res) => {
   });
 });
 
+exports.whatsappPassImage = asyncHandler(async (req, res) => {
+  let payload;
+  try {
+    payload = verifyGuestPassToken(req.params.token);
+  } catch {
+    const error = new Error('El enlace del pase expiró o no es válido');
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const [guest, event] = await Promise.all([
+    Guest.findById(payload.guestId),
+    Event.findById(payload.eventId).populate('venue')
+  ]);
+  if (!guest || !event || String(guest.event) !== String(event._id) || String(guest.owner) !== String(event.owner)) {
+    const error = new Error('Pase no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+  const invitation = payload.invitationId
+    ? await Invitation.findOne({ _id: payload.invitationId, event: event._id, owner: event.owner })
+    : null;
+  if (payload.invitationId && !invitation) {
+    const error = new Error('Pase no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const passData = passImageService.generatePassDataForGuest({ guest, event, invitation });
+  const buffer = await passImageService.generatePassImageBuffer(passData);
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.send(buffer);
+});
+
 exports.sendWhatsApp = asyncHandler(async (req, res) => {
   const { guest, event, ownerPlanUser } = await requireGuestAccess(req.params.id, req.user);
   assertEffectivePlanFeature(ownerPlanUser, event, 'whatsappMessaging', 'El envio de WhatsApp requiere Evento Individual o Pro');
@@ -349,7 +401,12 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
   }
 
   const type = req.validated.body.messageType;
-  await assertWhatsAppProviderReady(req.validated.body.media);
+  const attachPass = req.validated.body.attachPass === true;
+  validatePassAttachment({ attachPass, media: req.validated.body.media });
+  await assertWhatsAppProviderReady(req.validated.body.media || attachPass);
+  const media = attachPass
+    ? buildGuestPassWhatsAppMedia({ guest, event, invitation })
+    : req.validated.body.media;
   const result = await whatsappService.sendMessage({
     owner: event.owner,
     guest,
@@ -357,7 +414,8 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
     invitation,
     type,
     text: req.validated.body.text,
-    media: req.validated.body.media
+    messageBody: req.validated.body.messageBody,
+    media
   });
   applyWhatsAppGuestStatus(guest, { status: result.status, type });
   await guest.save();
@@ -397,7 +455,8 @@ exports.sendEmail = asyncHandler(async (req, res) => {
       event,
       invitation,
       publicUrl: personalizedPublicUrl(invitation, guest),
-      type
+      type,
+      messageBody: req.validated.body.messageBody
     });
     applyEmailGuestStatus(guest, { status: 'sent', type });
     await guest.save();
@@ -440,8 +499,16 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
   if (req.validated.body.guestIds?.length) query._id = { $in: req.validated.body.guestIds };
   const guests = await Guest.find(query).sort('name').limit(200);
   const type = req.validated.body.messageType;
+  const messageBody = req.validated.body.messageBody;
   const media = req.validated.body.media;
-  if (media && guests.length > WHATSAPP_BULK_MEDIA_LIMIT) {
+  const attachPass = req.validated.body.attachPass === true;
+  validatePassAttachment({ attachPass, media });
+  if (messageBody && whatsappService.activeProvider() === 'meta') {
+    const error = new Error('Meta solo permite el texto de la plantilla aprobada. Quita el texto personalizado o usa OpenWA.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if ((media || attachPass) && guests.length > WHATSAPP_BULK_MEDIA_LIMIT) {
     const error = new Error(`El envio masivo con imagen/media permite maximo ${WHATSAPP_BULK_MEDIA_LIMIT} invitados por campana. Envia media solo a grupos especiales y el resto con mensaje seguro.`);
     error.statusCode = 400;
     error.details = {
@@ -451,12 +518,15 @@ exports.sendWhatsAppBulk = asyncHandler(async (req, res) => {
     };
     throw error;
   }
-  await assertWhatsAppProviderReady(media);
+  await assertWhatsAppProviderReady(media || attachPass);
   const results = [];
 
   for (const guest of guests) {
     try {
-      const result = await whatsappService.sendMessage({ owner: event.owner, guest, event, invitation, type, media });
+      const guestMedia = attachPass
+        ? buildGuestPassWhatsAppMedia({ guest, event, invitation })
+        : media;
+      const result = await whatsappService.sendMessage({ owner: event.owner, guest, event, invitation, type, messageBody, media: guestMedia });
       applyWhatsAppGuestStatus(guest, { status: result.status, type });
       await guest.save();
       results.push({ guest: guest._id, status: result.status, provider: result.provider, log: result.log._id });
@@ -483,6 +553,20 @@ exports.listWhatsAppLogs = asyncHandler(async (req, res) => {
   const { event } = await requireGuestEventAccess(req.params.eventId, req.user);
   const logs = await WhatsAppMessageLog.find({ owner: event.owner, event: event._id }).sort('-createdAt').limit(100);
   res.json({ logs });
+});
+
+exports.listWhatsAppPassStatus = asyncHandler(async (req, res) => {
+  const { event } = await requireGuestEventAccess(req.params.eventId, req.user);
+  const guestIds = await WhatsAppMessageLog.distinct('guest', {
+    owner: event.owner,
+    event: event._id,
+    provider: 'openwa',
+    status: { $in: ['sent', 'delivered', 'read'] },
+    messageId: { $exists: true, $nin: ['', null] },
+    'payload.media.type': 'image',
+    'payload.media.filename': /^pase-.*\.png$/
+  });
+  res.json({ sentGuestIds: guestIds.map(String) });
 });
 
 exports.checkIn = asyncHandler(async (req, res) => {
@@ -669,12 +753,10 @@ exports.downloadGuestPassImage = asyncHandler(async (req, res) => {
 
   const EventModel = require('../models/Event');
   const fullEvent = await EventModel.findById(guest.event).populate('venue');
-  const invitation = await Invitation.findOne({ event: guest.event });
+  const invitation = await primaryInvitationForEvent(event._id, event.owner);
 
-  const passImageService = require('../services/passImageService');
   const passData = passImageService.generatePassDataForGuest({ guest, event: fullEvent, invitation });
-  const passHtml = passImageService.generateGuestPassHtml(passData);
-  const buffer = await passImageService.generatePassImageBuffer(passHtml);
+  const buffer = await passImageService.generatePassImageBuffer(passData);
 
   const safeName = guest.name.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_') || 'Invitado';
   res.setHeader('Content-Type', 'image/png');
@@ -695,9 +777,8 @@ exports.downloadAllPassesZip = asyncHandler(async (req, res) => {
 
   const EventModel = require('../models/Event');
   const fullEvent = await EventModel.findById(eventId).populate('venue');
-  const invitation = await Invitation.findOne({ event: eventId });
+  const invitation = await primaryInvitationForEvent(event._id, event.owner);
 
-  const passImageService = require('../services/passImageService');
   const JSZip = require('jszip');
 
   const items = guests.map((guest) => {

@@ -5,7 +5,7 @@
     "main": "src/server.js",
     "scripts": {
         "dev": "nodemon src/server.js",
-        "start": "node src/server.js",
+        "start": "nodemon src/server.js",
         "db:local": "powershell -ExecutionPolicy Bypass -File scripts/startLocalDb.ps1",
         "db:local:logs": "docker compose logs -f mongo",
         "db:local:down": "docker compose down",
@@ -20,6 +20,8 @@
         "test:smtp": "node scripts/testSmtp.js",
         "test:stripe": "node scripts/testStripeCheckout.js",
         "test:whatsapp": "node scripts/testWhatsAppProviders.js",
+        "test:whatsapp-pass": "node scripts/testWhatsAppPassMedia.js",
+        "test:whatsapp-pass:live": "node scripts/testWhatsAppPassLive.js",
         "test:integration-guide": "node scripts/testIntegrationGuide.js",
         "mock:whatsapp": "node scripts/whatsappMockServer.js",
         "demo:external": "node scripts/demoExternalDashboardFlow.js",

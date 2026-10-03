@@ -43,6 +43,7 @@ const communicationBody = z.object({
 
 const emailSendBody = z.object({
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional(),
+  messageBody: z.string().trim().min(1).max(2000).optional(),
   attachPass: z.boolean().optional()
 }).strict();
 
@@ -58,6 +59,7 @@ const whatsappMediaBody = z.object({
 const whatsappSendBody = z.object({
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']),
   text: z.string().max(3000).optional(),
+  messageBody: z.string().trim().min(1).max(2000).optional(),
   media: whatsappMediaBody.optional(),
   attachPass: z.boolean().optional()
 }).strict();
@@ -65,6 +67,7 @@ const whatsappSendBody = z.object({
 const whatsappBulkBody = z.object({
   confirm: z.boolean(),
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']),
+  messageBody: z.string().trim().min(1).max(2000).optional(),
   media: whatsappMediaBody.optional(),
   attachPass: z.boolean().optional(),
   guestIds: z.array(z.string().min(12)).max(200).optional(),
@@ -76,6 +79,10 @@ const whatsappBulkBody = z.object({
   }).strict().optional()
 }).strict();
 
+const whatsappPassTokenParams = validate(z.object({ params: z.object({ token: z.string().min(20).max(1200) }) }));
+router.get('/whatsapp-pass/:token/pase.png', whatsappPassTokenParams, controller.whatsappPassImage);
+router.get('/whatsapp-pass/:token', whatsappPassTokenParams, controller.whatsappPassImage);
+
 router.use(protect);
 router.get('/whatsapp/status', controller.whatsappStatus);
 router.get('/event/:eventId', controller.list);
@@ -83,6 +90,7 @@ router.get('/event/:eventId/export', controller.exportGuests);
 router.get('/:id/pass-image', validate(z.object({ params: z.object({ id: z.string().min(12) }) })), controller.downloadGuestPassImage);
 router.get('/event/:eventId/pass-images/zip', validate(z.object({ params: z.object({ eventId: z.string().min(12) }) })), controller.downloadAllPassesZip);
 router.get('/event/:eventId/whatsapp/logs', controller.listWhatsAppLogs);
+router.get('/event/:eventId/whatsapp/pass-status', controller.listWhatsAppPassStatus);
 router.post('/event/:eventId/whatsapp/bulk', validate(z.object({ params: z.object({ eventId: z.string().min(12) }), body: whatsappBulkBody })), controller.sendWhatsAppBulk);
 router.post('/check-in', validate(z.object({ body: z.object({ code: z.string().min(4) }).strict() })), controller.checkIn);
 router.post('/', validate(z.object({ body: guestBody })), controller.create);

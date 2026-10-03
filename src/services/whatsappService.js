@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const env = require('../config/env');
 const WhatsAppMessageLog = require('../models/WhatsAppMessageLog');
+const { customMessageRows } = require('./guestMessageBody');
 
 const TEMPLATE_BY_TYPE = {
   invitation: 'invitation_link',
@@ -130,7 +131,9 @@ function eventLocationText(event) {
   return [event?.venue?.name, event?.venue?.address].filter(Boolean).join(' - ');
 }
 
-function buildText({ guest, event, invitation, type, text }) {
+function buildText({ guest, event, invitation, type, text, messageBody }) {
+  const customRows = customMessageRows({ guest, messageBody, links: messageLinks(event, invitation, guest) });
+  if (customRows) return customRows.join('\n\n');
   if (text) return text;
   const title = event?.title || invitation?.content?.headline || 'nuestro evento';
   const date = eventDateText(event);
@@ -330,9 +333,9 @@ async function sendOpenWaMedia({ phone, media }) {
   return data;
 }
 
-function shouldFallbackFromOpenWa(error, normalizedMedia) {
+function shouldFallbackFromOpenWa(error, normalizedMedia, messageBody) {
   if (activeProvider() !== 'openwa' || fallbackProvider() !== 'meta' || !isFallbackEnabled()) return false;
-  if (normalizedMedia) return false;
+  if (normalizedMedia || messageBody) return false;
   if (error.name === 'AbortError') return true;
   if (!error.statusCode) return true;
   return error.statusCode === 501 || error.statusCode >= 500;
@@ -382,10 +385,15 @@ function normalizeMedia(media, fallbackCaption) {
   return normalized;
 }
 
-async function sendMessage({ owner, guest, event, invitation, type = 'invitation', text, media }) {
+async function sendMessage({ owner, guest, event, invitation, type = 'invitation', text, messageBody, media }) {
   const provider = activeProvider();
+  if (provider === 'meta' && messageBody) {
+    const error = new Error('Meta solo permite el texto de la plantilla aprobada. Quita el texto personalizado o usa OpenWA.');
+    error.statusCode = 400;
+    throw error;
+  }
   const phone = normalizePhone(guest.phone);
-  const finalText = buildText({ guest, event, invitation, type, text });
+  const finalText = buildText({ guest, event, invitation, type, text, messageBody });
   const normalizedMedia = normalizeMedia(media, finalText);
   const templateName = provider === 'meta' ? (TEMPLATE_BY_TYPE[type] || TEMPLATE_BY_TYPE.invitation) : undefined;
   const log = await WhatsAppMessageLog.create({
@@ -420,7 +428,7 @@ async function sendMessage({ owner, guest, event, invitation, type = 'invitation
     try {
       sendResult = await sendViaProvider(provider, { phone, type, guest, event, invitation, text: finalText, normalizedMedia });
     } catch (error) {
-      if (!shouldFallbackFromOpenWa(error, normalizedMedia)) throw error;
+      if (!shouldFallbackFromOpenWa(error, normalizedMedia, messageBody)) throw error;
       log.fallbackFrom = 'openwa';
       log.fallbackError = error.message;
       finalProvider = 'meta';
@@ -432,6 +440,12 @@ async function sendMessage({ owner, guest, event, invitation, type = 'invitation
       || providerResponse?.data?.id
       || providerResponse?.id
       || providerResponse?.messageId;
+    if (normalizedMedia && finalProvider === 'openwa' && !messageId) {
+      const error = new Error('OpenWA no devolvio un identificador para el mensaje con imagen; verifica el chat antes de reintentar.');
+      error.statusCode = 502;
+      error.providerResponse = providerResponse;
+      throw error;
+    }
     log.provider = finalProvider;
     log.templateName = finalProvider === 'meta' ? (TEMPLATE_BY_TYPE[type] || TEMPLATE_BY_TYPE.invitation) : undefined;
     log.payload = sendResult.payload;

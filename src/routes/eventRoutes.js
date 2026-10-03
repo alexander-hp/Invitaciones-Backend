@@ -29,6 +29,7 @@ const musicSettingsBody = z.object({
 const messageTypeBody = z.object({
   confirm: z.boolean().optional(),
   messageType: z.enum(['invitation', 'reminder', 'event_reminder', 'location_change', 'thanks']).optional(),
+  messageBody: z.string().trim().min(1).max(2000).optional(),
   guestIds: z.array(z.string().min(12)).max(200).optional(),
   attachPass: z.boolean().optional()
 }).strict();
@@ -131,8 +132,8 @@ const eventBody = z.object({
     }).strict()).max(20).optional(),
     digitalEnvelope: z.object({
       bank: z.string().optional(),
-      account: z.string().optional(),
-      clabe: z.string().optional(),
+      account: z.string().regex(/^\d{1,20}$/, 'La cuenta debe contener solo números y un máximo de 20 dígitos').or(z.literal('')).optional(),
+      clabe: z.string().regex(/^\d{18}$/, 'La CLABE debe contener exactamente 18 dígitos').or(z.literal('')).optional(),
       holder: z.string().optional(),
       note: z.string().optional(),
       qrImageUrl: z.string().url().optional().or(z.literal(''))
