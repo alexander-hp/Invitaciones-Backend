@@ -354,6 +354,7 @@ function eventLocationText(event) {
 
 function messageSubject(type, event) {
   const title = event?.title || 'Invitación';
+  if (type === 'pass') return `🎟️ Tu Pase de Acceso VIP - ${title}`;
   if (type === 'reminder') return `💌 Recordatorio RSVP - ${title}`;
   if (type === 'event_reminder') return `🎉 Recordatorio del evento - ${title}`;
   if (type === 'location_change') return `📍 Actualización de ubicación - ${title}`;
@@ -369,6 +370,15 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
   const location = eventLocationText(event);
   const greeting = `Hola ${guest.name},`;
   const rowsByType = {
+    pass: [
+      `${greeting} aquí tienes tu pase de entrada VIP para ${eventTitle}.`,
+      guest.tableName ? `Mesa: ${guest.tableName}` : '',
+      `Pases autorizados: ${(guest.allowedCompanions || 0) + 1} personas`,
+      date ? `Fecha: ${date}` : '',
+      location ? `Lugar: ${location}` : '',
+      publicUrl,
+      'Presenta este pase con tu código QR al ingresar al evento.'
+    ],
     reminder: [
       `${greeting} te recordamos confirmar tu asistencia a ${eventTitle}.`,
       date ? `Fecha: ${date}` : '',
@@ -412,6 +422,10 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
   const locationStr = escapeHtml(eventLocationText(event));
   const htmlPublicUrl = escapeHtml(publicUrl);
   const tableStr = escapeHtml(guest?.tableName || '');
+  const seatStr = escapeHtml(guest?.seatLabel || '');
+  const companionsCount = (guest?.allowedCompanions || 0) + 1;
+  const qrCodeVal = guest?.checkInCode || guest?.qrCode || guest?.invitationToken || guest?._id || '';
+  const qrImgUrl = qrCodeVal ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeVal)}` : '';
 
   let badgeText = '✨ INVITACIÓN DIGITAL';
   let ctaText = '✉️ Ver Mi Invitación Digital';
@@ -439,8 +453,29 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
     messageBody = escapeHtml(customBody.trim()).replace(/\r?\n/g, '<br>');
   }
 
-  const detailsHtml = (dateStr || locationStr || tableStr) ? `
+  const passQrBlock = (type === 'pass' && qrImgUrl) ? `
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:16px 0; text-align:center;">
+      <tr>
+        <td align="center">
+          <div style="display:inline-block; padding:12px; background:#ffffff; border:2px solid #e8dfd5; border-radius:16px; box-shadow:0 6px 16px rgba(0,0,0,0.06);">
+            <img src="${qrImgUrl}" alt="Código QR de Acceso" width="160" height="160" style="display:block; margin:0 auto; border-radius:8px;">
+            <p style="margin:8px 0 0; font-size:11px; font-weight:700; color:#888077; letter-spacing:1px; text-transform:uppercase;">Escanea para acceder</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  ` : '';
+
+  const detailsHtml = (dateStr || locationStr || tableStr || type === 'pass') ? `
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:24px 0; background-color:#fcfaf7; border:1px solid #efe4d8; border-radius:12px; padding:16px;">
+      ${passQrBlock ? `<tr><td style="padding-bottom:12px;">${passQrBlock}</td></tr>` : ''}
+      ${type === 'pass' ? `
+        <tr>
+          <td style="padding:6px 0; font-size:14px; color:#524c46;">
+            <strong style="color:#1e1b18;">👤 Invitado VIP:</strong> ${guestName}
+          </td>
+        </tr>
+      ` : ''}
       ${dateStr ? `
         <tr>
           <td style="padding:6px 0; font-size:14px; color:#524c46;">

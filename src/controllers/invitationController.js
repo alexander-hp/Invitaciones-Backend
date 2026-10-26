@@ -411,12 +411,11 @@ exports.update = asyncHandler(async (req, res) => {
   }
   const event = await Event.findOne({ _id: currentInvitation.event, owner: req.user._id }).select('_id plan date time createdAt');
   await assertInvitationPlanLimits(req.user, event, req.validated.body);
+  const updatePayload = { ...req.validated.body };
   if (currentInvitation.status === 'published' && req.validated.body.content && !currentInvitation.publishedContent) {
-    currentInvitation.publishedContent = plainInvitationContent(currentInvitation.content);
-    currentInvitation.markModified('publishedContent');
-    await currentInvitation.save();
+    updatePayload.publishedContent = plainInvitationContent(currentInvitation.content);
   }
-  const invitation = await Invitation.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, req.validated.body, { new: true });
+  const invitation = await Invitation.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, updatePayload, { new: true });
   if (!invitation) {
     const error = new Error('Invitacion no encontrada');
     error.statusCode = 404;
@@ -562,57 +561,71 @@ exports.requirePublicAccess = asyncHandler(async (req, _res, next) => {
 });
 
 exports.guestAccess = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings content');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
     throw error;
   }
 
-  if ((req.validated.body.email && !emailService.isEmailConfigured()) ||
-      (req.validated.body.phone && !req.validated.body.email && !whatsappService.isEnabled())) {
-    const error = new Error('El envío automático no está disponible. Usa tu enlace original o contacta al anfitrión.');
-    error.statusCode = 503;
-    throw error;
-  }
-
   const guest = await findGuestByPublicIdentity(invitation.event, req.validated.body);
-  const message = 'Si el contacto esta invitado, recibira un enlace personal para entrar. Revisa tambien la invitacion original.';
+  const defaultMessage = 'Si el contacto esta invitado, recibira su pase digital. Revisa tambien la invitacion original.';
   if (!guest || (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings))) {
-    return res.json({ message });
+    return res.json({ message: defaultMessage });
   }
 
-  if (!guest.invitationToken) {
-    const invitationToken = crypto.randomBytes(16).toString('hex');
-    await Guest.updateOne({ _id: guest._id, invitationToken: { $exists: false } }, { $set: { invitationToken } });
-    guest.invitationToken = (await Guest.findById(guest._id).select('invitationToken'))?.invitationToken;
+  if (!guest.checkInCode) {
+    guest.checkInCode = crypto.randomBytes(5).toString('hex').toUpperCase();
   }
+  if (!guest.qrCode) {
+    guest.qrCode = guest.checkInCode;
+  }
+  if (!guest.invitationToken) {
+    guest.invitationToken = crypto.randomBytes(16).toString('hex');
+  }
+  await Guest.updateOne({ _id: guest._id }, {
+    $set: {
+      checkInCode: guest.checkInCode,
+      qrCode: guest.qrCode,
+      invitationToken: guest.invitationToken
+    }
+  });
 
   const now = new Date();
-  const eligibleBefore = new Date(now.getTime() - 5 * 60 * 1000);
+  const eligibleBefore = new Date(now.getTime() - 2 * 60 * 1000);
   const claimed = await Guest.findOneAndUpdate({
     _id: guest._id,
     $or: [{ lastAccessLinkSentAt: { $exists: false } }, { lastAccessLinkSentAt: { $lt: eligibleBefore } }]
   }, { $set: { lastAccessLinkSentAt: now } });
-  if (!claimed) return res.json({ message });
 
   const event = await Event.findById(invitation.event);
   const link = whatsappService.publicInvitationUrl(invitation, guest, event);
-  try {
-    if (req.validated.body.email && guest.email) {
-      await emailService.sendMail({
-        to: guest.email,
-        subject: `Tu acceso a ${event?.title || 'la invitacion'}`,
-        text: `Hola ${guest.name}, abre tu invitacion personal: ${link}\nNo compartas este enlace; da acceso a tus datos del evento.`
-      });
-    } else if (req.validated.body.phone && guest.phone) {
-      await whatsappService.sendMessage({ owner: event.owner, guest, event, invitation, type: 'invitation' });
+  const guestSessionToken = signGuestSession(event, guest, invitation.slug);
+
+  if (claimed) {
+    try {
+      if (req.validated.body.email && guest.email && emailService.isEmailConfigured()) {
+        await emailService.sendGuestInvitationEmail({
+          to: guest.email,
+          guest,
+          event,
+          invitation,
+          publicUrl: link,
+          type: 'pass'
+        });
+      } else if (req.validated.body.phone && guest.phone && whatsappService.isEnabled()) {
+        await whatsappService.sendMessage({ owner: event.owner, guest, event, invitation, type: 'invitation' });
+      }
+    } catch (error) {
+      console.warn('No se pudo enviar el pase por correo/WhatsApp:', error.message);
     }
-  } catch (error) {
-    await Guest.updateOne({ _id: guest._id, lastAccessLinkSentAt: now }, { $unset: { lastAccessLinkSentAt: '' } });
-    console.warn('No se pudo enviar enlace de acceso a invitacion:', error.message);
   }
-  res.json({ message });
+
+  res.json({
+    message: `¡Pase encontrado para ${guest.name}!`,
+    guest: publicGuest(guest),
+    guestSessionToken
+  });
 });
 
 exports.guestByToken = asyncHandler(async (req, res) => {

@@ -114,6 +114,17 @@ const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
   mode: z.enum(['easy', 'advanced']),
+  documentType: z.enum(['web', 'pass']).optional(),
+  canvasSize: z.object({
+    preset: z.string().max(60).optional(),
+    name: z.string().max(80).optional(),
+    width: z.number().int().min(50).max(4000),
+    height: z.number().int().min(50).max(4000),
+    unit: z.enum(['px', 'mm', 'cm']).optional(),
+    widthMm: z.number().optional(),
+    heightMm: z.number().optional(),
+    orientation: z.enum(['portrait', 'landscape']).optional()
+  }).strict().optional(),
   presentationMode: z.enum(['continuous', 'chapters']).optional(),
   responsiveMode: z.enum(['shared', 'independent']).optional(),
   theme: z.object({
@@ -316,6 +327,8 @@ const invitationContentBody = z.object({
   privateAlbumEnabled: z.boolean().optional(),
   visualDesign: visualDesignBody.optional(),
   visualDesignDraft: visualDesignBody.optional(),
+  passDesign: visualDesignBody.optional(),
+  passDesignDraft: visualDesignBody.optional(),
   template: z.string().optional(),
   customHtml: z.string().optional(),
   customCss: z.string().optional(),

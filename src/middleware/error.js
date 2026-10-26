@@ -5,12 +5,26 @@ function notFound(req, _res, next) {
 }
 
 function errorHandler(error, _req, res, _next) {
-  const statusCode = error.statusCode || 500;
+  let statusCode = error.statusCode;
+  if (!statusCode && (error.name === 'ValidationError' || error.name === 'CastError')) {
+    statusCode = 400;
+  }
+  statusCode = statusCode || 500;
   if (statusCode === 400 && error.details) {
     console.error('Validation Error Details:', JSON.stringify(error.details, null, 2));
   }
+  let message = error.message || 'Error interno';
+  if (error.name === 'ValidationError' && error.errors) {
+    const errorKeys = Object.keys(error.errors);
+    if (errorKeys.length > 0) {
+      const messages = errorKeys.map((k) => error.errors[k]?.message || `${k} es inválido`).filter(Boolean);
+      if (messages.length > 0) {
+        message = messages.join('. ');
+      }
+    }
+  }
   res.status(statusCode).json({
-    message: error.message || 'Error interno',
+    message,
     details: error.details || undefined
   });
 }

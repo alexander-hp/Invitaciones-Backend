@@ -122,8 +122,8 @@ const eventSchema = new mongoose.Schema({
     }],
     digitalEnvelope: {
       bank: String,
-      account: { type: String, trim: true, maxlength: 20, match: /^\d*$/ },
-      clabe: { type: String, trim: true, maxlength: 18, match: /^(?:\d{18})?$/ },
+      account: { type: String, trim: true, maxlength: 20, match: [/^\d*$/, 'El número de cuenta solo debe contener dígitos'] },
+      clabe: { type: String, trim: true, maxlength: 18, match: [/^(?:\d{18})?$/, 'La CLABE debe contener exactamente 18 dígitos'] },
       holder: String,
       note: String,
       qrImageUrl: String
