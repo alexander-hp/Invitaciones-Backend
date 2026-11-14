@@ -295,8 +295,10 @@ const invitationSchema = new mongoose.Schema({
           style: { type: mongoose.Schema.Types.Mixed, default: {} }
         }],
         _id: false
-      }]
+      }],
+      accessScreen: { type: mongoose.Schema.Types.Mixed }
     },
+    accessScreen: { type: mongoose.Schema.Types.Mixed },
     visualDesignDraft: { type: mongoose.Schema.Types.Mixed },
     passDesign: { type: mongoose.Schema.Types.Mixed },
     passDesignDraft: { type: mongoose.Schema.Types.Mixed },

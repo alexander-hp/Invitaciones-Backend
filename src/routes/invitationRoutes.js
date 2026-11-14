@@ -110,6 +110,39 @@ const visualPluginDesignBody = z.object({
   minHeight: z.number().int().min(240).max(1600).optional(),
   parts: z.record(z.string().max(80), visualPluginPartDesignBody).optional()
 }).strict();
+const visualAccessScreenBody = z.object({
+  enabled: z.boolean().optional(),
+  title: z.string().max(160).optional(),
+  subtitle: z.string().max(300).optional(),
+  inputLabel: z.string().max(120).optional(),
+  inputPlaceholder: z.string().max(120).optional(),
+  buttonText: z.string().max(80).optional(),
+  badgeText: z.string().max(80).optional(),
+  showBadge: z.boolean().optional(),
+  showIcon: z.boolean().optional(),
+  iconName: z.string().max(80).optional(),
+  logoUrl: z.string().max(2000).optional(),
+  cardStyle: z.enum(['glass', 'solid', 'minimal', 'bordered']).optional(),
+  cardBgColor: z.string().max(40).optional(),
+  cardOpacity: z.number().min(0).max(100).optional(),
+  cardRadius: z.number().min(0).max(60).optional(),
+  cardShadow: z.enum(['none', 'soft', 'elevated', 'glow']).optional(),
+  backgroundType: z.enum(['color', 'gradient', 'image']).optional(),
+  backgroundColor: z.string().max(40).optional(),
+  backgroundGradient: z.string().max(300).optional(),
+  backgroundImageUrl: z.string().max(2000).optional(),
+  backgroundOverlayOpacity: z.number().min(0).max(100).optional(),
+  backgroundBlur: z.number().min(0).max(40).optional(),
+  primaryColor: z.string().max(40).optional(),
+  textColor: z.string().max(40).optional(),
+  accentColor: z.string().max(40).optional(),
+  buttonBgColor: z.string().max(40).optional(),
+  buttonTextColor: z.string().max(40).optional(),
+  buttonRadius: z.number().min(0).max(60).optional(),
+  headingFont: z.string().max(120).optional(),
+  bodyFont: z.string().max(120).optional()
+}).passthrough();
+
 const visualDesignBody = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -164,7 +197,8 @@ const visualDesignBody = z.object({
     pluginSettings: visualPluginSettingsBody.optional(),
     pluginDesign: visualPluginDesignBody.optional(),
     layers: z.array(visualLayerBody).max(100)
-  }).strict()).max(50)
+  }).strict()).max(50),
+  accessScreen: visualAccessScreenBody.optional()
 }).strict();
 const invitationContentBody = z.object({
   template: z.string().optional(),
@@ -185,6 +219,7 @@ const invitationContentBody = z.object({
   coverImageUrl: z.string().optional(),
   gallery: z.array(z.string()).optional(),
   galleryItems: z.array(z.object({
+    _id: z.string().optional(),
     id: z.string().max(100).optional(),
     url: z.string().url().or(z.literal('')),
     featured: z.boolean().optional(),
@@ -203,6 +238,7 @@ const invitationContentBody = z.object({
     intervalSeconds: z.number().int().min(2).max(30).optional()
   }).strict().optional(),
   itinerary: z.array(z.object({
+    _id: z.string().optional(),
     time: z.string().optional(),
     title: z.string().optional(),
     description: z.string().optional(),
@@ -211,6 +247,7 @@ const invitationContentBody = z.object({
     locationUrl: optionalHttpUrl
   }).strict()).optional(),
   locations: z.array(z.object({
+    _id: z.string().optional(),
     type: z.string().optional(),
     name: z.string().optional(),
     address: z.string().optional(),
@@ -240,6 +277,7 @@ const invitationContentBody = z.object({
   dressCodeOption1: z.string().optional(),
   dressCodeOption2: z.string().optional(),
   giftRegistry: z.array(z.object({
+    _id: z.string().optional(),
     store: z.string().optional(),
     title: z.string().optional(),
     label: z.string().optional(),
@@ -303,6 +341,7 @@ const invitationContentBody = z.object({
     songRequests: z.boolean().optional()
   }).strict().optional(),
   lodging: z.array(z.object({
+    _id: z.string().optional(),
     name: z.string().max(160).optional(),
     description: z.string().max(1200).optional(),
     url: z.string().url().or(z.literal('')).optional(),
@@ -332,7 +371,8 @@ const invitationContentBody = z.object({
   template: z.string().optional(),
   customHtml: z.string().optional(),
   customCss: z.string().optional(),
-  customPageApproved: z.boolean().optional()
+  customPageApproved: z.boolean().optional(),
+  accessScreen: visualAccessScreenBody.optional()
 }).strict();
 const rsvpSettingsBody = z.object({
   deadline: z.string().datetime().or(z.string().min(1)).or(z.date()).optional(),
@@ -394,13 +434,26 @@ const dedicationBody = z.object({
   visibility: z.enum(['public', 'hosts_only']).optional()
 }).strict();
 
+const selfRegisterGuestBody = z.object({
+  name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(120),
+  phone: z.string().trim().max(30).optional().or(z.literal('')),
+  email: z.string().trim().email('Correo no válido').optional().or(z.literal('')),
+  companions: z.number().int().min(0).max(20).optional(),
+  companionNames: z.array(z.string().trim().min(1).max(120)).max(20).optional(),
+  notes: z.string().trim().max(500).optional().or(z.literal('')),
+  group: z.string().trim().max(60).optional().or(z.literal('')),
+  status: z.enum(['confirmed', 'pending', 'declined']).optional()
+}).strict();
+
 router.get('/public/:slug', publicInvitationLimiter, controller.publicBySlug);
+router.post('/public/:slug/self-register-guest', publicInvitationLimiter, validate(z.object({ body: selfRegisterGuestBody })), controller.selfRegisterGuest);
 router.get('/public/:slug/album', publicInvitationLimiter, controller.requirePublicAccess, albumController.publicApproved);
 router.get('/public/:slug/dedications', publicInvitationLimiter, controller.requirePublicAccess, dedicationController.listInvitationPublic);
 router.get('/public/:slug/guest-token/:token', guestAccessLimiter, controller.guestByToken);
 router.post('/public/:slug/guest-access', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false }), validate(z.object({ body: z.object({
   email: z.string().email().optional(),
-  phone: z.string().min(6).max(30).optional()
+  phone: z.string().min(6).max(30).optional(),
+  pin: z.string().trim().max(30).optional()
 }).strict().refine((body) => body.email || body.phone, 'Email o telefono requerido') })), controller.guestAccess);
 router.get('/public/:slug/my-status', guestAccessLimiter, controller.guestActivity);
 router.patch('/public/:slug/my-status/rsvp', guestAccessLimiter, validate(z.object({ body: z.object({

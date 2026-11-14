@@ -276,15 +276,22 @@ exports.publicGuestByToken = asyncHandler(async (req, res) => {
   const guest = await Guest.findOne({
     event: event._id,
     invitationToken: String(req.params.token || '').trim()
-  }).select('name email allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt');
+  }).select('name email allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt invitationToken accessPin personalizedLinkGeneratedAt');
   if (!guest) {
     const error = new Error('Link personalizado invalido');
     error.statusCode = 404;
     throw error;
   }
-  guest.invitationOpenedAt = guest.invitationOpenedAt || new Date();
-  if (guest.communicationStatus === 'sent') guest.communicationStatus = 'opened';
-  await guest.save();
+  const openedAt = guest.invitationOpenedAt || new Date();
+  const newCommStatus = guest.communicationStatus === 'sent' ? 'opened' : guest.communicationStatus;
+  await Guest.updateOne({ _id: guest._id }, {
+    $set: {
+      invitationOpenedAt: openedAt,
+      communicationStatus: newCommStatus
+    }
+  });
+  guest.invitationOpenedAt = openedAt;
+  guest.communicationStatus = newCommStatus;
   res.json({ guest: publicGuest(guest) });
 });
 

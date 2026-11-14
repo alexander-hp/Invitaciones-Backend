@@ -78,7 +78,7 @@ function publicInvitation(invitation, { allowWhiteLabel = false, useDraft = fals
     ? invitation.publishedContent
     : invitation.content;
   const content = plainInvitationContent(sourceContent);
-  if (useDraft && content.visualDesignDraft?.sections?.length) {
+  if (useDraft && content.visualDesignDraft?.sections?.length && (!content.template || content.template === 'visual-builder')) {
     content.visualDesign = content.visualDesignDraft;
     content.template = 'visual-builder';
   }
@@ -150,6 +150,57 @@ function publicInvitation(invitation, { allowWhiteLabel = false, useDraft = fals
   };
 }
 
+function buildAccessGateData(invitation) {
+  const publishedContent = plainInvitationContent(invitation.publishedContent || {});
+  const baseContent = plainInvitationContent(invitation.content || {});
+  const isPublished = invitation.status === 'published' && Object.keys(publishedContent).length > 0;
+  const content = isPublished ? publishedContent : (Object.keys(publishedContent).length ? publishedContent : baseContent);
+  const visualDesign = (isPublished ? publishedContent.visualDesign : null) || baseContent.visualDesign || baseContent.visualDesignDraft || publishedContent.visualDesign || {};
+  const rawAccessScreen = isPublished && (publishedContent.accessScreen || publishedContent.visualDesign?.accessScreen)
+    ? {
+        ...(baseContent.accessScreen || {}),
+        ...(publishedContent.accessScreen || {}),
+        ...(publishedContent.visualDesign?.accessScreen || {})
+      }
+    : {
+        ...(baseContent.accessScreen || {}),
+        ...(baseContent.visualDesign?.accessScreen || {}),
+        ...(publishedContent.accessScreen || {}),
+        ...(publishedContent.visualDesign?.accessScreen || {}),
+        ...(baseContent.visualDesignDraft?.accessScreen || {})
+      };
+  let safeAccessScreen = null;
+  if (Object.keys(rawAccessScreen).length > 0) {
+    const { eventPin, ...rest } = rawAccessScreen;
+    safeAccessScreen = {
+      ...rest,
+      responsiveMode: visualDesign.responsiveMode || 'shared',
+      requirePin: Boolean(rawAccessScreen.requirePin),
+      pinMode: rawAccessScreen.pinMode || 'event',
+      pinInputLabel: rawAccessScreen.pinInputLabel || 'NIP de acceso',
+      pinInputPlaceholder: rawAccessScreen.pinInputPlaceholder || 'Ingresa tu NIP',
+      allowSelfRegistration: Boolean(rawAccessScreen.allowSelfRegistration),
+      selfRegTitle: rawAccessScreen.selfRegTitle || 'Solicitar Invitación',
+      selfRegSubtitle: rawAccessScreen.selfRegSubtitle || 'Ingresa tus datos para solicitar acceso a la lista oficial.',
+      selfRegButtonText: rawAccessScreen.selfRegButtonText || 'ENVIAR SOLICITUD',
+      selfRegSuccessMessage: rawAccessScreen.selfRegSuccessMessage || '¡Solicitud recibida! Los organizadores revisarán tu petición y te enviarán tu NIP y pase por correo.',
+      selfRegGroup: rawAccessScreen.selfRegGroup || 'Solicitudes de Acceso',
+      selfRegRequireApproval: rawAccessScreen.selfRegRequireApproval !== false,
+      selfRegMaxGuests: Number(rawAccessScreen.selfRegMaxGuests || 0)
+    };
+  }
+  return {
+    slug: invitation.slug,
+    eventTitle: invitation.event?.title || content.headline || 'Acceso al Evento',
+    accessMode: invitation.accessMode,
+    accessScreen: safeAccessScreen,
+    responsiveMode: visualDesign.responsiveMode || 'shared',
+    theme: visualDesign.theme || null,
+    palette: content.palette || null,
+    coverImageUrl: content.coverImageUrl || null
+  };
+}
+
 function publicGuest(guest) {
   return {
     id: guest._id,
@@ -206,13 +257,13 @@ function normalizePhoneDigits(value) {
 async function findGuestByPublicIdentity(eventId, { email, phone }) {
   const emailNormalized = email ? email.toLowerCase().trim() : '';
   if (emailNormalized) {
-    const guest = await Guest.findOne({ event: eventId, email: emailNormalized }).select('name email phone invitationToken lastAccessLinkSentAt group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+    const guest = await Guest.findOne({ event: eventId, email: emailNormalized }).select('name email phone invitationToken accessPin lastAccessLinkSentAt group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
     if (guest) return guest;
   }
   const phoneDigits = normalizePhoneDigits(phone);
   if (!phoneDigits) return null;
   if (phoneDigits.length < 10) return null;
-  const candidates = await Guest.find({ event: eventId, phone: { $exists: true, $ne: '' } }).select('name email phone invitationToken lastAccessLinkSentAt group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
+  const candidates = await Guest.find({ event: eventId, phone: { $exists: true, $ne: '' } }).select('name email phone invitationToken accessPin lastAccessLinkSentAt group roles tags relationshipLabel visibilityGroup allowedCompanions status checkInCode qrCode tableName seatLabel companions');
   return candidates.find((guest) => {
     const stored = normalizePhoneDigits(guest.phone);
     return stored && stored.slice(-10) === phoneDigits.slice(-10);
@@ -446,11 +497,21 @@ exports.publish = asyncHandler(async (req, res) => {
       throw error;
     }
     invitation.content.visualDesign = plainInvitationContent(draft);
+    if (draft.accessScreen) {
+      invitation.content.accessScreen = plainInvitationContent(draft.accessScreen);
+      invitation.content.visualDesign.accessScreen = plainInvitationContent(draft.accessScreen);
+    }
     invitation.content.template = 'visual-builder';
     invitation.markModified('content');
   }
   const publishedContent = plainInvitationContent(invitation.content);
+  if (invitation.content?.accessScreen) {
+    publishedContent.accessScreen = plainInvitationContent(invitation.content.accessScreen);
+  }
   delete publishedContent.visualDesignDraft;
+  if (publishedContent.template && publishedContent.template !== 'visual-builder' && publishedContent.visualDesign) {
+    publishedContent.visualDesign.active = false;
+  }
   invitation.publishedContent = publishedContent;
   invitation.markModified('publishedContent');
   invitation.status = 'published';
@@ -530,11 +591,18 @@ exports.publicBySlug = asyncHandler(async (req, res) => {
   }
 
   if (invitation.accessMode === 'guest_list' || invitation.accessMode === 'specific_users') {
-    const { guest } = await verifyGuestSessionForEvent(req, invitation.event, invitation.slug);
-    if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
-      const error = new Error('Esta invitacion no esta disponible para tu acceso');
-      error.statusCode = 403;
-      throw error;
+    try {
+      const { guest } = await verifyGuestSessionForEvent(req, invitation.event, invitation.slug);
+      if (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings)) {
+        const error = new Error('Esta invitacion no esta disponible para tu acceso');
+        error.statusCode = 403;
+        error.accessGate = buildAccessGateData(invitation);
+        throw error;
+      }
+    } catch (authError) {
+      authError.statusCode = authError.statusCode || 401;
+      authError.accessGate = buildAccessGateData(invitation);
+      throw authError;
     }
   }
   const limits = getEffectivePlanLimits(invitation.owner, invitation.event);
@@ -561,7 +629,7 @@ exports.requirePublicAccess = asyncHandler(async (req, _res, next) => {
 });
 
 exports.guestAccess = asyncHandler(async (req, res) => {
-  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings content');
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' }).select('event slug accessMode rsvpSettings content publishedContent');
   if (!invitation) {
     const error = new Error('Invitacion no disponible');
     error.statusCode = 404;
@@ -572,6 +640,42 @@ exports.guestAccess = asyncHandler(async (req, res) => {
   const defaultMessage = 'Si el contacto esta invitado, recibira su pase digital. Revisa tambien la invitacion original.';
   if (!guest || (invitation.accessMode === 'specific_users' && !guestMatchesSpecificRules(guest, invitation.rsvpSettings))) {
     return res.json({ message: defaultMessage });
+  }
+
+  const publishedContent = plainInvitationContent(invitation.publishedContent || {});
+  const baseContent = plainInvitationContent(invitation.content || {});
+  const content = Object.keys(publishedContent).length ? publishedContent : baseContent;
+  const accessScreen = {
+    ...(baseContent.accessScreen || {}),
+    ...(baseContent.visualDesign?.accessScreen || {}),
+    ...(publishedContent.accessScreen || {}),
+    ...(publishedContent.visualDesign?.accessScreen || {}),
+    ...(baseContent.visualDesignDraft?.accessScreen || {})
+  };
+
+  if (accessScreen.requirePin) {
+    const providedPin = String(req.validated.body.pin || '').trim();
+    if (!providedPin) {
+      const error = new Error('Se requiere el NIP de acceso para ingresar.');
+      error.statusCode = 401;
+      throw error;
+    }
+
+    if (accessScreen.pinMode === 'individual') {
+      const expectedPin = String(guest.accessPin || '').trim();
+      if (!expectedPin || providedPin.toLowerCase() !== expectedPin.toLowerCase()) {
+        const error = new Error('El NIP ingresado no es válido para este invitado. Revisa tu mensaje o invitación.');
+        error.statusCode = 401;
+        throw error;
+      }
+    } else {
+      const expectedPin = String(accessScreen.eventPin || '').trim();
+      if (expectedPin && providedPin.toLowerCase() !== expectedPin.toLowerCase()) {
+        const error = new Error('El NIP de acceso del evento es incorrecto.');
+        error.statusCode = 401;
+        throw error;
+      }
+    }
   }
 
   if (!guest.checkInCode) {
@@ -639,7 +743,7 @@ exports.guestByToken = asyncHandler(async (req, res) => {
   const guest = await Guest.findOne({
     event: invitation.event,
     invitationToken: String(req.params.token || '').trim()
-  }).select('name email group roles tags relationshipLabel visibilityGroup allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt');
+  }).select('name email group roles tags relationshipLabel visibilityGroup allowedCompanions status communicationStatus checkInCode qrCode tableName seatLabel companions invitationOpenedAt invitationToken accessPin personalizedLinkGeneratedAt');
 
   if (!guest) {
     const error = new Error('Link personalizado invalido');
@@ -652,9 +756,16 @@ exports.guestByToken = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  guest.invitationOpenedAt = guest.invitationOpenedAt || new Date();
-  if (guest.communicationStatus === 'sent') guest.communicationStatus = 'opened';
-  await guest.save();
+  const openedAt = guest.invitationOpenedAt || new Date();
+  const newCommStatus = guest.communicationStatus === 'sent' ? 'opened' : guest.communicationStatus;
+  await Guest.updateOne({ _id: guest._id }, {
+    $set: {
+      invitationOpenedAt: openedAt,
+      communicationStatus: newCommStatus
+    }
+  });
+  guest.invitationOpenedAt = openedAt;
+  guest.communicationStatus = newCommStatus;
 
   const event = await Event.findById(invitation.event).select('_id');
   res.json({ guest: publicGuest(guest), guestSessionToken: signGuestSession(event, guest, invitation.slug) });
@@ -682,3 +793,158 @@ exports.guestActivity = asyncHandler(async (req, res) => {
   ]);
   res.json(publicGuestActivity({ guest, rsvp, albumUploads, songRequests, dedications }));
 });
+
+exports.selfRegisterGuest = asyncHandler(async (req, res) => {
+  const invitation = await Invitation.findOne({ slug: req.params.slug, status: 'published' })
+    .populate('owner', 'email name plan planExpiresAt subscriptionStatus subscriptionPlan subscriptionCurrentPeriodEnd');
+  if (!invitation) {
+    const error = new Error('Invitación no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+  const event = await Event.findById(invitation.event);
+  if (!event) {
+    const error = new Error('Evento no disponible');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { name, phone, email, companions, companionNames, notes, group, status } = req.validated.body;
+
+  // Plan limits verification
+  const ownerPlanUser = invitation.owner;
+  const limits = getEffectivePlanLimits(ownerPlanUser, event);
+  const currentGuestCount = await Guest.countDocuments({ owner: event.owner, event: event._id });
+  if (currentGuestCount >= limits.guests) {
+    const error = new Error(`Se ha alcanzado el límite máximo de ${limits.guests} invitados permitidos para tu plan.`);
+    error.statusCode = 402;
+    throw error;
+  }
+
+  // Section-specific max guests limit verification (if configured by the host)
+  const selfRegSection = invitation.content?.visualDesign?.sections?.find((s) => s.type === 'selfRegister' && s.enabled !== false);
+  const sectionMaxGuests = Number(selfRegSection?.pluginSettings?.maxGuests || 0);
+  if (sectionMaxGuests > 0) {
+    const assignedGroup = (group && group.trim()) || selfRegSection?.pluginSettings?.defaultGroup || 'Auto-registro';
+    const formGuestCount = await Guest.countDocuments({ owner: event.owner, event: event._id, group: assignedGroup });
+    if (formGuestCount >= sectionMaxGuests) {
+      const error = new Error(`Se ha alcanzado el cupo máximo de ${sectionMaxGuests} personas registradas por este formulario.`);
+      error.statusCode = 409;
+      throw error;
+    }
+  }
+
+  const emailNormalized = email && email.trim() ? email.toLowerCase().trim() : undefined;
+  const rawDigits = phone ? String(phone).replace(/\D/g, '') : '';
+  let phoneNormalized = undefined;
+  if (rawDigits) {
+    if (rawDigits.length === 10) phoneNormalized = `+52${rawDigits}`;
+    else if (rawDigits.startsWith('521') && rawDigits.length === 13) phoneNormalized = `+52${rawDigits.slice(3)}`;
+    else phoneNormalized = `+${rawDigits}`;
+  }
+
+  // Check if a guest with this contact already exists in this event
+  let guest = null;
+  if (emailNormalized || phoneNormalized) {
+    const contactOr = [];
+    if (emailNormalized) contactOr.push({ email: emailNormalized });
+    if (phoneNormalized) contactOr.push({ phone: phoneNormalized });
+    guest = await Guest.findOne({ owner: event.owner, event: event._id, $or: contactOr });
+  }
+
+  const companionsCount = Number(companions || 0);
+  const guestStatus = ['confirmed', 'pending', 'declined'].includes(status) ? status : 'confirmed';
+  const assignedGroup = (group && group.trim()) || 'Auto-registro';
+
+  let isNew = false;
+  if (guest) {
+    guest.name = name.trim();
+    if (emailNormalized) guest.email = emailNormalized;
+    if (phoneNormalized) guest.phone = phoneNormalized;
+    guest.status = guestStatus;
+    guest.allowedCompanions = Math.max(guest.allowedCompanions || 0, companionsCount);
+    if (!guest.group) guest.group = assignedGroup;
+    if (Array.isArray(companionNames) && companionNames.length > 0) {
+      const companionList = companionNames.map((cn) => ({ name: String(cn || '').trim() })).filter((c) => c.name);
+      if (companionList.length > 0) guest.companions = companionList;
+    }
+    await guest.save();
+  } else {
+    isNew = true;
+    const companionList = Array.isArray(companionNames)
+      ? companionNames.map((cn) => ({ name: String(cn || '').trim() })).filter((c) => c.name)
+      : [];
+
+    guest = await Guest.create({
+      owner: event.owner,
+      event: event._id,
+      name: name.trim(),
+      email: emailNormalized,
+      phone: phoneNormalized,
+      group: assignedGroup,
+      allowedCompanions: companionsCount,
+      companions: companionList,
+      status: guestStatus,
+      communicationStatus: 'confirmed'
+    });
+  }
+
+  // Sync RSVP record
+  try {
+    const existingRsvp = await Rsvp.findOne({ invitation: invitation._id, guest: guest._id });
+    const rsvpData = {
+      invitation: invitation._id,
+      event: event._id,
+      guest: guest._id,
+      name: guest.name,
+      email: guest.email,
+      emailNormalized: guest.email ? guest.email.toLowerCase().trim() : undefined,
+      response: guestStatus === 'declined' ? 'declined' : 'confirmed',
+      companions: companionsCount,
+      companionNames: Array.isArray(companionNames) ? companionNames.filter(Boolean) : [],
+      attendingCount: guestStatus === 'confirmed' ? (1 + companionsCount) : 0,
+      message: notes ? String(notes).trim() : undefined
+    };
+
+    if (existingRsvp) {
+      Object.assign(existingRsvp, rsvpData);
+      await existingRsvp.save();
+    } else {
+      await Rsvp.create(rsvpData);
+    }
+  } catch (rsvpErr) {
+    console.warn('Error sincronizando RSVP en auto-registro:', rsvpErr.message);
+  }
+
+  // Log activity
+  try {
+    logEventActivity({
+      eventId: event._id,
+      actorType: 'guest',
+      category: 'guest',
+      action: isNew ? 'guest_self_registered' : 'guest_self_updated',
+      description: isNew
+        ? `Auto-registro de invitado: ${guest.name}${companionsCount > 0 ? ` (+${companionsCount} pases)` : ''}`
+        : `Actualización de auto-registro: ${guest.name}`,
+      metadata: { guestId: guest._id, group: guest.group, companions: companionsCount, status: guest.status }
+    });
+  } catch (logErr) {
+    console.warn('Error registrando log de auto-registro:', logErr.message);
+  }
+
+  const guestSessionToken = signGuestSession(event, guest, invitation.slug);
+
+  res.status(isNew ? 201 : 200).json({
+    ok: true,
+    isNew,
+    guest: publicGuest(guest),
+    guestSessionToken,
+    message: isNew
+      ? '¡Registro exitoso! Ya estás en la lista oficial de invitados.'
+      : '¡Tus datos han sido actualizados en la lista de invitados!'
+  });
+});
+
+exports.buildAccessGateData = buildAccessGateData;
+exports.plainInvitationContent = plainInvitationContent;
+

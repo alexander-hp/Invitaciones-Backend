@@ -57,6 +57,7 @@ const eventBody = z.object({
     musicUrl: z.string().url().optional().or(z.literal('')),
     musicSettings: musicSettingsBody.optional(),
     audioSections: z.array(z.object({
+      _id: z.string().optional(),
       title: z.string().optional(),
       url: z.string().url(),
       description: z.string().optional()
@@ -64,6 +65,7 @@ const eventBody = z.object({
     sectionMusic: z.record(z.string(), z.string()).optional(),
     sectionMusicCues: z.record(z.string(), musicCueBody).optional(),
     locations: z.array(z.object({
+      _id: z.string().optional(),
       type: z.string().optional(),
       name: z.string().optional(),
       address: z.string().optional(),
@@ -82,6 +84,7 @@ const eventBody = z.object({
       priority: z.number().int().min(0).max(1000).optional()
     }).strict()).max(20).optional(),
     sections: z.array(z.object({
+      _id: z.string().optional(),
       key: z.string().optional(),
       type: z.enum(['text', 'image', 'video', 'cta', 'iframe', 'timeline', 'story', 'dress_code', 'gift_registry', 'dedications', 'lodging', 'faq', 'people']).optional(),
       title: z.string().optional(),
@@ -122,6 +125,7 @@ const eventBody = z.object({
       autoApproveDedications: z.boolean().optional()
     }).strict().optional(),
     giftRegistry: z.array(z.object({
+      _id: z.string().optional(),
       store: z.string().optional(),
       title: z.string().optional(),
       label: z.string().optional(),
@@ -156,7 +160,7 @@ const eventBody = z.object({
   date: z.string().or(z.date()),
   time: z.string().max(30).optional().or(z.literal('')), 
   venue: z.object({ name: z.string().optional(), address: z.string().optional(), mapUrl: z.string().optional() }).optional(),
-  agenda: z.array(z.object({ time: z.string(), title: z.string(), description: z.string().optional() })).optional(),
+  agenda: z.array(z.object({ _id: z.string().optional(), time: z.string(), title: z.string(), description: z.string().optional() })).optional(),
   status: z.enum(['draft', 'published', 'archived']).optional()
 }).strict();
 const eventUpdateBody = eventBody.partial().refine((body) => Object.keys(body).length > 0, 'Se requiere al menos un campo para actualizar');

@@ -38,6 +38,39 @@ const visualPluginDesign = z.object({
   minHeight: z.number().int().min(240).max(1600).optional(),
   parts: z.record(z.string().max(80), visualPluginPartDesign).optional()
 }).strict();
+const visualAccessScreen = z.object({
+  enabled: z.boolean().optional(),
+  title: z.string().max(160).optional(),
+  subtitle: z.string().max(300).optional(),
+  inputLabel: z.string().max(120).optional(),
+  inputPlaceholder: z.string().max(120).optional(),
+  buttonText: z.string().max(80).optional(),
+  badgeText: z.string().max(80).optional(),
+  showBadge: z.boolean().optional(),
+  showIcon: z.boolean().optional(),
+  iconName: z.string().max(80).optional(),
+  logoUrl: z.string().max(2000).optional(),
+  cardStyle: z.enum(['glass', 'solid', 'minimal', 'bordered']).optional(),
+  cardBgColor: z.string().max(40).optional(),
+  cardOpacity: z.number().min(0).max(100).optional(),
+  cardRadius: z.number().min(0).max(60).optional(),
+  cardShadow: z.enum(['none', 'soft', 'elevated', 'glow']).optional(),
+  backgroundType: z.enum(['color', 'gradient', 'image']).optional(),
+  backgroundColor: z.string().max(40).optional(),
+  backgroundGradient: z.string().max(300).optional(),
+  backgroundImageUrl: z.string().max(2000).optional(),
+  backgroundOverlayOpacity: z.number().min(0).max(100).optional(),
+  backgroundBlur: z.number().min(0).max(40).optional(),
+  primaryColor: z.string().max(40).optional(),
+  textColor: z.string().max(40).optional(),
+  accentColor: z.string().max(40).optional(),
+  buttonBgColor: z.string().max(40).optional(),
+  buttonTextColor: z.string().max(40).optional(),
+  buttonRadius: z.number().min(0).max(60).optional(),
+  headingFont: z.string().max(120).optional(),
+  bodyFont: z.string().max(120).optional()
+}).passthrough();
+
 const visualDesign = z.object({
   version: z.number().int().min(1).max(10),
   active: z.boolean(),
@@ -74,7 +107,8 @@ const visualDesign = z.object({
       layouts: z.object({ mobile: visualLayout.optional(), tablet: visualLayout.optional(), desktop: visualLayout.optional() }).strict().optional(),
       style: z.record(z.string(), styleValue).optional()
     }).strict()).max(100)
-  }).strict()).max(50)
+  }).strict()).max(50),
+  accessScreen: visualAccessScreen.optional()
 }).strict();
 const body = z.object({
   name: z.string().min(2).max(120),

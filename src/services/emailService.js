@@ -369,11 +369,21 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
   const date = eventDateText(event);
   const location = eventLocationText(event);
   const greeting = `Hola ${guest.name},`;
+  const accessScreen = {
+    ...(invitation?.content?.accessScreen || {}),
+    ...(invitation?.content?.visualDesign?.accessScreen || {}),
+    ...(invitation?.publishedContent?.accessScreen || {}),
+    ...(invitation?.publishedContent?.visualDesign?.accessScreen || {}),
+    ...(invitation?.content?.visualDesignDraft?.accessScreen || {})
+  };
+  const activePin = accessScreen.requirePin ? (accessScreen.pinMode === 'event' ? accessScreen.eventPin : guest.accessPin) : '';
+  const pinLine = activePin ? `🔑 Tu NIP de acceso: ${activePin}` : '';
   const rowsByType = {
     pass: [
       `${greeting} aquí tienes tu pase de entrada VIP para ${eventTitle}.`,
       guest.tableName ? `Mesa: ${guest.tableName}` : '',
       `Pases autorizados: ${(guest.allowedCompanions || 0) + 1} personas`,
+      pinLine,
       date ? `Fecha: ${date}` : '',
       location ? `Lugar: ${location}` : '',
       publicUrl,
@@ -381,12 +391,14 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
     ],
     reminder: [
       `${greeting} te recordamos confirmar tu asistencia a ${eventTitle}.`,
+      pinLine,
       date ? `Fecha: ${date}` : '',
       publicUrl,
       'Tu confirmación nos ayuda a organizar mejor el evento.'
     ],
     event_reminder: [
       `${greeting} te compartimos un recordatorio para ${eventTitle}.`,
+      pinLine,
       date ? `Fecha: ${date}` : '',
       location ? `Lugar: ${location}` : '',
       publicUrl,
@@ -394,6 +406,7 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
     ],
     location_change: [
       `${greeting} te compartimos una actualización de ubicación para ${eventTitle}.`,
+      pinLine,
       location ? `Lugar: ${location}` : '',
       publicUrl,
       'Revisa el enlace para ver los detalles actualizados.'
@@ -406,13 +419,16 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
     ],
     invitation: [
       `${greeting} te compartimos tu invitación digital para ${eventTitle}.`,
+      guest.tableName ? `Mesa: ${guest.tableName}` : '',
+      `Pases autorizados: ${(guest.allowedCompanions || 0) + 1} personas`,
+      pinLine,
       date ? `Fecha: ${date}` : '',
       location ? `Lugar: ${location}` : '',
       publicUrl,
       'Por favor confirma tu asistencia desde el enlace.'
     ]
   };
-  return rowsByType[type] || rowsByType.invitation;
+  return (rowsByType[type] || rowsByType.invitation).filter(Boolean);
 }
 
 function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invitation', messageBody: customBody }) {
@@ -424,6 +440,17 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
   const tableStr = escapeHtml(guest?.tableName || '');
   const seatStr = escapeHtml(guest?.seatLabel || '');
   const companionsCount = (guest?.allowedCompanions || 0) + 1;
+  const accessScreen = {
+    ...(invitation?.content?.accessScreen || {}),
+    ...(invitation?.content?.visualDesign?.accessScreen || {}),
+    ...(invitation?.publishedContent?.accessScreen || {}),
+    ...(invitation?.publishedContent?.visualDesign?.accessScreen || {}),
+    ...(invitation?.content?.visualDesignDraft?.accessScreen || {})
+  };
+  const pinVal = (accessScreen.requirePin && accessScreen.pinMode === 'event' && accessScreen.eventPin)
+    ? accessScreen.eventPin
+    : (accessScreen.requirePin ? guest?.accessPin : '');
+  const pinStr = pinVal ? escapeHtml(pinVal) : '';
   const qrCodeVal = guest?.checkInCode || guest?.qrCode || guest?.invitationToken || guest?._id || '';
   const qrImgUrl = qrCodeVal ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeVal)}` : '';
 
@@ -431,7 +458,11 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
   let ctaText = '✉️ Ver Mi Invitación Digital';
   let messageBody = `Te enviamos tu invitación digital para <strong>${eventTitle}</strong>. Nos dará muchísimo gusto contar con tu presencia en este día tan especial.`;
 
-  if (type === 'reminder') {
+  if (type === 'pass') {
+    badgeText = '🎟️ PASE DE ACCESO VIP';
+    ctaText = '🎟️ Ver Mi Pase VIP';
+    messageBody = `Aquí tienes tu pase de entrada VIP para <strong>${eventTitle}</strong>. Presenta este correo o tu código QR al llegar.`;
+  } else if (type === 'reminder') {
     badgeText = '💌 RECORDATORIO RSVP';
     ctaText = '💌 Confirmar Asistencia';
     messageBody = `Te recordamos amablemente confirmar tu asistencia para <strong>${eventTitle}</strong>. Tu respuesta es muy importante para la organización del evento.`;
@@ -453,7 +484,7 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
     messageBody = escapeHtml(customBody.trim()).replace(/\r?\n/g, '<br>');
   }
 
-  const passQrBlock = (type === 'pass' && qrImgUrl) ? `
+  const passQrBlock = qrImgUrl ? `
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:16px 0; text-align:center;">
       <tr>
         <td align="center">
@@ -466,13 +497,37 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
     </table>
   ` : '';
 
-  const detailsHtml = (dateStr || locationStr || tableStr || type === 'pass') ? `
+  const detailsHtml = `
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:24px 0; background-color:#fcfaf7; border:1px solid #efe4d8; border-radius:12px; padding:16px;">
       ${passQrBlock ? `<tr><td style="padding-bottom:12px;">${passQrBlock}</td></tr>` : ''}
-      ${type === 'pass' ? `
+      <tr>
+        <td style="padding:6px 0; font-size:14px; color:#524c46;">
+          <strong style="color:#1e1b18;">👤 Invitado${type === 'pass' ? ' VIP' : ''}:</strong> ${guestName}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; font-size:14px; color:#524c46;">
+          <strong style="color:#1e1b18;">👥 Pases autorizados:</strong> ${companionsCount} persona${companionsCount > 1 ? 's' : ''}
+        </td>
+      </tr>
+      ${pinStr ? `
         <tr>
           <td style="padding:6px 0; font-size:14px; color:#524c46;">
-            <strong style="color:#1e1b18;">👤 Invitado VIP:</strong> ${guestName}
+            <strong style="color:#1e1b18;">🔑 Tu NIP de acceso:</strong> <span style="font-family:monospace; font-size:16px; font-weight:bold; letter-spacing:2px; background:#f4ede4; padding:3px 10px; border-radius:6px; border:1px solid #d8cbbe; color:#1e1b18;">${pinStr}</span>
+          </td>
+        </tr>
+      ` : ''}
+      ${tableStr ? `
+        <tr>
+          <td style="padding:6px 0; font-size:14px; color:#524c46;">
+            <strong style="color:#1e1b18;">🪑 Mesa:</strong> ${tableStr}
+          </td>
+        </tr>
+      ` : ''}
+      ${seatStr ? `
+        <tr>
+          <td style="padding:6px 0; font-size:14px; color:#524c46;">
+            <strong style="color:#1e1b18;">💺 Asiento:</strong> ${seatStr}
           </td>
         </tr>
       ` : ''}
@@ -490,15 +545,8 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
           </td>
         </tr>
       ` : ''}
-      ${tableStr ? `
-        <tr>
-          <td style="padding:6px 0; font-size:14px; color:#524c46;">
-            <strong style="color:#1e1b18;">🪑 Mesa:</strong> ${tableStr}
-          </td>
-        </tr>
-      ` : ''}
     </table>
-  ` : '';
+  `;
 
   return `
 <!DOCTYPE html>

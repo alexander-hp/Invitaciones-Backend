@@ -29,6 +29,7 @@ const guestSchema = new mongoose.Schema({
   lastAccessLinkSentAt: Date,
   qrCode: String,
   checkInCode: { type: String, unique: true, sparse: true, index: true },
+  accessPin: { type: String, trim: true },
   checkedIn: { type: Boolean, default: false },
   checkedInAt: Date,
   status: { type: String, enum: ['pending', 'confirmed', 'declined'], default: 'pending' },
@@ -40,10 +41,16 @@ const guestSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 guestSchema.pre('validate', function ensureCheckInCode(next) {
-  if (!this.checkInCode) this.checkInCode = crypto.randomBytes(5).toString('hex').toUpperCase();
-  if (!this.qrCode) this.qrCode = this.checkInCode;
-  if (!this.invitationToken) this.invitationToken = crypto.randomBytes(16).toString('hex');
-  if (!this.personalizedLinkGeneratedAt) this.personalizedLinkGeneratedAt = new Date();
+  if (this.isNew) {
+    if (!this.checkInCode) this.checkInCode = crypto.randomBytes(5).toString('hex').toUpperCase();
+    if (!this.qrCode) this.qrCode = this.checkInCode;
+    if (!this.invitationToken) this.invitationToken = crypto.randomBytes(16).toString('hex');
+    if (!this.accessPin) this.accessPin = String(Math.floor(1000 + Math.random() * 9000));
+    if (!this.personalizedLinkGeneratedAt) this.personalizedLinkGeneratedAt = new Date();
+  } else {
+    if (this.isModified('checkInCode') && !this.checkInCode) this.checkInCode = crypto.randomBytes(5).toString('hex').toUpperCase();
+    if (this.isModified('qrCode') && !this.qrCode) this.qrCode = this.checkInCode || crypto.randomBytes(5).toString('hex').toUpperCase();
+  }
   next();
 });
 

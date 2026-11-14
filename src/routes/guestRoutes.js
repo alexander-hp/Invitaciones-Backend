@@ -26,6 +26,7 @@ const guestBody = z.object({
     checkedIn: z.boolean().optional()
   }).strict()).optional(),
   allowedCompanions: z.number().int().min(0).max(20).optional(),
+  accessPin: z.string().trim().max(30).optional(),
   checkedIn: z.boolean().optional()
 }).strict();
 

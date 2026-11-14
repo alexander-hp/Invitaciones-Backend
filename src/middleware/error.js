@@ -25,7 +25,8 @@ function errorHandler(error, _req, res, _next) {
   }
   res.status(statusCode).json({
     message,
-    details: error.details || undefined
+    details: error.details || undefined,
+    accessGate: error.accessGate || (error.details && error.details.accessGate) || undefined
   });
 }
 

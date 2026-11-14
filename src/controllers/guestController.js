@@ -1,5 +1,6 @@
 const readXlsxFile = require('read-excel-file/node');
 const { parse } = require('csv-parse/sync');
+const crypto = require('crypto');
 const Guest = require('../models/Guest');
 const Event = require('../models/Event');
 const Invitation = require('../models/Invitation');
@@ -57,6 +58,7 @@ function normalizeGuestPayload(payload) {
     seatLabel: payload.seatLabel ? String(payload.seatLabel).trim() : undefined,
     companions,
     allowedCompanions: Number(payload.allowedCompanions || 0),
+    accessPin: payload.accessPin ? String(payload.accessPin).trim() : undefined,
     checkedIn: payload.checkedIn === true
   };
 }
@@ -82,7 +84,8 @@ function normalizeGuestRow(row, event, owner) {
     tableName: row.tableName || row.mesa || row.Mesa || undefined,
     seatLabel: row.seatLabel || row.asiento || row.Asiento || undefined,
     companions: companionRows(row),
-    allowedCompanions: Number(row.allowedCompanions || row.acompanantes || row.Acompanantes || 0)
+    allowedCompanions: Number(row.allowedCompanions || row.acompanantes || row.Acompanantes || 0),
+    accessPin: row.nip || row.Nip || row.NIP || row.pin || row.PIN || row.accessPin || undefined
   });
 }
 
@@ -142,6 +145,30 @@ function buildGuestFilters(query) {
   if (group) filters.group = group;
 
   return filters;
+}
+
+async function ensureGuestSecrets(guest) {
+  let changed = false;
+  if (!guest.invitationToken) {
+    guest.invitationToken = crypto.randomBytes(16).toString('hex');
+    changed = true;
+  }
+  if (!guest.accessPin) {
+    guest.accessPin = String(Math.floor(1000 + Math.random() * 9000));
+    changed = true;
+  }
+  if (!guest.checkInCode) {
+    guest.checkInCode = crypto.randomBytes(5).toString('hex').toUpperCase();
+    guest.qrCode = guest.checkInCode;
+    changed = true;
+  }
+  if (!guest.personalizedLinkGeneratedAt) {
+    guest.personalizedLinkGeneratedAt = new Date();
+    changed = true;
+  }
+  if (changed) {
+    await guest.save();
+  }
 }
 
 function personalizedPublicUrl(invitation, guest) {
@@ -269,6 +296,7 @@ exports.update = asyncHandler(async (req, res) => {
   guest.seatLabel = payload.seatLabel;
   guest.companions = payload.companions || [];
   guest.allowedCompanions = payload.allowedCompanions;
+  if (payload.accessPin !== undefined) guest.accessPin = payload.accessPin;
   guest.checkedIn = payload.checkedIn;
   guest.checkedInAt = payload.checkedIn ? (guest.checkedInAt || new Date()) : undefined;
   try {
@@ -400,17 +428,21 @@ exports.sendWhatsApp = asyncHandler(async (req, res) => {
     throw error;
   }
 
+  const EventModel = require('../models/Event');
+  const fullEvent = await EventModel.findById(event._id || guest.event).populate('venue') || event;
+
   const type = req.validated.body.messageType;
+  await ensureGuestSecrets(guest);
   const attachPass = req.validated.body.attachPass === true;
   validatePassAttachment({ attachPass, media: req.validated.body.media });
   await assertWhatsAppProviderReady(req.validated.body.media || attachPass);
   const media = attachPass
-    ? buildGuestPassWhatsAppMedia({ guest, event, invitation })
+    ? buildGuestPassWhatsAppMedia({ guest, event: fullEvent, invitation })
     : req.validated.body.media;
   const result = await whatsappService.sendMessage({
     owner: event.owner,
     guest,
-    event,
+    event: fullEvent,
     invitation,
     type,
     text: req.validated.body.text,
@@ -447,12 +479,16 @@ exports.sendEmail = asyncHandler(async (req, res) => {
     throw error;
   }
 
+  const EventModel = require('../models/Event');
+  const fullEvent = await EventModel.findById(event._id || guest.event).populate('venue') || event;
+
   const type = req.validated.body.messageType || 'invitation';
+  await ensureGuestSecrets(guest);
   try {
     await emailService.sendGuestInvitationEmail({
       to: guest.email,
       guest,
-      event,
+      event: fullEvent,
       invitation,
       publicUrl: personalizedPublicUrl(invitation, guest),
       type,
@@ -707,7 +743,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
   const rsvps = await Rsvp.find({ event: event._id, guest: { $in: guests.map((guest) => guest._id) } }).lean();
   const rsvpByGuest = new Map(rsvps.map((rsvp) => [String(rsvp.guest), rsvp]));
   const rows = [
-    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Token link', 'Link generado', 'Abierta en', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Asistentes totales', 'Acompanantes RSVP', 'Nombres acompanantes', 'Respuestas personalizadas', 'Mensaje'],
+    ['Nombre', 'Email', 'Telefono', 'Grupo', 'Mesa', 'Asiento', 'NIP', 'Acompanantes nombrados', 'Check-in', 'Codigo QR', 'Token link', 'Link generado', 'Abierta en', 'Acompanantes permitidos', 'Estado invitado', 'Seguimiento', 'Ultimo mensaje', 'Canal', 'Enviado en', 'RSVP', 'Asistentes totales', 'Acompanantes RSVP', 'Nombres acompanantes', 'Respuestas personalizadas', 'Mensaje'],
     ...guests.map((guest) => {
       const rsvp = rsvpByGuest.get(String(guest._id));
       return [
@@ -717,6 +753,7 @@ exports.exportGuests = asyncHandler(async (req, res) => {
         guest.group || 'General',
         guest.tableName || '',
         guest.seatLabel || '',
+        guest.accessPin || '',
         (guest.companions || []).map((companion) => [companion.name, companion.tableName, companion.seatLabel].filter(Boolean).join(' / ')).join('; '),
         guest.checkedIn ? 'Si' : 'No',
         guest.checkInCode || '',
