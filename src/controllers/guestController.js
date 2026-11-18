@@ -71,21 +71,54 @@ function companionRows(row) {
   })).filter((companion) => companion.name || companion.tableName || companion.seatLabel);
 }
 
+function getRowField(row, aliases) {
+  const keys = Object.keys(row || {});
+  for (const alias of aliases) {
+    const cleanAlias = alias.toLowerCase().replace(/[^a-z0-9]/g, '');
+    for (const key of keys) {
+      const cleanKey = String(key)
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+      if (cleanKey === cleanAlias || cleanKey.startsWith(cleanAlias)) {
+        const val = row[key];
+        if (val !== undefined && val !== null && String(val).trim() !== '') {
+          return String(val).trim();
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 function normalizeGuestRow(row, event, owner) {
-  const name = row.name || row.nombre || row.Nombre;
+  const rawName = getRowField(row, ['name', 'nombre']) || row.name || row.nombre || row.Nombre;
+  if (!rawName) return null;
+  // Limpiar prefijo de muestra si el usuario lo dejó en la plantilla
+  const name = String(rawName).replace(/^\[?ejemplo\]?[:\s-]*|^ej[:\s-]+/i, '').trim();
   if (!name) return null;
+
+  const email = getRowField(row, ['email', 'correo', 'mail']) || undefined;
+  const phone = getRowField(row, ['phone', 'telefono', 'tel', 'whatsapp', 'celular']) || undefined;
+  const group = getRowField(row, ['group', 'grupo']) || undefined;
+  const tableName = getRowField(row, ['tablename', 'mesa', 'table']) || undefined;
+  const seatLabel = getRowField(row, ['seatlabel', 'asiento', 'seat']) || undefined;
+  const rawCompanions = getRowField(row, ['allowedcompanions', 'acompanantes', 'pasesextra', 'pasesadicionales', 'pases', 'extra']) || '0';
+  const allowedCompanions = Number.isNaN(Number(rawCompanions)) ? 0 : Number(rawCompanions);
+  const accessPin = getRowField(row, ['accesspin', 'nip', 'pin']) || undefined;
+
   return normalizeGuestPayload({
     owner,
     event: event._id,
     name,
-    email: row.email || row.correo || row.Correo || undefined,
-    phone: row.phone || row.telefono || row.Telefono || undefined,
-    group: row.group || row.grupo || row.Grupo || undefined,
-    tableName: row.tableName || row.mesa || row.Mesa || undefined,
-    seatLabel: row.seatLabel || row.asiento || row.Asiento || undefined,
+    email,
+    phone,
+    group,
+    tableName,
+    seatLabel,
     companions: companionRows(row),
-    allowedCompanions: Number(row.allowedCompanions || row.acompanantes || row.Acompanantes || 0),
-    accessPin: row.nip || row.Nip || row.NIP || row.pin || row.PIN || row.accessPin || undefined
+    allowedCompanions,
+    accessPin
   });
 }
 
@@ -645,10 +678,37 @@ exports.importGuests = asyncHandler(async (req, res) => {
   if (ext === 'csv') {
     rows = parse(req.file.buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
   } else {
-    const sheetRows = await readXlsxFile(req.file.buffer);
-    const headers = (sheetRows[0] || []).map((header) => String(header || '').trim());
-    rows = sheetRows.slice(1).map((values) => headers.reduce((item, header, index) => {
-      item[header] = values[index];
+    const rawResult = await readXlsxFile(req.file.buffer);
+    let targetSheet = null;
+    if (Array.isArray(rawResult) && rawResult.length > 0 && Array.isArray(rawResult[0]?.data)) {
+      // 1. Buscar la hoja de invitados explícita
+      targetSheet = rawResult.find((s) => /invitado|guest/i.test(s.sheet || s.name || ''));
+      // 2. Si no se llama así, buscar la hoja que tenga encabezado con 'nombre' o 'name'
+      if (!targetSheet) {
+        targetSheet = rawResult.find((s) => {
+          const firstRows = (s.data || []).slice(0, 5);
+          return firstRows.some((row) => (row || []).some((cell) => /nombre|name/i.test(String(cell || ''))));
+        });
+      }
+      targetSheet = targetSheet || rawResult[0];
+    }
+
+    const sheetData = targetSheet?.data || (Array.isArray(rawResult) ? rawResult : []);
+
+    let headerRowIndex = 0;
+    for (let i = 0; i < Math.min(sheetData.length, 5); i++) {
+      const rowStrings = (sheetData[i] || []).map((v) => String(v || '').toLowerCase());
+      if (rowStrings.some((s) => s.includes('nombre') || s.includes('name'))) {
+        headerRowIndex = i;
+        break;
+      }
+    }
+
+    const headers = (sheetData[headerRowIndex] || []).map((header) => String(header || '').trim());
+    rows = sheetData.slice(headerRowIndex + 1).map((values) => headers.reduce((item, header, index) => {
+      if (header) {
+        item[header] = values ? values[index] : undefined;
+      }
       return item;
     }, {}));
   }
