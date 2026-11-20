@@ -60,6 +60,32 @@ app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev', {
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'invitaciones-api' }));
 
+const fs = require('fs');
+const path = require('path');
+
+app.get('/api/qa-checklist', (_req, res) => {
+  const filePath = path.resolve(__dirname, '../../Invitaciones-Frontend/.agents/docs/checklist-verificacion-release.md');
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: 'Archivo no encontrado' });
+  }
+  const content = fs.readFileSync(filePath, 'utf8');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.send(content);
+});
+
+app.post('/api/qa-checklist', express.text({ type: '*/*' }), (req, res) => {
+  const filePath = path.resolve(__dirname, '../../Invitaciones-Frontend/.agents/docs/checklist-verificacion-release.md');
+  let content = req.body;
+  if (typeof content === 'object' && content !== null && content.markdown) {
+    content = content.markdown;
+  }
+  if (typeof content === 'string' && content.trim()) {
+    fs.writeFileSync(filePath, content, 'utf8');
+    return res.json({ ok: true, message: 'Checklist sincronizado en disco exitosamente' });
+  }
+  res.status(400).json({ message: 'Contenido inválido' });
+});
+
 const http = require('http');
 app.all('/api/media/*', (req, res) => {
   if (req.method === 'OPTIONS') {

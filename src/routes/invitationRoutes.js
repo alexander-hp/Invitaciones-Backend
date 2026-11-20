@@ -368,6 +368,8 @@ const invitationContentBody = z.object({
   visualDesignDraft: visualDesignBody.optional(),
   passDesign: visualDesignBody.optional(),
   passDesignDraft: visualDesignBody.optional(),
+  passType: z.enum(['generic', 'custom']).optional(),
+  useCustomPass: z.boolean().optional(),
   template: z.string().optional(),
   customHtml: z.string().optional(),
   customCss: z.string().optional(),

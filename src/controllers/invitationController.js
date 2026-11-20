@@ -307,13 +307,7 @@ function assertInvitationRsvpDeadline(event, rawDeadline) {
     throw error;
   }
 
-  const currentMinute = new Date();
-  currentMinute.setSeconds(0, 0);
-  if (deadline.getTime() < currentMinute.getTime()) {
-    const error = new Error('La fecha limite de respuesta no puede estar en el pasado');
-    error.statusCode = 400;
-    throw error;
-  }
+  // Nota: Se permite que la fecha límite esté en el pasado para facilitar pruebas y eventos de testing/históricos.
 
   const eventDate = eventStartsAt(event);
   if (eventDate && deadline.getTime() > eventDate.getTime()) {

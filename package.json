@@ -41,6 +41,7 @@
         "helmet": "^7.1.0",
         "jsonwebtoken": "^9.0.2",
         "jszip": "^3.10.1",
+        "lucide-static": "^1.76.0",
         "mongoose": "^8.4.3",
         "morgan": "^1.10.0",
         "multer": "^2.0.2",

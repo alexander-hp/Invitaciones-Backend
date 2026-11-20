@@ -1,127 +1,45 @@
 const express = require('express');
 const controller = require('../controllers/visualDesignTemplateController');
-const { protect } = require('../middleware/auth');
+const { protect, optionalAuth, requireRole } = require('../middleware/auth');
 const { validate, z } = require('../utils/validate');
 
 const router = express.Router();
-const styleValue = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-const visualLayout = z.object({
-  x: z.number().min(-100).max(200), y: z.number().min(-10000).max(10000),
-  width: z.number().min(1).max(100), height: z.number().min(1).max(100),
-  rotation: z.number().min(-360).max(360).optional()
-}).strict();
-const visualModuleStyle = z.object({
-  layout: z.enum(['list', 'grid']).optional(), columns: z.number().int().min(1).max(3).optional(),
-  alignment: z.enum(['left', 'center']).optional(), surface: z.enum(['transparent', 'solid', 'soft']).optional(),
-  cardStyle: z.enum(['none', 'bordered', 'elevated']).optional(), gap: z.number().int().min(4).max(32).optional(),
-  showTitle: z.boolean().optional()
-}).strict();
-const visualPluginSettings = z.record(
-  z.string().max(80),
-  z.union([z.string().max(1000), z.number(), z.boolean()])
-);
-const visualPluginPartDesign = z.object({
-  label: z.string().max(160).optional(), placeholder: z.string().max(240).optional(),
-  x: z.number().min(0).max(100).optional(), y: z.number().min(0).max(100).optional(),
-  width: z.number().min(1).max(100).optional(), height: z.number().min(1).max(100).optional(),
-  fontFamily: z.string().max(120).optional(), fontSize: z.number().min(8).max(120).optional(),
-  fontWeight: z.number().int().min(100).max(900).optional(), color: z.string().max(80).optional(),
-  backgroundColor: z.string().max(80).optional(), backgroundImageUrl: z.string().max(2000).optional(),
-  borderColor: z.string().max(80).optional(), borderWidth: z.number().min(0).max(20).optional(),
-  borderRadius: z.number().min(0).max(200).optional(), padding: z.number().min(0).max(80).optional(),
-  textAlign: z.enum(['left', 'center', 'right']).optional(), boxShadow: z.string().max(240).optional(),
-  shape: z.enum(['rectangle', 'pill', 'cloud', 'notebook']).optional(),
-  variant: z.enum(['default', 'cards']).optional(), hidden: z.boolean().optional()
-}).strict();
-const visualPluginDesign = z.object({
-  layout: z.enum(['flow', 'free']).optional(),
-  minHeight: z.number().int().min(240).max(1600).optional(),
-  parts: z.record(z.string().max(80), visualPluginPartDesign).optional()
-}).strict();
-const visualAccessScreen = z.object({
-  enabled: z.boolean().optional(),
-  title: z.string().max(160).optional(),
-  subtitle: z.string().max(300).optional(),
-  inputLabel: z.string().max(120).optional(),
-  inputPlaceholder: z.string().max(120).optional(),
-  buttonText: z.string().max(80).optional(),
-  badgeText: z.string().max(80).optional(),
-  showBadge: z.boolean().optional(),
-  showIcon: z.boolean().optional(),
-  iconName: z.string().max(80).optional(),
-  logoUrl: z.string().max(2000).optional(),
-  cardStyle: z.enum(['glass', 'solid', 'minimal', 'bordered']).optional(),
-  cardBgColor: z.string().max(40).optional(),
-  cardOpacity: z.number().min(0).max(100).optional(),
-  cardRadius: z.number().min(0).max(60).optional(),
-  cardShadow: z.enum(['none', 'soft', 'elevated', 'glow']).optional(),
-  backgroundType: z.enum(['color', 'gradient', 'image']).optional(),
-  backgroundColor: z.string().max(40).optional(),
-  backgroundGradient: z.string().max(300).optional(),
-  backgroundImageUrl: z.string().max(2000).optional(),
-  backgroundOverlayOpacity: z.number().min(0).max(100).optional(),
-  backgroundBlur: z.number().min(0).max(40).optional(),
-  primaryColor: z.string().max(40).optional(),
-  textColor: z.string().max(40).optional(),
-  accentColor: z.string().max(40).optional(),
-  buttonBgColor: z.string().max(40).optional(),
-  buttonTextColor: z.string().max(40).optional(),
-  buttonRadius: z.number().min(0).max(60).optional(),
-  headingFont: z.string().max(120).optional(),
-  bodyFont: z.string().max(120).optional()
+
+const templateBody = z.object({
+  name: z.string().min(2).max(120),
+  authorName: z.string().max(100).optional(),
+  eventType: z.string().max(50).optional(),
+  category: z.string().max(50).optional(),
+  description: z.string().max(500).optional(),
+  previewImageUrl: z.string().max(2000).optional(),
+  thumbnailUrl: z.string().max(2000).optional(),
+  isPublic: z.boolean().optional(),
+  authorRewardPercent: z.number().min(0).max(100).optional(),
+  includesInvitation: z.boolean().optional(),
+  includesPass: z.boolean().optional(),
+  includesAccess: z.boolean().optional(),
+  design: z.any(),
+  passDesign: z.any().optional(),
+  accessScreen: z.any().optional(),
+  tags: z.array(z.string().max(50)).max(20).optional()
 }).passthrough();
 
-const visualDesign = z.object({
-  version: z.number().int().min(1).max(10),
-  active: z.boolean(),
-  mode: z.enum(['easy', 'advanced']),
-  presentationMode: z.enum(['continuous', 'chapters']).optional(),
-  responsiveMode: z.enum(['shared', 'independent']).optional(),
-  theme: z.object({
-    backgroundColor: z.string().max(40), textColor: z.string().max(40), accentColor: z.string().max(40),
-    headingFont: z.string().max(120), bodyFont: z.string().max(120),
-    buttonBackgroundColor: z.string().max(40), buttonTextColor: z.string().max(40),
-    buttonStyle: z.enum(['solid', 'outline', 'soft']), buttonRadius: z.number().min(0).max(100)
-  }).strict().optional(),
-  assets: z.array(z.object({
-    id: z.string().min(1).max(100), url: z.string().url().max(2000),
-    type: z.enum(['image', 'video', 'audio']), name: z.string().min(1).max(200),
-    attribution: z.string().max(200).optional(), attributionUrl: z.string().url().max(2000).optional(), sourceUrl: z.string().url().max(2000).optional(),
-    createdAt: z.string().datetime().optional()
-  }).strict()).max(200).optional(),
-  sections: z.array(z.object({
-    id: z.string().min(1).max(100), type: z.string().min(1).max(80), title: z.string().max(160).optional(),
-    enabled: z.boolean(), layout: z.enum(['flow', 'canvas']), height: z.number().int().min(240).max(1600),
-    background: z.object({ color: z.string().max(40).optional(), imageUrl: z.string().max(2000).optional(), overlay: z.number().min(0).max(1).optional() }).strict().optional(),
-    moduleStyle: visualModuleStyle.optional(),
-    pluginSettings: visualPluginSettings.optional(),
-    pluginDesign: visualPluginDesign.optional(),
-    layers: z.array(z.object({
-      id: z.string().min(1).max(100), type: z.enum(['text', 'image', 'video', 'audio', 'button', 'shape', 'field']),
-      groupId: z.string().min(1).max(100).optional(),
-      name: z.string().max(120).optional(),
-      text: z.string().max(5000).optional(), placeholder: z.string().max(240).optional(), url: z.string().max(2000).optional(), binding: z.string().max(100).optional(),
-      x: z.number().min(-100).max(200), y: z.number().min(-10000).max(10000), width: z.number().min(1).max(100), height: z.number().min(1).max(100),
-      rotation: z.number().min(-360).max(360).optional(), zIndex: z.number().int().min(0).max(1000).optional(), locked: z.boolean().optional(), hidden: z.boolean().optional(),
-      animation: z.object({ type: z.enum(['none', 'fade', 'slide-up', 'slide-left', 'slide-right', 'zoom', 'float', 'pulse', 'bounce']), duration: z.number().min(0.2).max(10).optional(), delay: z.number().min(0).max(10).optional(), repeat: z.boolean().optional() }).strict().optional(),
-      layouts: z.object({ mobile: visualLayout.optional(), tablet: visualLayout.optional(), desktop: visualLayout.optional() }).strict().optional(),
-      style: z.record(z.string(), styleValue).optional()
-    }).strict()).max(100)
-  }).strict()).max(50),
-  accessScreen: visualAccessScreen.optional()
-}).strict();
-const body = z.object({
-  name: z.string().min(2).max(120),
-  eventType: z.string().min(1).max(50).optional(),
-  description: z.string().max(500).optional(),
-  previewImageUrl: z.string().url().or(z.literal('')).optional(),
-  design: visualDesign
-}).strict();
+// Public / Community Catalog routes
+router.get('/catalog', optionalAuth, controller.catalog);
+router.post('/:id/use', optionalAuth, controller.useTemplate);
 
+// Protected routes (user's personal templates and publishing)
 router.use(protect);
+
+// Admin Moderation & Management routes (Placed before /:id)
+router.get('/admin/settings', requireRole('admin'), controller.getAdminSettings);
+router.put('/admin/settings', requireRole('admin'), controller.updateAdminSettings);
+router.get('/admin/manage', requireRole('admin'), controller.adminList);
+router.patch('/admin/:id/status', requireRole('admin'), controller.adminUpdateStatus);
+
 router.get('/', controller.list);
-router.post('/', validate(z.object({ body })), controller.create);
-router.patch('/:id', validate(z.object({ body: body.partial().refine((value) => Object.keys(value).length > 0) })), controller.update);
+router.post('/', validate(z.object({ body: templateBody })), controller.create);
+router.patch('/:id', validate(z.object({ body: templateBody.partial().refine((value) => Object.keys(value).length > 0) })), controller.update);
 router.delete('/:id', controller.remove);
 
 module.exports = router;

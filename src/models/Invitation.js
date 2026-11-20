@@ -302,6 +302,8 @@ const invitationSchema = new mongoose.Schema({
     visualDesignDraft: { type: mongoose.Schema.Types.Mixed },
     passDesign: { type: mongoose.Schema.Types.Mixed },
     passDesignDraft: { type: mongoose.Schema.Types.Mixed },
+    passType: { type: String, enum: ['generic', 'custom'], default: 'generic' },
+    useCustomPass: { type: Boolean, default: false },
     template: String,
     customHtml: String,
     customCss: String,

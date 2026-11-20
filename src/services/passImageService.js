@@ -1,6 +1,71 @@
+const fs = require('fs');
 const url = require('url');
 const path = require('path');
 const QRCode = require('qrcode');
+
+let lucideDir = null;
+try {
+  lucideDir = path.join(path.dirname(require.resolve('lucide-static/package.json')), 'icons');
+} catch (e) {
+  lucideDir = null;
+}
+
+const lucideCache = new Map();
+
+function getLucideSvg(iconName, style = {}) {
+  if (!iconName) return '';
+  const cleanName = iconName
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+    .trim()
+    .replace(/_/g, '-');
+
+  let rawSvg = lucideCache.get(cleanName);
+  if (!rawSvg) {
+    if (!lucideDir) return '';
+    const filePath = path.join(lucideDir, `${cleanName}.svg`);
+    if (!fs.existsSync(filePath)) return '';
+    rawSvg = fs.readFileSync(filePath, 'utf8');
+    lucideCache.set(cleanName, rawSvg);
+  }
+
+  const strokeWidth = style.iconStrokeWidth || 2;
+  const fill = style.iconFilled ? (style.color || 'currentColor') : 'none';
+
+  return rawSvg
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/width="24"/g, 'width="100%"')
+    .replace(/height="24"/g, 'height="100%"')
+    .replace(/stroke-width="2"/g, `stroke-width="${strokeWidth}"`)
+    .replace(/fill="none"/g, `fill="${fill}"`)
+    .replace('<svg', '<svg style="display:block; width:100%; height:100%; overflow:visible;"')
+    .trim();
+}
+
+function shapeClipPath(kind) {
+  const shapes = {
+    rectangle: 'none',
+    rounded: 'inset(0 round 12px)',
+    pill: 'inset(0 round 9999px)',
+    circle: 'circle(50% at 50% 50%)',
+    ellipse: 'ellipse(50% 42% at 50% 50%)',
+    arch: 'inset(0 round 50% 50% 0 0)',
+    'arch-inverted': 'inset(0 round 0 0 50% 50%)',
+    window: 'inset(0 round 48% 48% 6% 6%)',
+    triangle: 'polygon(50% 0, 100% 100%, 0 100%)',
+    'triangle-down': 'polygon(0 0, 100% 0, 50% 100%)',
+    diamond: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
+    pentagon: 'polygon(50% 0, 100% 38%, 81% 100%, 19% 100%, 0 38%)',
+    hexagon: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)',
+    octagon: 'polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%)',
+    star: 'polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 93%, 50% 72%, 21% 93%, 32% 57%, 2% 35%, 39% 35%)',
+    'star-4': 'polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%)',
+    'star-8': 'polygon(50% 0, 65% 20%, 85% 15%, 80% 35%, 100% 50%, 80% 65%, 85% 85%, 65% 80%, 50% 100%, 35% 80%, 15% 85%, 20% 65%, 0 50%, 20% 35%, 15% 15%, 35% 20%)',
+    heart: 'polygon(50% 88%, 35% 73%, 20% 58%, 10% 42%, 8% 26%, 16% 12%, 30% 8%, 42% 14%, 50% 26%, 58% 14%, 70% 8%, 84% 12%, 92% 26%, 90% 42%, 80% 58%, 65% 73%)',
+    shield: 'polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%)'
+  };
+  return shapes[kind] || 'none';
+}
 
 // Dynamically import puppeteer using pathToFileURL to support CommonJS and ES Module on Windows/Linux
 async function getPuppeteer() {
@@ -120,36 +185,155 @@ function generatePassDataForGuest({ guest, event, invitation }) {
 
   // QR Code URL (QR Server API - high resolution fallback)
   const qrCodeUrl = guest.checkInCode
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(guest.checkInCode)}`
-    : 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VIP';
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(guest.checkInCode)}`
+    : 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=VIP';
 
   // Resolve locationAddress (first location from invitation content, falling back to event venue)
   const firstLocation = invitation?.content?.locations?.[0];
   const locationAddress = firstLocation?.address || firstLocation?.name || event?.venue?.address || event?.venue?.name || '';
+  const eventTime = event?.time || event?.eventTime || styles.eventTime || '';
+
+  const totalPasses = (guest.allowedCompanions !== undefined && guest.allowedCompanions !== null)
+    ? (Number(guest.allowedCompanions) + 1)
+    : 1;
+
+  const tableName = (guest.tableName && guest.tableName.trim() !== '' && guest.tableName.trim() !== '—')
+    ? guest.tableName.trim()
+    : 'General';
+
+  const passDesign = invitation?.passDesign || styles.passDesign;
+  const passType = invitation?.passType || styles.passType || (invitation?.useCustomPass || styles.useCustomPass ? 'custom' : 'generic');
 
   return {
+    guestId: guest._id,
     guestName: guest.name || 'Invitado',
-    tableName: guest.tableName || '',
+    tableName,
     seatLabel: guest.seatLabel || '',
-    allowedCompanions: guest.allowedCompanions || 1,
+    allowedCompanions: totalPasses,
     checkInCode,
     qrCodeUrl,
     headline: event?.title || styles.headline || 'Nuestro Evento',
     subheadline,
     eventDateFormatted,
     locationAddress,
+    eventTime,
     dressCode: event?.dressCode || styles.dressCode || '',
     brandLogoUrl: styles.passLogoUrl || styles.brandLogoUrl || '',
     coverImageUrl: styles.coverImageUrl || '',
     primaryColor: palette.primary || '#0b1426',
-    accentColor: palette.accent || '#c9a87c'
+    accentColor: palette.accent || '#c9a87c',
+    passType,
+    passDesign
   };
 }
 
 /**
  * Generates the card-only HTML snippet for a pass.
  */
+function generateCustomPassCardInnerHtml(data) {
+  const design = data.passDesign || {};
+  const sheet = design.sections?.[0] || {};
+  const width = Number(sheet.pluginSettings?.sheetWidth || sheet.width || design.canvasSize?.width || 450);
+  const height = Number(sheet.pluginSettings?.sheetHeight || sheet.height || design.canvasSize?.height || 800);
+  const bg = sheet.background?.color || sheet.style?.backgroundColor || design.theme?.backgroundColor || '#0b1426';
+  const bgImg = sheet.background?.imageUrl ? `background-image: url('${sheet.background.imageUrl}'); background-size: cover; background-position: center;` : '';
+
+  const evalText = (txt) => {
+    if (!txt) return '';
+    const guestName = data.guestName || 'Invitado VIP';
+    const tableName = (data.tableName && data.tableName !== '—' && data.tableName.trim() !== '') ? data.tableName : 'General';
+    const seatLabel = data.seatLabel || '';
+    const companions = String(data.allowedCompanions !== undefined ? data.allowedCompanions : 1);
+    const checkInCode = data.checkInCode || (data.guestId ? String(data.guestId).slice(-6).toUpperCase() : 'VIP-001');
+    const headline = data.headline || 'Invitación';
+    const subheadline = data.subheadline || '';
+    const eventDate = data.eventDateFormatted || '';
+    const location = data.locationAddress || '';
+    const eventTime = data.eventTime || '';
+
+    return txt
+      .replace(/\{\{guest\.name\}\}|\{nombre\}|\{invitado\}/gi, guestName)
+      .replace(/\{\{guest\.table\}\}|\{mesa\}/gi, tableName)
+      .replace(/\{\{guest\.seat\}\}|\{asiento\}/gi, seatLabel)
+      .replace(/\{\{guest\.companions\}\}|\{pases\}|\{acompañantes\}|\{lugares\}/gi, companions)
+      .replace(/\{\{guest\.checkInCode\}\}|\{codigo\}|\{checkin\}|\{folio\}/gi, checkInCode)
+      .replace(/\{\{event\.title\}\}|\{evento\}/gi, headline)
+      .replace(/\{\{event\.date\}\}|\{fecha\}/gi, eventDate)
+      .replace(/\{\{event\.venue\}\}|\{lugar\}|\{direccion\}/gi, location)
+      .replace(/\{\{event\.time\}\}|\{hora\}/gi, eventTime)
+      .replace(/\{\{event\.subheadline\}\}|\{subheadline\}/gi, subheadline);
+  };
+
+  const layersHtml = (sheet.layers || []).map(l => {
+    const left = l.x || 0;
+    const top = l.y || 0;
+    const w = l.width || 100;
+    const h = l.height || 10;
+    const z = l.zIndex || 1;
+    const s = l.style || {};
+    const isIcon = Boolean(s.iconName || l.iconName);
+
+    let inner = '';
+    if (l.type === 'text') {
+      if (isIcon) {
+        const iconSvg = getLucideSvg(s.iconName || l.iconName, s);
+        inner = `<div class="canvas-icon-layer" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:${s.color || '#c9a87c'}; pointer-events:none;">${iconSvg}</div>`;
+      } else {
+        const text = evalText(l.text || '');
+        const align = s.textAlign || 'center';
+        const justify = align === 'left' ? 'flex-start' : (align === 'right' ? 'flex-end' : 'center');
+        inner = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:${justify}; text-align:${align}; color:${s.color || '#2E2621'}; font-size:${s.fontSize || 14}px; font-weight:${s.fontWeight || '400'}; font-family:${s.fontFamily || "'Playfair Display', serif"}; letter-spacing:${s.letterSpacing || 0}px; line-height:${s.lineHeight || 1.3}; font-style:${s.fontStyle || 'normal'}; text-transform:${s.textTransform || 'none'}; text-decoration:${s.textDecoration || 'none'}; text-shadow:${s.textShadow || 'none'}; white-space:pre-wrap; word-break:break-word;">${text}</div>`;
+      }
+    } else if (l.type === 'image') {
+      const isQr = l.binding === 'pass.qrCode' || l.binding === 'guest.qrCode' || (l.text && l.text.toLowerCase().includes('qr')) || (l.url && l.url.includes('qr'));
+      const src = isQr ? data.qrCodeUrl : (l.url || '');
+      inner = `<img src="${src}" alt="Elemento" style="width:100%; height:100%; object-fit:${s.objectFit || 'contain'}; border-radius:${s.borderRadius || 0}px; display:block;" />`;
+    } else if (l.type === 'shape') {
+      const shapeBg = s.gradientEnabled
+        ? `linear-gradient(${Number(s.gradientAngle || 0)}deg, ${s.gradientStart || '#ffffff'}, ${s.gradientEnd || '#000000'})`
+        : (s.backgroundColor || 'transparent');
+      const shapeBorder = (s.borderWidth && Number(s.borderWidth) > 0)
+        ? `${s.borderWidth}px ${s.borderStyle || 'solid'} ${s.borderColor || 'transparent'}`
+        : 'none';
+      const clip = shapeClipPath(s.shapeKind || 'rectangle');
+      const clipStyle = clip !== 'none' ? `clip-path:${clip}; -webkit-clip-path:${clip};` : '';
+      inner = `<div class="shape-content" style="box-sizing:border-box; width:100%; height:100%; background:${shapeBg}; border:${shapeBorder}; border-radius:${s.borderRadius || 0}px; box-shadow:${s.boxShadow || 'none'}; ${clipStyle}"></div>`;
+    }
+
+    const outerStyles = [
+      `position:absolute`,
+      `left:${left}%`,
+      `top:${top}%`,
+      `width:${w}%`,
+      `height:${h}%`,
+      `z-index:${z}`,
+      `transform:rotate(${l.rotation || 0}deg)`,
+      `opacity:${s.opacity !== undefined ? s.opacity : 1}`,
+      `pointer-events:none`
+    ];
+
+    if (l.type !== 'shape' && !isIcon) {
+      if (s.borderRadius) outerStyles.push(`border-radius:${s.borderRadius}px`);
+      if (s.borderWidth && Number(s.borderWidth) > 0) outerStyles.push(`border:${s.borderWidth}px ${s.borderStyle || 'solid'} ${s.borderColor || 'transparent'}`);
+      if (s.backgroundColor) outerStyles.push(`background-color:${s.backgroundColor}`);
+      if (s.boxShadow) outerStyles.push(`box-shadow:${s.boxShadow}`);
+      outerStyles.push(`overflow:hidden`);
+    }
+
+    return `<div style="${outerStyles.join('; ')}">${inner}</div>`;
+  }).join('');
+
+  return `
+    <div class="pass-container custom-pass-container" style="width:${width}px; height:${height}px; position:relative; background-color:${bg}; ${bgImg} overflow:hidden; border-radius:20px; box-shadow:0 16px 50px rgba(0,0,0,0.35); margin:0 auto;">
+      ${layersHtml}
+    </div>
+  `;
+}
+
 function generatePassCardInnerHtml(data) {
+  if (data.passType === 'custom' && data.passDesign && Array.isArray(data.passDesign.sections) && data.passDesign.sections.length > 0) {
+    return generateCustomPassCardInnerHtml(data);
+  }
   const primary = data.primaryColor || '#0b1426';
   const accent = data.accentColor || '#c9a87c';
 
@@ -240,7 +424,7 @@ function generatePassCardInnerHtml(data) {
 function getPassCommonCss(primary = '#0b1426', accent = '#c9a87c') {
   const accentLight = accent ? `${accent}33` : '#c9a87c33';
   return `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alex+Brush&family=Allura&family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400&family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Serif+Display:ital@0;1&family=Dancing+Script:wght@400;500;600;700&family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800&family=Italianno&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Marcellus&family=MonteCarlo&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700&family=Outfit:wght@300;400;500;600;700&family=Pacifico&family=Parisienne&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sacramento&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -274,6 +458,13 @@ function getPassCommonCss(primary = '#0b1426', accent = '#c9a87c') {
       border: 1px solid rgba(201, 168, 124, 0.25);
       pointer-events: none;
       z-index: 10;
+    }
+
+    /* El pase personalizado renderiza su propio diseño y bordes de capa */
+    .custom-pass-container::before {
+      display: none !important;
+      content: none !important;
+      border: none !important;
     }
 
     .pass-header {
@@ -569,8 +760,16 @@ function generateGuestPassHtml(data) {
  */
 async function generatePassImageBuffer(dataOrHtml) {
   let html;
+  let targetWidth = 450;
+  let targetHeight = 800;
+
   if (typeof dataOrHtml === 'object' && dataOrHtml !== null) {
     await ensureLocalQrCode(dataOrHtml);
+    if (dataOrHtml.passDesign) {
+      const sheet = dataOrHtml.passDesign.sections?.[0] || {};
+      targetWidth = Number(sheet.pluginSettings?.sheetWidth || sheet.width || dataOrHtml.passDesign.canvasSize?.width || 450);
+      targetHeight = Number(sheet.pluginSettings?.sheetHeight || sheet.height || dataOrHtml.passDesign.canvasSize?.height || 800);
+    }
     html = generateGuestPassHtml(dataOrHtml);
   } else {
     html = dataOrHtml;
@@ -579,8 +778,30 @@ async function generatePassImageBuffer(dataOrHtml) {
   const browser = await getOrCreateBrowser();
   const page = await browser.newPage();
   try {
-    await page.setViewport({ width: 640, height: 900, deviceScaleFactor: 2 });
-    await page.setContent(html, { waitUntil: 'load', timeout: 15000 });
+    await page.setViewport({
+      width: Math.max(640, targetWidth + 100),
+      height: Math.max(900, targetHeight + 100),
+      deviceScaleFactor: 2
+    });
+    await page.setContent(html, { waitUntil: 'load', timeout: 25000 });
+
+    // Wait for web fonts and images to be fully rendered
+    await page.evaluate(async () => {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      const images = Array.from(document.querySelectorAll('img'));
+      await Promise.all(
+        images.map(img => {
+          if (img.complete) return;
+          return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            setTimeout(resolve, 2000);
+          });
+        })
+      );
+    });
 
     const element = await page.$('.pass-container');
     if (element) {
@@ -653,10 +874,13 @@ async function generateBatchPassImages(items) {
         </html>
       `;
 
-      await page.setContent(batchDoc, { waitUntil: 'load', timeout: 30000 });
+      await page.setContent(batchDoc, { waitUntil: 'load', timeout: 35000 });
 
-      // Wait for images to be loaded
+      // Wait for fonts and images to be loaded
       await page.evaluate(async () => {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
         const images = Array.from(document.querySelectorAll('img'));
         await Promise.all(
           images.map(img => {

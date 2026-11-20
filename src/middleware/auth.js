@@ -1,4 +1,4 @@
-﻿const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const env = require('../config/env');
 const asyncHandler = require('../utils/asyncHandler');
@@ -24,6 +24,20 @@ const protect = asyncHandler(async (req, _res, next) => {
   next();
 });
 
+const optionalAuth = asyncHandler(async (req, _res, next) => {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return next();
+  try {
+    const payload = jwt.verify(token, env.jwtSecret);
+    const user = await User.findById(payload.sub).select('-passwordHash');
+    if (user) req.user = user;
+  } catch (e) {
+    // Non-blocking for optional authentication
+  }
+  next();
+});
+
 const requireRole = (...roles) => (req, _res, next) => {
   if (!roles.includes(req.user.role)) {
     const error = new Error('Permisos insuficientes');
@@ -33,4 +47,4 @@ const requireRole = (...roles) => (req, _res, next) => {
   next();
 };
 
-module.exports = { protect, requireRole };
+module.exports = { protect, optionalAuth, requireRole };
