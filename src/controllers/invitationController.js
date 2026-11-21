@@ -197,7 +197,8 @@ function buildAccessGateData(invitation) {
     responsiveMode: visualDesign.responsiveMode || 'shared',
     theme: visualDesign.theme || null,
     palette: content.palette || null,
-    coverImageUrl: content.coverImageUrl || null
+    coverImageUrl: content.coverImageUrl || null,
+    template: content.template || invitation.template || 'envelope-cards'
   };
 }
 
