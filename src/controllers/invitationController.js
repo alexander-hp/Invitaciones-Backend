@@ -498,7 +498,6 @@ exports.publish = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id date time createdAt');
   const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id owner title type date time plan status createdAt');
   if (!event) {
     const error = new Error('Evento no encontrado');
