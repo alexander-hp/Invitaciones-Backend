@@ -17,6 +17,7 @@ const whatsappService = require('../services/whatsappService');
 const { logEventActivity } = require('../services/eventLogService');
 const { requireEventAccess } = require('../utils/eventAccess');
 const VisualDesignRevision = require('../models/VisualDesignRevision');
+const { recordPublishedTemplateUsage } = require('./visualDesignTemplateController');
 const { signGuestSession, verifyGuestSessionForEvent } = require('../utils/guestSession');
 
 async function buildUniqueSlug(source) {
@@ -497,7 +498,7 @@ exports.publish = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-  const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id date time createdAt');
+  const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id owner title type date time plan status createdAt');
   if (!event) {
     const error = new Error('Evento no encontrado');
     error.statusCode = 404;
@@ -542,6 +543,13 @@ exports.publish = asyncHandler(async (req, res) => {
   invitation.status = 'published';
   invitation.publishedAt = new Date();
   await invitation.save();
+  if (invitation.sourceVisualTemplate) {
+    try {
+      await recordPublishedTemplateUsage({ invitation, event });
+    } catch (error) {
+      console.warn('Template usage tracking failed:', error.message);
+    }
+  }
   const publicUrl = `${env.publicBaseUrl}/i/${invitation.slug}`;
   if (req.user.email) {
     try {

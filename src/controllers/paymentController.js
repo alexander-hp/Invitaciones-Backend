@@ -3,6 +3,7 @@ const Event = require('../models/Event');
 const Invitation = require('../models/Invitation');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
+const VisualTemplateUsage = require('../models/VisualTemplateUsage');
 const env = require('../config/env');
 const {
   PLAN_DEFINITIONS,
@@ -114,6 +115,22 @@ async function activateOneTimePayment(payment, stripeEventId) {
       ...(plan.key === 'external_dashboard_12m' ? { mode: 'external_dashboard' } : {})
     }
   );
+
+  // Update any published community template usage record with the paid amount so 5% reward is accurate
+  try {
+    const usages = await VisualTemplateUsage.find({ event: payment.event });
+    for (const usage of usages) {
+      const paidAmount = payment.amount || plan.amount || 0;
+      usage.payment = payment._id;
+      usage.eventPlan = plan.key;
+      usage.eventPaidAmount = paidAmount;
+      usage.currency = payment.currency || 'mxn';
+      usage.rewardAmount = usage.isSelfUse ? 0 : Math.round(paidAmount * ((usage.rewardPercent || 5) / 100));
+      await usage.save();
+    }
+  } catch (err) {
+    console.warn('[activateOneTimePayment] Failed to sync VisualTemplateUsage:', err.message);
+  }
 }
 
 async function applySubscriptionToUser({ userId, planKey, status, customerId, subscriptionId, currentPeriodEnd }) {

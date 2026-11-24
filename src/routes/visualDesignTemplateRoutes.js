@@ -35,6 +35,8 @@ router.use(protect);
 router.get('/admin/settings', requireRole('admin'), controller.getAdminSettings);
 router.put('/admin/settings', requireRole('admin'), controller.updateAdminSettings);
 router.get('/admin/manage', requireRole('admin'), controller.adminList);
+router.get('/admin/usages', requireRole('admin'), controller.adminListUsages);
+router.patch('/admin/usages/:usageId/payout', requireRole('admin'), controller.adminUpdateUsagePayout);
 router.patch('/admin/:id/status', requireRole('admin'), controller.adminUpdateStatus);
 
 router.get('/', controller.list);

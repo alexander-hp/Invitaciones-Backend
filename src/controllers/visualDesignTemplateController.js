@@ -1,6 +1,94 @@
 const VisualDesignTemplate = require('../models/VisualDesignTemplate');
+const VisualTemplateUsage = require('../models/VisualTemplateUsage');
+const Invitation = require('../models/Invitation');
+const Event = require('../models/Event');
+const Payment = require('../models/Payment');
 const SystemSetting = require('../models/SystemSetting');
+const { getPlanDefinition } = require('../config/plans');
 const asyncHandler = require('../utils/asyncHandler');
+
+async function resolveEventPaymentAmount(event) {
+  if (!event?._id) {
+    return { payment: null, eventPaidAmount: 0, currency: 'mxn', eventPlan: event?.plan || 'free' };
+  }
+  const latestPayment = await Payment.findOne({ event: event._id, status: 'paid' })
+    .sort({ paidAt: -1, createdAt: -1 })
+    .lean();
+  if (latestPayment && typeof latestPayment.amount === 'number' && latestPayment.amount > 0) {
+    return {
+      payment: latestPayment._id,
+      eventPaidAmount: latestPayment.amount,
+      currency: latestPayment.currency || 'mxn',
+      eventPlan: event.plan || latestPayment.package || 'free'
+    };
+  }
+  const planDef = getPlanDefinition(event.plan);
+  const fallbackAmount = planDef && planDef.key !== 'free' && planDef.amount > 0 ? planDef.amount : 0;
+  return {
+    payment: null,
+    eventPaidAmount: fallbackAmount,
+    currency: 'mxn',
+    eventPlan: event.plan || 'free'
+  };
+}
+
+/**
+ * Record or update a published event usage for a community visual template.
+ */
+async function recordPublishedTemplateUsage({ invitation, event }) {
+  if (!invitation?.sourceVisualTemplate) return null;
+
+  const template = await VisualDesignTemplate.findById(invitation.sourceVisualTemplate).lean();
+  const meta = invitation.sourceVisualTemplateMeta || {};
+  const templateAuthor = template?.owner || meta.authorId;
+  if (!templateAuthor) return null;
+
+  const fullEvent = event?.title
+    ? event
+    : await Event.findById(invitation.event).select('_id owner title type date plan status').lean();
+  if (!fullEvent) return null;
+
+  const eventOwner = invitation.owner || fullEvent.owner;
+  const isSelfUse = String(eventOwner) === String(templateAuthor);
+  const rewardPercent = template?.authorRewardPercent ?? meta.authorRewardPercent ?? 5;
+  const paymentInfo = await resolveEventPaymentAmount(fullEvent);
+  const rewardAmount = isSelfUse ? 0 : Math.round((paymentInfo.eventPaidAmount || 0) * (rewardPercent / 100));
+
+  const existing = await VisualTemplateUsage.findOne({ invitation: invitation._id });
+  const nextPayoutStatus = existing?.payoutStatus === 'paid'
+    ? 'paid'
+    : (isSelfUse ? 'not_applicable' : (existing?.payoutStatus || 'pending'));
+
+  const payload = {
+    template: invitation.sourceVisualTemplate,
+    templateName: template?.name || meta.templateName || 'Plantilla comunitaria',
+    templateAuthor,
+    templateAuthorName: template?.authorName || meta.authorName || 'Creador de la Comunidad',
+    event: fullEvent._id,
+    invitation: invitation._id,
+    eventOwner,
+    invitationSlug: invitation.slug,
+    eventTitle: fullEvent.title || 'Evento sin título',
+    eventType: fullEvent.type || 'otro',
+    eventDate: fullEvent.date || null,
+    eventPlan: paymentInfo.eventPlan,
+    payment: paymentInfo.payment,
+    eventPaidAmount: paymentInfo.eventPaidAmount,
+    currency: paymentInfo.currency,
+    rewardPercent,
+    rewardAmount,
+    isSelfUse,
+    payoutStatus: nextPayoutStatus,
+    publishedAt: invitation.publishedAt || new Date()
+  };
+
+  return VisualTemplateUsage.findOneAndUpdate(
+    { invitation: invitation._id },
+    { $set: payload },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+}
+exports.recordPublishedTemplateUsage = recordPublishedTemplateUsage;
 
 // ═══ SEED TEMPLATES FOR MARKETPLACE ═══
 const SEED_TEMPLATES = [
@@ -606,6 +694,7 @@ exports.create = asyncHandler(async (req, res) => {
  */
 exports.useTemplate = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const { invitationId, eventId } = req.body || {};
   let template = null;
   if (!id.startsWith('seed-tpl-')) {
     template = await VisualDesignTemplate.findByIdAndUpdate(
@@ -624,9 +713,39 @@ exports.useTemplate = asyncHandler(async (req, res) => {
     throw error;
   }
 
+  // Link this community template to the user's invitation so we can track when the event is published
+  if (!id.startsWith('seed-tpl-') && req.user?._id && (invitationId || eventId)) {
+    try {
+      const invQuery = invitationId
+        ? { _id: invitationId, owner: req.user._id }
+        : { event: eventId, owner: req.user._id };
+      const invitation = await Invitation.findOneAndUpdate(
+        invQuery,
+        {
+          $set: {
+            sourceVisualTemplate: template._id,
+            sourceVisualTemplateMeta: {
+              templateName: template.name,
+              authorId: template.owner,
+              authorName: template.authorName || 'Creador de la Comunidad',
+              authorRewardPercent: template.authorRewardPercent ?? 5,
+              appliedAt: new Date()
+            }
+          }
+        },
+        { new: true }
+      );
+      if (invitation && invitation.status === 'published') {
+        await recordPublishedTemplateUsage({ invitation });
+      }
+    } catch (err) {
+      console.warn('[useTemplate] Failed to link template to invitation:', err.message);
+    }
+  }
+
   res.json({
     template,
-    rewardNotice: `Esta plantilla otorga 5% de comisión a ${template.authorName || 'el creador'}.`
+    rewardNotice: `Esta plantilla otorga ${template.authorRewardPercent ?? 5}% de comisión a ${template.authorName || 'el creador'}.`
   });
 });
 
@@ -731,6 +850,29 @@ exports.adminList = asyncHandler(async (req, res) => {
     .sort(sortCriteria)
     .lean();
 
+  // Attach count of published events per template
+  const templateIds = templates.map((t) => t._id);
+  const usageAgg = templateIds.length
+    ? await VisualTemplateUsage.aggregate([
+        { $match: { template: { $in: templateIds } } },
+        {
+          $group: {
+            _id: '$template',
+            publishedEventsCount: { $sum: 1 },
+            pendingPayoutsCount: {
+              $sum: { $cond: [{ $eq: ['$payoutStatus', 'pending'] }, 1, 0] }
+            }
+          }
+        }
+      ])
+    : [];
+  const usageMap = new Map(usageAgg.map((row) => [String(row._id), row]));
+  for (const tpl of templates) {
+    const stats = usageMap.get(String(tpl._id));
+    tpl.publishedEventsCount = stats?.publishedEventsCount || 0;
+    tpl.pendingPayoutsCount = stats?.pendingPayoutsCount || 0;
+  }
+
   const counts = {
     total: await VisualDesignTemplate.countDocuments({}),
     pending: await VisualDesignTemplate.countDocuments({ status: 'pending' }),
@@ -791,4 +933,163 @@ exports.adminUpdateStatus = asyncHandler(async (req, res) => {
     template,
     message
   });
+});
+
+/**
+ * List all published events that used a community visual template (for 5% creator refund/payout management)
+ */
+exports.adminListUsages = asyncHandler(async (req, res) => {
+  const { payoutStatus, templateId, search } = req.query;
+
+  // Backfill any published invitations with sourceVisualTemplate that don't yet have a usage record
+  const trackedInvitationIds = await VisualTemplateUsage.distinct('invitation');
+  const untrackedPublished = await Invitation.find({
+    sourceVisualTemplate: { $exists: true, $ne: null },
+    status: 'published',
+    _id: { $nin: trackedInvitationIds }
+  }).limit(100);
+  for (const inv of untrackedPublished) {
+    try {
+      await recordPublishedTemplateUsage({ invitation: inv });
+    } catch (_err) {
+      // Non-blocking
+    }
+  }
+
+  // Refresh payment info for pending records with 0 paid amount in case the host paid after publishing
+  const pendingZero = await VisualTemplateUsage.find({ payoutStatus: 'pending', eventPaidAmount: 0 }).limit(100);
+  for (const u of pendingZero) {
+    try {
+      const ev = await Event.findById(u.event).select('_id plan').lean();
+      if (ev) {
+        const payInfo = await resolveEventPaymentAmount(ev);
+        if (payInfo.eventPaidAmount > 0 || payInfo.eventPlan !== u.eventPlan) {
+          u.payment = payInfo.payment;
+          u.eventPlan = payInfo.eventPlan;
+          u.eventPaidAmount = payInfo.eventPaidAmount;
+          u.currency = payInfo.currency;
+          u.rewardAmount = u.isSelfUse ? 0 : Math.round(payInfo.eventPaidAmount * ((u.rewardPercent || 5) / 100));
+          await u.save();
+        }
+      }
+    } catch (_err) {
+      // Non-blocking
+    }
+  }
+
+  const query = {};
+  if (payoutStatus && payoutStatus !== 'all') {
+    query.payoutStatus = payoutStatus;
+  }
+  if (templateId && templateId !== 'all') {
+    query.template = templateId;
+  }
+
+  let usages = await VisualTemplateUsage.find(query)
+    .populate('template', 'name eventType thumbnailUrl previewImageUrl status authorRewardPercent')
+    .populate('templateAuthor', 'name email avatarUrl')
+    .populate('eventOwner', 'name email')
+    .populate('event', 'title type date plan status')
+    .populate('invitation', 'slug status publishedAt')
+    .populate('paidBy', 'name email')
+    .sort({ publishedAt: -1, createdAt: -1 })
+    .lean();
+
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
+    usages = usages.filter((u) =>
+      (u.eventTitle && u.eventTitle.toLowerCase().includes(q)) ||
+      (u.templateName && u.templateName.toLowerCase().includes(q)) ||
+      (u.templateAuthorName && u.templateAuthorName.toLowerCase().includes(q)) ||
+      (u.templateAuthor?.name && u.templateAuthor.name.toLowerCase().includes(q)) ||
+      (u.templateAuthor?.email && u.templateAuthor.email.toLowerCase().includes(q)) ||
+      (u.eventOwner?.name && u.eventOwner.name.toLowerCase().includes(q)) ||
+      (u.eventOwner?.email && u.eventOwner.email.toLowerCase().includes(q)) ||
+      (u.invitationSlug && u.invitationSlug.toLowerCase().includes(q))
+    );
+  }
+
+  // Summary across all usages (unfiltered by payoutStatus so KPI cards always stay accurate)
+  const summaryFilter = templateId && templateId !== 'all' ? { template: templateId } : {};
+  const allForSummary = await VisualTemplateUsage.find(summaryFilter)
+    .select('payoutStatus rewardAmount eventPaidAmount')
+    .lean();
+
+  const summary = {
+    totalPublished: allForSummary.length,
+    pendingCount: 0,
+    paidCount: 0,
+    notApplicableCount: 0,
+    totalPendingRewardAmount: 0,
+    totalPaidRewardAmount: 0,
+    currency: 'mxn'
+  };
+
+  for (const row of allForSummary) {
+    if (row.payoutStatus === 'pending') {
+      summary.pendingCount += 1;
+      summary.totalPendingRewardAmount += row.rewardAmount || 0;
+    } else if (row.payoutStatus === 'paid') {
+      summary.paidCount += 1;
+      summary.totalPaidRewardAmount += row.rewardAmount || 0;
+    } else if (row.payoutStatus === 'not_applicable') {
+      summary.notApplicableCount += 1;
+    }
+  }
+
+  res.json({
+    usages,
+    summary,
+    total: usages.length
+  });
+});
+
+/**
+ * Update payout status (pending / paid / not_applicable) and reference note for a published template usage
+ */
+exports.adminUpdateUsagePayout = asyncHandler(async (req, res) => {
+  const { usageId } = req.params;
+  const { payoutStatus, payoutNote } = req.body || {};
+
+  if (!['pending', 'paid', 'not_applicable'].includes(payoutStatus)) {
+    const error = new Error('Estado de pago no válido');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const update = {
+    payoutStatus
+  };
+  if (payoutNote !== undefined) {
+    update.payoutNote = String(payoutNote || '').trim().slice(0, 500);
+  }
+  if (payoutStatus === 'paid') {
+    update.paidAt = new Date();
+    update.paidBy = req.user._id;
+  } else {
+    update.paidAt = null;
+    update.paidBy = null;
+  }
+
+  const usage = await VisualTemplateUsage.findByIdAndUpdate(usageId, update, { new: true })
+    .populate('template', 'name eventType thumbnailUrl previewImageUrl status authorRewardPercent')
+    .populate('templateAuthor', 'name email avatarUrl')
+    .populate('eventOwner', 'name email')
+    .populate('event', 'title type date plan status')
+    .populate('invitation', 'slug status publishedAt')
+    .populate('paidBy', 'name email');
+
+  if (!usage) {
+    const error = new Error('Registro de evento publicado no encontrado');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const message = payoutStatus === 'paid'
+    ? `Pago del ${usage.rewardPercent || 5}% marcado como PAGADO para ${usage.templateAuthorName || 'el creador'}.`
+    : payoutStatus === 'pending'
+      ? 'Estado actualizado a Pendiente de pago.'
+      : 'Registro marcado como No aplica.';
+
+  res.json({ usage, message });
 });

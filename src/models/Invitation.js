@@ -11,6 +11,14 @@ const invitationSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true, index: true },
   template: { type: mongoose.Schema.Types.ObjectId, ref: 'Template' },
+  sourceVisualTemplate: { type: mongoose.Schema.Types.ObjectId, ref: 'VisualDesignTemplate', index: true },
+  sourceVisualTemplateMeta: {
+    templateName: { type: String, trim: true },
+    authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    authorName: { type: String, trim: true },
+    authorRewardPercent: { type: Number, default: 5 },
+    appliedAt: { type: Date }
+  },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
   status: { type: String, enum: ['draft', 'published', 'unpublished'], default: 'draft' },
   accessMode: { type: String, enum: ['open', 'public', 'guest_list', 'specific_users'], default: 'open' },
