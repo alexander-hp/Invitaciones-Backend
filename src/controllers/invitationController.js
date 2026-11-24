@@ -158,16 +158,17 @@ function buildAccessGateData(invitation) {
   const visualDesign = (isPublished ? publishedContent.visualDesign : null) || baseContent.visualDesign || baseContent.visualDesignDraft || publishedContent.visualDesign || {};
   const rawAccessScreen = isPublished && (publishedContent.accessScreen || publishedContent.visualDesign?.accessScreen)
     ? {
+        ...(baseContent.visualDesign?.accessScreen || {}),
         ...(baseContent.accessScreen || {}),
-        ...(publishedContent.accessScreen || {}),
-        ...(publishedContent.visualDesign?.accessScreen || {})
+        ...(publishedContent.visualDesign?.accessScreen || {}),
+        ...(publishedContent.accessScreen || {})
       }
     : {
-        ...(baseContent.accessScreen || {}),
-        ...(baseContent.visualDesign?.accessScreen || {}),
-        ...(publishedContent.accessScreen || {}),
         ...(publishedContent.visualDesign?.accessScreen || {}),
-        ...(baseContent.visualDesignDraft?.accessScreen || {})
+        ...(publishedContent.accessScreen || {}),
+        ...(baseContent.visualDesign?.accessScreen || {}),
+        ...(baseContent.visualDesignDraft?.accessScreen || {}),
+        ...(baseContent.accessScreen || {})
       };
   let safeAccessScreen = null;
   if (Object.keys(rawAccessScreen).length > 0) {
@@ -207,6 +208,9 @@ function publicGuest(guest) {
     id: guest._id,
     name: guest.name,
     email: guest.email,
+    phone: guest.phone,
+    phoneCountryCode: guest.phoneCountryCode,
+    phoneNationalNumber: guest.phoneNationalNumber,
     group: guest.group,
     roles: guest.roles || [],
     tags: guest.tags || [],
@@ -458,8 +462,24 @@ exports.update = asyncHandler(async (req, res) => {
   const event = await Event.findOne({ _id: currentInvitation.event, owner: req.user._id }).select('_id plan date time createdAt');
   await assertInvitationPlanLimits(req.user, event, req.validated.body);
   const updatePayload = { ...req.validated.body };
-  if (currentInvitation.status === 'published' && req.validated.body.content && !currentInvitation.publishedContent) {
-    updatePayload.publishedContent = plainInvitationContent(currentInvitation.content);
+  if (currentInvitation.status === 'published' && req.validated.body.content) {
+    if (!currentInvitation.publishedContent) {
+      updatePayload.publishedContent = plainInvitationContent(currentInvitation.content);
+    } else if (req.validated.body.content.accessScreen) {
+      const nextPublished = plainInvitationContent(currentInvitation.publishedContent);
+      const nextAccess = plainInvitationContent(req.validated.body.content.accessScreen);
+      nextPublished.accessScreen = nextAccess;
+      if (nextPublished.visualDesign) {
+        nextPublished.visualDesign = {
+          ...nextPublished.visualDesign,
+          accessScreen: {
+            ...(nextPublished.visualDesign.accessScreen || {}),
+            ...nextAccess
+          }
+        };
+      }
+      updatePayload.publishedContent = nextPublished;
+    }
   }
   const invitation = await Invitation.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, updatePayload, { new: true });
   if (!invitation) {
@@ -501,7 +521,17 @@ exports.publish = asyncHandler(async (req, res) => {
   }
   const publishedContent = plainInvitationContent(invitation.content);
   if (invitation.content?.accessScreen) {
-    publishedContent.accessScreen = plainInvitationContent(invitation.content.accessScreen);
+    const cleanAccess = plainInvitationContent(invitation.content.accessScreen);
+    publishedContent.accessScreen = cleanAccess;
+    if (publishedContent.visualDesign) {
+      publishedContent.visualDesign = {
+        ...publishedContent.visualDesign,
+        accessScreen: {
+          ...(publishedContent.visualDesign.accessScreen || {}),
+          ...cleanAccess
+        }
+      };
+    }
   }
   delete publishedContent.visualDesignDraft;
   if (publishedContent.template && publishedContent.template !== 'visual-builder' && publishedContent.visualDesign) {
@@ -640,13 +670,21 @@ exports.guestAccess = asyncHandler(async (req, res) => {
   const publishedContent = plainInvitationContent(invitation.publishedContent || {});
   const baseContent = plainInvitationContent(invitation.content || {});
   const content = Object.keys(publishedContent).length ? publishedContent : baseContent;
-  const accessScreen = {
-    ...(baseContent.accessScreen || {}),
-    ...(baseContent.visualDesign?.accessScreen || {}),
-    ...(publishedContent.accessScreen || {}),
-    ...(publishedContent.visualDesign?.accessScreen || {}),
-    ...(baseContent.visualDesignDraft?.accessScreen || {})
-  };
+  const isPublished = invitation.status === 'published' && Object.keys(publishedContent).length > 0;
+  const accessScreen = isPublished && (publishedContent.accessScreen || publishedContent.visualDesign?.accessScreen)
+    ? {
+        ...(baseContent.visualDesign?.accessScreen || {}),
+        ...(baseContent.accessScreen || {}),
+        ...(publishedContent.visualDesign?.accessScreen || {}),
+        ...(publishedContent.accessScreen || {})
+      }
+    : {
+        ...(publishedContent.visualDesign?.accessScreen || {}),
+        ...(publishedContent.accessScreen || {}),
+        ...(baseContent.visualDesign?.accessScreen || {}),
+        ...(baseContent.visualDesignDraft?.accessScreen || {}),
+        ...(baseContent.accessScreen || {})
+      };
 
   if (accessScreen.requirePin) {
     const providedPin = String(req.validated.body.pin || '').trim();

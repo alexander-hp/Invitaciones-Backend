@@ -11,10 +11,13 @@ const publicRsvpLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, stand
 const publicRsvpBody = z.object({
   guest: z.string().min(12).optional(),
   name: z.string().min(2),
-  email: z.string().email().optional(),
+  email: z.union([z.string().email(), z.literal('')]).optional(),
   response: z.enum(['confirmed', 'declined', 'maybe']),
   companions: z.number().int().min(0).optional(),
   companionNames: z.array(z.string()).optional(),
+  mealPreference: z.string().max(200).optional(),
+  dietaryRestrictions: z.string().max(300).optional(),
+  menuSelection: z.string().max(200).optional(),
   customAnswers: z.array(z.object({
     key: z.string().min(1),
     label: z.string().optional(),

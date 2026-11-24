@@ -370,11 +370,11 @@ function buildGuestMessage({ guest, event, invitation, publicUrl, type = 'invita
   const location = eventLocationText(event);
   const greeting = `Hola ${guest.name},`;
   const accessScreen = {
-    ...(invitation?.content?.accessScreen || {}),
-    ...(invitation?.content?.visualDesign?.accessScreen || {}),
-    ...(invitation?.publishedContent?.accessScreen || {}),
     ...(invitation?.publishedContent?.visualDesign?.accessScreen || {}),
-    ...(invitation?.content?.visualDesignDraft?.accessScreen || {})
+    ...(invitation?.publishedContent?.accessScreen || {}),
+    ...(invitation?.content?.visualDesign?.accessScreen || {}),
+    ...(invitation?.content?.visualDesignDraft?.accessScreen || {}),
+    ...(invitation?.content?.accessScreen || {})
   };
   const activePin = accessScreen.requirePin ? (accessScreen.pinMode === 'event' ? accessScreen.eventPin : guest.accessPin) : '';
   const pinLine = activePin ? `🔑 Tu NIP de acceso: ${activePin}` : '';
@@ -441,11 +441,11 @@ function buildGuestEmailHtml({ guest, event, invitation, publicUrl, type = 'invi
   const seatStr = escapeHtml(guest?.seatLabel || '');
   const companionsCount = (guest?.allowedCompanions || 0) + 1;
   const accessScreen = {
-    ...(invitation?.content?.accessScreen || {}),
-    ...(invitation?.content?.visualDesign?.accessScreen || {}),
-    ...(invitation?.publishedContent?.accessScreen || {}),
     ...(invitation?.publishedContent?.visualDesign?.accessScreen || {}),
-    ...(invitation?.content?.visualDesignDraft?.accessScreen || {})
+    ...(invitation?.publishedContent?.accessScreen || {}),
+    ...(invitation?.content?.visualDesign?.accessScreen || {}),
+    ...(invitation?.content?.visualDesignDraft?.accessScreen || {}),
+    ...(invitation?.content?.accessScreen || {})
   };
   const pinVal = (accessScreen.requirePin && accessScreen.pinMode === 'event' && accessScreen.eventPin)
     ? accessScreen.eventPin
