@@ -159,18 +159,18 @@ function buildAccessGateData(invitation) {
   const visualDesign = (isPublished ? publishedContent.visualDesign : null) || baseContent.visualDesign || baseContent.visualDesignDraft || publishedContent.visualDesign || {};
   const rawAccessScreen = isPublished && (publishedContent.accessScreen || publishedContent.visualDesign?.accessScreen)
     ? {
-        ...(baseContent.visualDesign?.accessScreen || {}),
-        ...(baseContent.accessScreen || {}),
-        ...(publishedContent.visualDesign?.accessScreen || {}),
-        ...(publishedContent.accessScreen || {})
-      }
+      ...(baseContent.visualDesign?.accessScreen || {}),
+      ...(baseContent.accessScreen || {}),
+      ...(publishedContent.visualDesign?.accessScreen || {}),
+      ...(publishedContent.accessScreen || {})
+    }
     : {
-        ...(publishedContent.visualDesign?.accessScreen || {}),
-        ...(publishedContent.accessScreen || {}),
-        ...(baseContent.visualDesign?.accessScreen || {}),
-        ...(baseContent.visualDesignDraft?.accessScreen || {}),
-        ...(baseContent.accessScreen || {})
-      };
+      ...(publishedContent.visualDesign?.accessScreen || {}),
+      ...(publishedContent.accessScreen || {}),
+      ...(baseContent.visualDesign?.accessScreen || {}),
+      ...(baseContent.visualDesignDraft?.accessScreen || {}),
+      ...(baseContent.accessScreen || {})
+    };
   let safeAccessScreen = null;
   if (Object.keys(rawAccessScreen).length > 0) {
     const { eventPin, ...rest } = rawAccessScreen;
@@ -340,11 +340,11 @@ async function assertInvitationPlanLimits(user, event, payload) {
   const secMusicRaw = payload.content?.sectionMusic;
   const secMusicValues = secMusicRaw
     ? (secMusicRaw instanceof Map
-        ? Array.from(secMusicRaw.values())
-        : typeof secMusicRaw === 'object'
-          ? Object.values(secMusicRaw)
-          : []
-      ).filter(Boolean)
+      ? Array.from(secMusicRaw.values())
+      : typeof secMusicRaw === 'object'
+        ? Object.values(secMusicRaw)
+        : []
+    ).filter(Boolean)
     : [];
   if (secMusicValues.length && !limits.music) {
     const error = new Error('La musica por seccion requiere Evento Individual o Pro');
@@ -498,6 +498,7 @@ exports.publish = asyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
+  const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id date time createdAt');
   const event = await Event.findOne({ _id: invitation.event, owner: req.user._id }).select('_id owner title type date time plan status createdAt');
   if (!event) {
     const error = new Error('Evento no encontrado');
@@ -681,18 +682,18 @@ exports.guestAccess = asyncHandler(async (req, res) => {
   const isPublished = invitation.status === 'published' && Object.keys(publishedContent).length > 0;
   const accessScreen = isPublished && (publishedContent.accessScreen || publishedContent.visualDesign?.accessScreen)
     ? {
-        ...(baseContent.visualDesign?.accessScreen || {}),
-        ...(baseContent.accessScreen || {}),
-        ...(publishedContent.visualDesign?.accessScreen || {}),
-        ...(publishedContent.accessScreen || {})
-      }
+      ...(baseContent.visualDesign?.accessScreen || {}),
+      ...(baseContent.accessScreen || {}),
+      ...(publishedContent.visualDesign?.accessScreen || {}),
+      ...(publishedContent.accessScreen || {})
+    }
     : {
-        ...(publishedContent.visualDesign?.accessScreen || {}),
-        ...(publishedContent.accessScreen || {}),
-        ...(baseContent.visualDesign?.accessScreen || {}),
-        ...(baseContent.visualDesignDraft?.accessScreen || {}),
-        ...(baseContent.accessScreen || {})
-      };
+      ...(publishedContent.visualDesign?.accessScreen || {}),
+      ...(publishedContent.accessScreen || {}),
+      ...(baseContent.visualDesign?.accessScreen || {}),
+      ...(baseContent.visualDesignDraft?.accessScreen || {}),
+      ...(baseContent.accessScreen || {})
+    };
 
   if (accessScreen.requirePin) {
     const providedPin = String(req.validated.body.pin || '').trim();
