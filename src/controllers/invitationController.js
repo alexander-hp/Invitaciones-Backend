@@ -191,6 +191,12 @@ function buildAccessGateData(invitation) {
       selfRegMaxGuests: Number(rawAccessScreen.selfRegMaxGuests || 0)
     };
   }
+  const effectiveTemplate = (safeAccessScreen?.templateKey && safeAccessScreen.templateKey !== 'visual-builder' ? safeAccessScreen.templateKey : null)
+    || (content.sourceTemplateKey && content.sourceTemplateKey !== 'visual-builder' ? content.sourceTemplateKey : null)
+    || (content.template && content.template !== 'visual-builder' ? content.template : null)
+    || (invitation.template && invitation.template !== 'visual-builder' ? invitation.template : null)
+    || 'envelope-cards';
+
   return {
     slug: invitation.slug,
     eventTitle: invitation.event?.title || content.headline || 'Acceso al Evento',
@@ -200,7 +206,7 @@ function buildAccessGateData(invitation) {
     theme: visualDesign.theme || null,
     palette: content.palette || null,
     coverImageUrl: content.coverImageUrl || null,
-    template: content.template || invitation.template || 'envelope-cards'
+    template: effectiveTemplate
   };
 }
 
@@ -516,6 +522,9 @@ exports.publish = asyncHandler(async (req, res) => {
     if (draft.accessScreen) {
       invitation.content.accessScreen = plainInvitationContent(draft.accessScreen);
       invitation.content.visualDesign.accessScreen = plainInvitationContent(draft.accessScreen);
+    }
+    if (!invitation.content.sourceTemplateKey || invitation.content.sourceTemplateKey === 'visual-builder') {
+      invitation.content.sourceTemplateKey = draft.accessScreen?.templateKey || 'envelope-cards';
     }
     invitation.content.template = 'visual-builder';
     invitation.markModified('content');
