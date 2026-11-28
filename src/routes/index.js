@@ -16,6 +16,7 @@ const whatsappWebhooks = require('./whatsappWebhookRoutes');
 const integrationTemplates = require('./integrationTemplateRoutes');
 const visualDesignTemplates = require('./visualDesignTemplateRoutes');
 const locations = require('./locationRoutes');
+const analytics = require('./analyticsRoutes');
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.use('/external', external);
 router.use('/integration-templates', integrationTemplates);
 router.use('/visual-design-templates', visualDesignTemplates);
 router.use('/locations', locations);
+router.use('/analytics', analytics);
 router.use('/webhooks/whatsapp', whatsappWebhooks);
 
 module.exports = router;
